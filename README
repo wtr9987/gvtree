@@ -1,1 +1,114 @@
-# gvtree
+gvtree 
+
+Copyright (C) 2021 Wolfgang Trummer
+wolfgang.trummer@t-online.de
+
+                       Abstract
+
+gvtree is a graphical git version tree browser written C++ 
+for Linux platform using Qt libraries. The main focus is
+the review of repositories, rather than changing code and
+developing. The main functionality is to select a node in
+the version graph and compare it to the current HEAD version,
+the direct predecessors or a selected version. Additionally 
+a comparison between the current local changes and the local
+HEAD version is possible. A version history of a individual
+file can be viewed as well.
+
+
+ This program comes with ABSOLUTELY NO WARRANTY
+ This is free software, and you are welcome to redistribute it
+ under certain conditions
+
+ This program is licensed under
+ GNU GENERAL PUBLIC LICENSE
+ Version 3, 29 June 2007
+
+
+
+References
+----------
+
+(1) https://doc.qt.io/archives/qt-4.8/index.html
+
+(2) /usr/lib/qt4/examples/graphicsview/elasticnodes
+
+(3) https://rachel53461.wordpress.com/2014/04/20/algorithm-for-drawing-trees
+
+
+Credits
+-------
+
+Thanks for beta testing to
+Carsten Raufuß & Winfried Nöth 
+
+
+Build
+-------------------------------------------------------------------------------
+
+Just run the following commands:
+qmake PREFIX=/usr/local
+make
+sudo make install
+
+
+Run
+-------------------------------------------------------------------------------
+
+After installation 
+gvtree -h 
+will give you the following information:
+
+gvtree V1.1-0
+
+Tool to display git log graph
+
+gvtree Copyright (C) 2021 Wolfgang Trummer
+
+  This program comes with ABSOLUTELY NO WARRANTY
+  This is free software, and you are welcome to redistribute it
+  under certain conditions
+
+  This program is licensed under
+  GNU GENERAL PUBLIC LICENSE
+  Version 3, 29 June 2007
+
+--------------------------------------------------------------------------------
+Parameters:
+[path]
+   Set a file constraint. Only the version tree of the file will
+   be displayed.
+
+-r [local git repository directory]
+   If not specified the current path is checked for a valid repository
+   or the repository used in the previous session is displayed.
+   Which one to use can be controlled by preferences setting.
+
+--version Version string is printed to stdout
+
+--silent true|false Silent mode.
+   If true, commands are not printed to stdout. The preferences
+   'print commandline to stdout' is set to this value.
+
+--css [style sheet file]
+   Load a css style sheet file.
+   If not specified the last file used will be taken.
+   Perhaps it is a good idea to copy gvtree.css to ~/.config/gvtree
+   and run ./gvtree --css ~/.config/gvtree/gvtree.css once.
+
+-t Testing:
+   Display the test tree graph from (3).
+
+-f [gitlog] 
+   Testing:
+   Load a file created with 
+     git log --graph --decorate --pretty="%h %at %d"
+   This has been helpful during development to import constraint and
+   complex repository data.
+
+-h This information.
+
+--------------------------------------------------------------------------------
+
+For more details please refer to doc/gvtree-1.1-0.pdf
+

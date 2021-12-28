@@ -1,0 +1,20 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource prefix="/">
+  <file>css/gvtree.css</file>
+  <file>images/connectorStyle0.png</file>
+  <file>images/connectorStyle1.png</file>
+  <file>images/gvt_add.png</file>
+  <file>images/gvt_del.png</file>
+  <file>images/gvt_mod.png</file>
+  <file>images/gvtree_logo_128.png</file>
+  <file>images/gvtree_logo_256.png</file>
+  <file>images/gvtree_logo_512.png</file>
+  <file>images/gvtree_title_512.png</file>
+  <file>images/gvt_pointer.png</file>
+  <file>images/gvt_refresh.png</file>
+  <file>images/gvt_ren.png</file>
+  <file>images/gvt_text_512.png</file>
+  <file>doc/GNU_GPL_v3.0.html</file>
+  <file>doc/gvtree-1.1-0.xhtml</file>
+</qresource>
+</RCC>

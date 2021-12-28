@@ -1,0 +1,101 @@
+/* --------------------------------------------- */
+/*                                               */
+/*   Copyright (C) 2021 Wolfgang Trummer         */
+/*   Contact: wolfgang.trummer@t-online.de       */
+/*                                               */
+/*                  gvtree V1.1-0                */
+/*                                               */
+/*             git version tree browser          */
+/*                                               */
+/*   28. December 2021                           */
+/*                                               */
+/*         This program is licensed under        */
+/*           GNU GENERAL PUBLIC LICENSE          */
+/*            Version 3, 29 June 2007            */
+/*                                               */
+/* --------------------------------------------- */
+
+#include <QFontDialog>
+#include "tagpreference.h"
+
+TagPreference::TagPreference(int _row,
+                const QString& _name,
+                const QString& _regexDefault,
+                QGridLayout* _layout) : QObject(NULL)
+{
+    tagType = new QLabel(_name);
+    _layout->addWidget(tagType, _row,0,1,1);
+
+    fontButton = new QPushButton("Courier,10,-1,5,50,0,0,0,0,0");
+    connect(fontButton, SIGNAL(clicked()), this, SLOT(setFont()));
+    _layout->addWidget(fontButton,_row,1,1,1);
+
+    regularExpression = new QLineEdit();
+    connect(regularExpression, SIGNAL(returnPressed()), this, SLOT(setRegularExpression()));
+    _layout->addWidget(regularExpression,_row,2,1,1);
+
+    QString lookupRegexp = _name + "/regExp";
+    QSettings settings;
+    if (settings.contains(lookupRegexp))
+    {
+        regularExpression->setText(settings.value(lookupRegexp).toString());
+        setRegularExpression();
+    }
+    else
+    {
+        regularExpression->setText(_regexDefault);
+        setRegularExpression();
+    }
+    QString lookupFont = _name + "/font";
+    if (settings.contains(lookupFont))
+    {
+        fontButton->setText(settings.value(lookupFont).toString());
+        font.fromString(settings.value(lookupFont).toString());
+    }
+    else
+    {
+        font.fromString(settings.value(fontButton->text()).toString());
+    }
+}
+
+const QFont& TagPreference::getFont() const
+{
+    return font;
+}
+
+const QRegExp& TagPreference::getRegExp() const
+{
+    return regExp;
+}
+
+void TagPreference::setFont()
+{
+    bool ok;
+    QFont result = QFontDialog::getFont(&ok, font, NULL);
+
+    if (ok)
+    {
+        font = result;
+        fontButton->setText(result.key());
+        QString settingsKey = tagType->text() + "/font";
+        QSettings settings;
+        settings.setValue(settingsKey, result.key());
+    }
+}
+
+void TagPreference::setRegularExpression()
+{
+    regExp = QRegExp(regularExpression->text());
+
+    if (regExp.isValid())
+    {
+        QSettings settings;
+        QString lookupRegexp = tagType->text() + "/regExp";
+        settings.setValue(lookupRegexp, regularExpression->text());
+        regularExpression->setStyleSheet("color: black;  background-color: white");
+    }
+    else
+    {
+        regularExpression->setStyleSheet("color: black;  background-color: red");
+    }
+}
