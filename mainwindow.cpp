@@ -985,7 +985,7 @@ void MainWindow::getMimeTypeTools(const QString& _mimeType,
                                   QString& _diff,
                                   QString& _edit)
 {
-    _diff = QString("gvim -d %1 %2 %3");
+    _diff = QString("gvim -d %1");
     _edit = QString("gvim %1");
 
     // if entry exists...
