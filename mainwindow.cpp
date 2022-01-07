@@ -846,7 +846,7 @@ bool MainWindow::checkGitLocalRepository(const QString& _path,
             watcher->removePaths(watcher->directories());
         if (watcher->files().size())
             watcher->removePaths(watcher->files());
-        QString gitpath = _path + "/.git";
+        QString gitpath = _repoPath + "/.git";
         watcher->addPath(gitpath);
     }
 
