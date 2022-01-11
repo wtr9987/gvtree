@@ -527,6 +527,7 @@ void MainWindow::restoreLocalRepository()
             gvtree_preferences.pbLocalRepositoryPath->setText(repositoryPath);
 
             graphwidget->setLocalRepositoryPath(repositoryPath);
+            graphwidget->gitlog();
             refreshRepo->setEnabled(true);
         }
         else
