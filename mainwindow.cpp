@@ -310,12 +310,15 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
 
             // check if the constraint is existing at all...
             QFileInfo fi(repositoryPath + "/" + fileConstraint);
-            if (fi.exists() == false)
+            if (fi.exists())
+            {
+                graphwidget->setGitLogFileConstraint(fileConstraint);
+            }
+            else
+            {
                 fileConstraint = QString();
+            }
         }
-        graphwidget->gitlog();
-        graphwidget->setGitLogFileConstraint(fileConstraint);
-        refreshRepo->setEnabled(true);
     }
     else
     {

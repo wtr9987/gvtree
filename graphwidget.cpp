@@ -491,7 +491,7 @@ void GraphWidget::process(QList<QString> _cache)
         if (previousTree.isEmpty())
         {
             // initial setting
-            for (int i = 0; i < tree.size(); i++)
+            for (int i = 0; i < tree.size()+1; i++)
             {
                 if (i % 2 != 0)
                     branchslots.push_back(NULL);
