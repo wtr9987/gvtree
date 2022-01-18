@@ -50,7 +50,6 @@ Version::Version(GraphWidget* _graphWidget, QGraphicsItem* _parent) :
     selected(false)
 {
     // flags
-    setFlag(ItemIsSelectable);
     setFlag(ItemSendsGeometryChanges);
     // setCacheMode(DeviceCoordinateCache);
     setZValue(5);
@@ -74,7 +73,6 @@ Version::Version(const QStringList& _globalVersionInfo,
     selected(false)
 {
     // flags
-    setFlag(ItemIsSelectable);
     setFlag(ItemIsMovable);
     setFlag(ItemSendsGeometryChanges);
     setCacheMode(DeviceCoordinateCache);
@@ -420,12 +418,10 @@ void Version::mouseMoveEvent(QGraphicsSceneMouseEvent* _event)
         return;
 
     if (isFolder())
-    {
         linear.front()->mouseMoveEvent(_event);
-        return;
-    }
+    else
+        QGraphicsItem::mouseMoveEvent(_event);
 
-    QGraphicsItem::mouseMoveEvent(_event);
     graph->updateFromToInfo();
 }
 
@@ -782,12 +778,12 @@ void Version::reduceToFileConstraint(Version* _parent, bool _merge)
                 e->adjust();
                 e->show();
                 if (!_merge)
-                v->reduceToFileConstraint(v, edge->getMerge());
+                    v->reduceToFileConstraint(v, edge->getMerge());
             }
             else
             {
-              if (!_merge)
-                v->reduceToFileConstraint(_parent, edge->getMerge());
+                if (!_merge)
+                    v->reduceToFileConstraint(_parent, edge->getMerge());
             }
         }
     }
