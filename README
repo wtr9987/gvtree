@@ -102,7 +102,7 @@ Parameters:
 -f [gitlog] 
    Testing:
    Load a file created with 
-     git log --graph --decorate --pretty="%h %at %d"
+     git log --graph --decorate --pretty="#%H#%at#%an#%d#"
    This has been helpful during development to import constraint and
    complex repository data.
 
