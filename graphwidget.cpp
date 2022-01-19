@@ -491,7 +491,7 @@ void GraphWidget::process(QList<QString> _cache)
         if (previousTree.isEmpty())
         {
             // initial setting
-            for (int i = 0; i < tree.size()+1; i++)
+            for (int i = 0; i < tree.size() + 1; i++)
             {
                 if (i % 2 != 0)
                     branchslots.push_back(NULL);
@@ -899,7 +899,7 @@ void GraphWidget::calculateGraphicsViewPosition()
         Version* n = dynamic_cast<Version*>(it);
         if (n)
         {
-            n->calculateCoordinates(16.0 * xfactor, 12.8 * yfactor);
+            n->calculateCoordinates(getXFactor(), getYFactor());
             n->calculateLocalBoundingBox();
         }
     }
@@ -1005,8 +1005,7 @@ bool GraphWidget::focusElement(const QString& _text, bool _exactMatch)
         return false;
     }
 
-    QRectF tmp;
-    int hit = 0;
+    QList<QGraphicsItem*> hits;
     QRegExp pattern(_text);
 
     foreach(QGraphicsItem * it, scene()->items())
@@ -1017,17 +1016,24 @@ bool GraphWidget::focusElement(const QString& _text, bool _exactMatch)
         Version* n = dynamic_cast<Version*>(it);
         if (n && n->findMatch(pattern, _text, _exactMatch))
         {
-            if (hit == 0)
-                tmp = n->boundingRect().translated(n->scenePos());
-            else
-                tmp |= n->boundingRect().translated(n->scenePos());
-            hit++;
+            hits.push_back(it);
         }
     }
-    if (hit > 0)
+
+    if (hits.size() > 0)
     {
+        // ensure visibility
         updateGraphFolding();
-        tmp.adjust(-128, -128, 128, 128);
+
+        QGraphicsItem* it = hits.front();
+        QRectF tmp = QRectF(-10, -10, 20, 20).translated(it->scenePos());
+
+        foreach(QGraphicsItem * it, hits)
+        {
+            tmp |= QRectF(-10, -10, 20, 20).translated(it->scenePos());
+        }
+
+        tmp.adjust(-getXFactor(), -getYFactor(), getXFactor(), getYFactor());
         QGraphicsView::fitInView(tmp, Qt::KeepAspectRatio);
     }
     else

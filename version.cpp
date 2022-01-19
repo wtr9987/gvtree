@@ -334,11 +334,10 @@ void Version::processGitLogTagInformation(const QString& _tagInfo)
 bool Version::findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatch)
 {
     bool oldmatched = matched;
+    bool newmatched = false;
 
     QSet<QString> oldLocalVersionInfo = localVersionInfo;
     localVersionInfo.clear();
-
-    matched = false;
 
     bool checkDetail = false;
     QString rawInput = keyInformation["_input"].join(" ");
@@ -369,7 +368,7 @@ bool Version::findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatc
                 QString tmp = kit.value().join(QString(" "));
                 if (_pattern.indexIn(tmp, 0) != -1)
                 {
-                    matched = true;
+                    newmatched = true;
                     localVersionInfo.insert(kit.key());
                 }
             }
@@ -381,26 +380,26 @@ bool Version::findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatc
                     {
                         if (str == _text)
                         {
-                            matched = true;
+                            newmatched = true;
                             localVersionInfo.insert(kit.key());
                             break;
                         }
                     }
-                    if (matched)
+                    if (newmatched)
                         break;
                 }
                 else if (kit.value().join(QString(" ")).indexOf(_text) != -1)
                 {
-                    matched = true;
+                    newmatched = true;
                     localVersionInfo.insert(kit.key());
                 }
             }
         }
     }
-    if (matched != oldmatched
+    if (newmatched != oldmatched
         || localVersionInfo != oldLocalVersionInfo)
     {
-        if (_exactMatch == true && matched == true && !isFolder())
+        if (_exactMatch == true && newmatched == true && !isFolder())
         {
             Version* folder = lookupFolderVersion();
             if (folder && folder->isFolded())
@@ -408,6 +407,8 @@ bool Version::findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatc
                 folder->foldAction();
             }
         }
+
+        setMatched(newmatched);
     }
     return matched;
 }
