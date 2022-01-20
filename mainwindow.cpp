@@ -99,6 +99,7 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
     graphwidget->preferencesUpdated();
     centralLayout->addWidget(graphwidget);
     graphwidget->centerOn(graphwidget->mapToScene(QPoint(0, 0)));
+    graphwidget->setFocus();
 
     // ...
     setMinimumSize(400, 400);
@@ -1113,7 +1114,7 @@ void MainWindow::restoreColorSettings()
     restoreColorSettingsHelper(gvtree_preferences.pbColorVersion, QString("colorVersion"), QColor(255, 192, 0));
     restoreColorSettingsHelper(gvtree_preferences.pbColorEdge, QString("colorEdge"), QColor(64, 64, 64));
     restoreColorSettingsHelper(gvtree_preferences.pbColorMerge, QString("colorMerge"), QColor(64, 64, 192));
-    restoreColorSettingsHelper(gvtree_preferences.pbColorSearch, QString("colorSearch"), QColor(0, 255, 0));
+    restoreColorSettingsHelper(gvtree_preferences.pbColorSearch, QString("colorSearch"), QColor(20, 100, 200));
     restoreColorSettingsHelper(gvtree_preferences.pbColorSelected, QString("colorSelected"), QColor(255, 0, 0));
     restoreColorSettingsHelper(gvtree_preferences.pbColorFolded, QString("colorFolded"), QColor(64, 64, 64));
     restoreColorSettingsHelper(gvtree_preferences.pbColorUnfolded, QString("colorUnfolded"), QColor(192, 192, 192));

@@ -835,6 +835,8 @@ void GraphWidget::focusCurrent()
 {
     if (localHeadVersion)
     {
+        resetMatches();
+        localHeadVersion->setMatched(true);
         focusVersion(localHeadVersion);
     }
 }
@@ -1125,6 +1127,7 @@ void GraphWidget::preferencesUpdated()
     if (connectorStyle != mwin->getConnectorStyle())
     {
         connectorStyle = mwin->getConnectorStyle();
+        adjustAllEdges();
     }
 
     if (updateAll && currentLines > 0)

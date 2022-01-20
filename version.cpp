@@ -107,16 +107,28 @@ void Version::focusNeighbourBox()
 
 QRectF Version::getNeighbourBox() const
 {
-    QRectF focusBox(QGraphicsItem::scenePos(), QGraphicsItem::scenePos());
+    // in case of a folder...
+    if (isFolder() && isFolded())
+        return linear.front()->getNeighbourBox();
+
+    // normal case
+    QRectF focusBox(QGraphicsItem::scenePos(), QSizeF(1.0, 1.0));
 
     foreach (const Edge * edge, edgeList)
     {
         // TODO with or without merge nodes?
-        if (edge->getMerge() == false)
-            focusBox |= edge->boundingRect();
+        if (edge->getMerge())
+            continue;
+
+        Version* v =
+            dynamic_cast<Version*>(
+                this == edge->sourceVersion()
+                ? edge->destVersion() : edge->sourceVersion());
+        if (v)
+            focusBox |= QRectF(v->scenePos(), QSizeF(1.0, 1.0));
     }
 
-    focusBox.adjust(-128, -128, 128, 128);
+    focusBox.adjust(-graph->getXFactor() / 2, -graph->getYFactor() / 2, graph->getXFactor() / 2, graph->getYFactor() / 2);
 
     return focusBox;
 }
@@ -186,8 +198,13 @@ void Version::paint(QPainter* _painter, const QStyleOptionGraphicsItem* _option,
     if (matched)
     {
         _painter->setPen(QPen(graph->getSearchColor(), 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-        //_painter->setBrush(searchColor);
+        _painter->setBrush(graph->getSearchColor().lighter());
         _painter->drawEllipse(-15, -15, 30, 30);
+    }
+    else
+    {
+        _painter->setPen(QPen(graph->getNodeColor(), 0, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        _painter->setBrush(graph->getNodeColor());
     }
 
     // dot is red if selected, blue if it is a merge version and black if normal
@@ -196,19 +213,14 @@ void Version::paint(QPainter* _painter, const QStyleOptionGraphicsItem* _option,
         _painter->setPen(QPen(graph->getSelectedColor(), 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         _painter->setBrush(graph->getSelectedColor().lighter());
     }
-    else
-    {
-        _painter->setPen(QPen(graph->getNodeColor(), 0, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-        _painter->setBrush(graph->getNodeColor());
-    }
 
     _painter->drawEllipse(-10, -10, 20, 20);
 
-    // text color is black
-    _painter->setPen(QPen(graph->getTextColor(), 0));
-
-    if (lod > 0.2)
+    if (lod > 0.3)
     {
+        // text color is black
+        _painter->setPen(QPen(graph->getTextColor(), 0));
+
         int height = 0;
         for (QMap<QString, QStringList>::iterator kit = keyInformation.begin();
              kit != keyInformation.end();

@@ -92,18 +92,18 @@ void Edge::adjust()
 
     prepareGeometryChange();
 
-    if (length > float(20.))
+    if (length > 1)
     {
-        QPointF edgeOffset((line.dx() * 10) / length, (line.dy() * 10) / length);
-        if (!merge && graph->getConnectorStyle() == 1)
-            edgeOffset.setX(0);
-        if (merge)
+        if (merge || graph->getConnectorStyle() != 1)
+        {
+            QPointF edgeOffset((line.dx() * 10) / length, (line.dy() * 10) / length);
             sourcePoint = line.p1() + edgeOffset;
-        destPoint = line.p2() - edgeOffset;
-    }
-    else
-    {
-        sourcePoint = destPoint = line.p1();
+            destPoint = line.p2() - edgeOffset;
+        }
+        else
+        {
+            destPoint = line.p2() - QPointF(0, 10);
+        }
     }
 }
 
