@@ -26,6 +26,7 @@
 #include <QMenu>
 #include <QAction>
 #include <QTreeView>
+#include <QTextBrowser>
 #include <QComboBox>
 #include <QFileSystemWatcher>
 
@@ -172,7 +173,12 @@ protected:
     // in case of exit, save settings
     virtual void closeEvent(QCloseEvent* _event);
 
+    // update git status on reload
+    void updateGitStatus(const QString& _repoPath);
+
     TagWidget* tagwidget;
+    
+    QTextBrowser* gitstatus;
 
     // menu
     QMenu* filemenu;

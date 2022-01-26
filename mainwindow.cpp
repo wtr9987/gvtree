@@ -15,24 +15,24 @@
 /*                                               */
 /* --------------------------------------------- */
 
-#include <QStatusBar>
-#include <QWidget>
-#include <QColorDialog>
-#include <QVBoxLayout>
-#include <QDesktopWidget>
 #include <QApplication>
-#include <QTextStream>
-#include <QScrollBar>
-#include <QDockWidget>
-#include <QtAlgorithms>
-#include <QFileDialog>
+#include <QColorDialog>
 #include <QCoreApplication>
+#include <QDesktopWidget>
+#include <QDockWidget>
+#include <QFileDialog>
 #include <QMenuBar>
 #include <QMessageBox>
 #include <QPixmap>
+#include <QScrollBar>
 #include <QSettings>
-#include <QDockWidget>
+#include <QStatusBar>
 #include <QTextBrowser>
+#include <QTextStream>
+#include <QVBoxLayout>
+#include <QWidget>
+
+#include <QtAlgorithms>
 
 #include <iostream>
 
@@ -40,6 +40,7 @@
 #include <stdio.h>
 #include <sys/stat.h>
 
+#include "execute_cmd.h"
 #include "mainwindow.h"
 
 using namespace std;
@@ -117,6 +118,16 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
     dock->setObjectName("Version Information");
     dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     dock->setWidget(tagwidget);
+    addDockWidget(Qt::RightDockWidgetArea, dock);
+    windowmenu->addAction(dock->toggleViewAction());
+    dock->hide();
+
+    // -- create text browser for current git status
+    gitstatus = new QTextBrowser(this);
+    dock = new QDockWidget(tr("Current git status"), this);
+    dock->setObjectName("Current git status");
+    dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    dock->setWidget(gitstatus);
     addDockWidget(Qt::RightDockWidgetArea, dock);
     windowmenu->addAction(dock->toggleViewAction());
     dock->hide();
@@ -851,6 +862,12 @@ bool MainWindow::checkGitLocalRepository(const QString& _path,
             watcher->removePaths(watcher->directories());
         if (watcher->files().size())
             watcher->removePaths(watcher->files());
+    }
+
+    updateGitStatus(_repoPath);
+
+    if (watcher)
+    {
         QString gitpath = _repoPath + "/.git";
         watcher->addPath(gitpath);
     }
@@ -1247,4 +1264,19 @@ void MainWindow::directoryChanged(const QString&)
 void MainWindow::fileChanged(const QString&)
 {
     pbRepositoryRefresh->show();
+}
+
+void MainWindow::updateGitStatus(const QString& _repoPath)
+{
+    gitstatus->clear();
+
+    // get data
+    QString cmd = "git -C " + _repoPath + " status";
+    QList<QString> cache;
+    execute_cmd(cmd.toUtf8().data(), cache, getPrintCmdToStdout());
+    foreach(const QString &str, cache)
+    {
+        gitstatus->insertPlainText(str);
+    }
+    gitstatus->moveCursor(QTextCursor::Start);
 }

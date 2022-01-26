@@ -131,7 +131,7 @@ void GraphWidget::test()
 
     foreach (const QString &n, nodeNames)
     {
-        QString line = "#0#0#(tag: " + n + ")#";
+        QString line = "#0#0##(tag: " + n + ")#";
         QStringList parts = line.split(QChar('#'));
 
         nodes[n] = new Version(globalVersionInfo, this);
@@ -491,7 +491,7 @@ void GraphWidget::process(QList<QString> _cache)
         if (previousTree.isEmpty())
         {
             // initial setting
-            for (int i = 0; i < tree.size() + 1; i++)
+            for (int i = 0; i < tree.size(); i++)
             {
                 if (i % 2 != 0)
                     branchslots.push_back(NULL);
@@ -500,6 +500,8 @@ void GraphWidget::process(QList<QString> _cache)
             }
             maxTreePatternLength = branchslots.size();
             previousBranchslots = branchslots;
+            // +1
+            previousBranchslots.push_back(NULL);
         }
         else if (maxTreePatternLength < len)
         {
@@ -552,7 +554,6 @@ void GraphWidget::process(QList<QString> _cache)
                     Edge* e = new Edge (parent, v, this, false, parent == rootVersion);
 
                     scene()->addItem(e);
-
 
                     // merge version node ?
                     Version* merge = (tree.size() >= i + 1) ? branchslots[i + 1] : NULL;
