@@ -64,44 +64,27 @@ void Node::simpleTreeGeometry(Node* _sibling)
         xval = _sibling->getX() + 1.0f;
 }
 
-void Node::centerParents(Node* _sibling)
+void Node::centerParents(Node* _parent)
 {
     if (outEdges.size() == 0)
     {
-        if (_sibling)
-            mod = xval + _sibling->getMod();
-
-        return;
-    }
-
-    float minChildX = 10e6;
-    float maxChildX = -10e6;
-    Node* sibling = NULL;
-
-    foreach (const Edge * edge, outEdges)
-    {
-        // the first node has no left sibling
-        edge->destVersion()->centerParents(sibling);
-        //
-        sibling = edge->destVersion();
-
-        float childX = edge->destVersion()->getX();
-        if (childX < minChildX)
-            minChildX = childX;
-        if (childX > maxChildX)
-            maxChildX = childX;
-    }
-
-    float center = minChildX + (maxChildX - minChildX) / 2.0f;
-
-    // if this is not a leaf node ...
-    if (_sibling)
-    {
-        mod = xval - center;
+        mod = _parent->getMod();
     }
     else
     {
-        xval = center;
+        float minChildX = 10e6;
+        float maxChildX = -10e6;
+
+        foreach (const Edge * edge, outEdges)
+        {
+            edge->destVersion()->centerParents(this);
+
+            float childX = edge->destVersion()->getX();
+            minChildX = (childX < minChildX)?childX:minChildX;
+            maxChildX = (childX > maxChildX)?childX:maxChildX;
+        }
+
+        mod = xval - (minChildX + (maxChildX - minChildX) / 2.0f);
     }
 }
 
@@ -141,7 +124,7 @@ void Node::shiftTree()
             if (shift >= 0.0f)
             {
                 shift += 1.0f;
-                current->addX(shift); // funny, this was missing ;(
+                current->addX(shift); 
                 current->addMod(shift);
             }
         }
@@ -227,5 +210,5 @@ QList<class Edge*>& Node::getOutEdges()
 
 int Node::getNumOutEdges() const
 {
-  return outEdges.size();
+    return outEdges.size();
 }
