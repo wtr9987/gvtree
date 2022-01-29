@@ -68,7 +68,10 @@ void Node::centerParents(Node* _parent)
 {
     if (outEdges.size() == 0)
     {
-        mod = _parent->getMod();
+        if (_parent)
+        {
+            mod = _parent->getMod();
+        }
     }
     else
     {
@@ -80,8 +83,8 @@ void Node::centerParents(Node* _parent)
             edge->destVersion()->centerParents(this);
 
             float childX = edge->destVersion()->getX();
-            minChildX = (childX < minChildX)?childX:minChildX;
-            maxChildX = (childX > maxChildX)?childX:maxChildX;
+            minChildX = (childX < minChildX) ? childX : minChildX;
+            maxChildX = (childX > maxChildX) ? childX : maxChildX;
         }
 
         mod = xval - (minChildX + (maxChildX - minChildX) / 2.0f);
@@ -124,7 +127,7 @@ void Node::shiftTree()
             if (shift >= 0.0f)
             {
                 shift += 1.0f;
-                current->addX(shift); 
+                current->addX(shift);
                 current->addMod(shift);
             }
         }

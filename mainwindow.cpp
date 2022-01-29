@@ -379,6 +379,7 @@ bool MainWindow::applyStyleSheetFile(QString _path)
         // remember style sheet file
         QSettings settings;
         settings.setValue("styleSheetFile", _path);
+        gvtree_preferences.pbCssPath->setText(_path);
         return true;
     }
     return false;
@@ -404,6 +405,9 @@ void MainWindow::restorePreferencesSettings()
     if (!settings.contains("tempPath"))
         settings.setValue("tempPath", "/tmp");
     gvtree_preferences.pbTempPath->setText(settings.value("tempPath").toString());
+
+    if (settings.contains("styleSheetFile"))
+        gvtree_preferences.pbCssPath->setText(settings.value("styleSheetFile").toString());
 
     if (!settings.contains("gitLogLines"))
         settings.setValue("gitLogLines", "1000");
@@ -563,6 +567,7 @@ void MainWindow::createMenus()
     setGitRepo->setStatusTip(tr("Set path to git repository."));
     connect(setGitRepo, SIGNAL(triggered()), this, SLOT(setGitLocalRepository()));
     connect(gvtree_preferences.pbLocalRepositoryPath, SIGNAL(pressed()), this, SLOT(setGitLocalRepository()));
+    connect(gvtree_preferences.pbCssPath, SIGNAL(pressed()), this, SLOT(changeCssFilePath()));
     connect(gvtree_preferences.pbTempPath, SIGNAL(pressed()), this, SLOT(changeTempPath()));
     filemenu->addAction(setGitRepo);
     refreshRepo = new QAction(tr("Reload repository"), this);
@@ -731,7 +736,6 @@ void MainWindow::changeCssFilePath()
 {
     QFileDialog dialog(this, tr("Change Path to CSS Style Sheet File"), gvtree_preferences.pbCssPath->text());
 
-    dialog.setFileMode(QFileDialog::DirectoryOnly);
     if (dialog.exec())
     {
         applyStyleSheetFile(dialog.selectedFiles().at(0));
@@ -762,16 +766,14 @@ bool MainWindow::checkForValidTempPath(const QString& _tmppath)
 {
     QFileInfo fi(_tmppath);
 
-    if (_tmppath == fi.absoluteFilePath()
-        && fi.permission(QFile::WriteUser | QFile::ReadUser))
-        return true;
-
-    return false;
+    return (_tmppath == fi.absoluteFilePath()
+            && fi.permission(QFile::WriteUser | QFile::ReadUser));
 }
 
 void MainWindow::setGitLocalRepository()
 {
     QFileDialog dialog(this, tr("Change Local git Repository Path"), gvtree_preferences.pbLocalRepositoryPath->text());
+
     QStringList directoryNames;
     QString oldRepositoryPath = repositoryPath;
 
@@ -913,13 +915,13 @@ void MainWindow::licenseDialog()
 
 void MainWindow::aboutDialog()
 {
-    QMessageBox tmp(QMessageBox::Information, tr("About"), tr(""), QMessageBox::NoButton, this);
+    QMessageBox about(QMessageBox::Information, tr("About"), tr(""), QMessageBox::NoButton, this);
     QString css = "background-color: white; color: black;";
 
-    tmp.setStyleSheet(css);
+    about.setStyleSheet(css);
 
-    tmp.setIconPixmap(QPixmap(":/images/gvtree_title_512.png"));
-    tmp.exec();
+    about.setIconPixmap(QPixmap(":/images/gvtree_title_512.png"));
+    about.exec();
 }
 
 void MainWindow::resizeEvent(QResizeEvent* event)

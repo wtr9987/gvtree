@@ -281,6 +281,9 @@ bool Version::processGitLogInfo(const QString& _input, const QStringList& _parts
     if (keyInformation[QString("_input")].join(QString()) == _input)
         return false;
 
+    // erase old information
+    keyInformation.clear();
+
     // store the raw input in the key information, too
     keyInformation[QString("_input")] = QStringList(_input);
     keyInformation[QString("Hash")] = QStringList(hash);

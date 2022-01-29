@@ -333,7 +333,8 @@ void GraphWidget::setGitLogFileConstraint(const QString& _fileConstraint)
             + (shortHashes ? "%h" : "%H")
             + "\"";
 
-        cmd += " --remotes";
+        if (remotes)
+            cmd += " --remotes";
 
         if (fileConstraint.size())
             cmd += " -- " + fileConstraint;
@@ -347,7 +348,7 @@ void GraphWidget::setGitLogFileConstraint(const QString& _fileConstraint)
         }
     }
 
-    // set fileConstraint flag 
+    // set fileConstraint flag
     foreach(QGraphicsItem * it, scene()->items())
     {
         if (it->type() != QGraphicsItem::UserType + 1)

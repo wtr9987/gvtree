@@ -18,26 +18,26 @@
 #ifndef __MAINWINDOW_H__
 #define __MAINWINDOW_H__
 
-#include <QMainWindow>
-#include <QLineEdit>
-#include <QStringList>
-#include <QMap>
-#include <QString>
-#include <QMenu>
 #include <QAction>
-#include <QTreeView>
-#include <QTextBrowser>
 #include <QComboBox>
 #include <QFileSystemWatcher>
+#include <QLineEdit>
+#include <QMainWindow>
+#include <QMap>
+#include <QMenu>
+#include <QString>
+#include <QStringList>
+#include <QTextBrowser>
+#include <QTreeView>
 
 #include "graphwidget.h"
 #include "tagprefgridlayout.h"
 #include "tagwidget.h"
-#include "ui_gvtree_preferences.h"
+#include "ui_gvtree_comparetree.h"
 #include "ui_gvtree_difftool.h"
 #include "ui_gvtree_help.h"
 #include "ui_gvtree_license.h"
-#include "ui_gvtree_comparetree.h"
+#include "ui_gvtree_preferences.h"
 
 class MainWindow : public QMainWindow
 {
