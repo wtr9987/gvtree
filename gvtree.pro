@@ -6,7 +6,13 @@ VERSION = -1.1-0
 RC_ICONS = gvtree.ico
 CPPFLAGS += -O3
 QT += opengl widgets
-INSTALLS += target
+INSTALLS += target documentation
+
+isEmpty(PREFIX) {
+PREFIX="."
+}
+
+DEFINES += INSTALLATION_PATH=\"\\\"$${PREFIX}\\\"\"
 
 RESOURCES += gvtree.qrc
 
@@ -58,7 +64,6 @@ DISTFILES += $$SOURCEFILES \
   ChangeLog \
   css/gvtree.css \
   doc/GNU_GPL_v3.0.html \
-  doc/gvtree-1.1-0.xhtml \
   doc/gvtree-1.1-0.odt \
   doc/gvtree-1.1-0.pdf \
   images/connectorStyle0.png \
@@ -82,3 +87,5 @@ TARGET.EPOCHEAPSIZE = 0x200000 0xA00000
 target.path = $$PREFIX/bin
 source.files = $$SOURCES $$HEADERS $$RESOURCES *.pro
 
+documentation.path = $$PREFIX/share/doc/gvtree
+documentation.files = doc/gvtree-1.1-0.pdf

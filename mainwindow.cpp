@@ -245,13 +245,13 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
             cout << "--------------------------------------------------------------------------------" << endl;
             cout << "Parameters:" << endl;
             cout << "[path]" << endl;
-            cout << "   Set a file constraint. Only the version tree of the file will" << endl;
+            cout << "   Set a file constraint. The version tree of the file will" << endl;
             cout << "   be displayed." << endl;
             cout << endl;
             cout << "-r [local git repository directory]" << endl;
             cout << "   If not specified the current path is checked for a valid repository" << endl;
             cout << "   or the repository used in the previous session is displayed." << endl;
-            cout << "   Which one to use can be controlled by preferences setting." << endl;
+            cout << "   Which one is used can be controlled by the preferences setting." << endl;
             cout << endl;
             cout << "--version Version string is printed to stdout" << endl;
             cout << endl;
@@ -647,6 +647,7 @@ void MainWindow::createMenus()
     licenseAct = new QAction(tr("License"), this);
     connect(licenseAct, SIGNAL(triggered()), this, SLOT(licenseDialog()));
     helpmenu->addAction(helpAct);
+    helpmenu->addSeparator();
     helpmenu->addAction(aboutAct);
     helpmenu->addAction(licenseAct);
 
@@ -879,20 +880,10 @@ bool MainWindow::checkGitLocalRepository(const QString& _path,
 
 void MainWindow::helpDialog()
 {
-    QDialog* hDialog = new QDialog;
-    QString css = "background-color: white; color: black;";
-
-    hDialog->setStyleSheet(css);
-
-    gvtree_help.setupUi(hDialog);
-    connect(gvtree_help.pbOK, SIGNAL(clicked()), hDialog, SLOT(close()));
-
-    QFile file(":/doc/gvtree-1.1-0.xhtml");
-    file.open(QFile::ReadOnly | QFile::Text);
-    QTextStream stream(&file);
-    gvtree_help.textBrowser->setHtml(stream.readAll());
-
-    hDialog->exec();
+    QMessageBox help(QMessageBox::Information, tr("Help"), tr(""), QMessageBox::NoButton, this);
+    QString msg = "For more detailed information, please refer to<br/><br/><b><i>"
+            + QString(INSTALLATION_PATH) + "/share/doc/gvtree-1.1-0.pdf</b></i>";
+    help.information(this,"Help", msg);
 }
 
 void MainWindow::licenseDialog()
@@ -905,7 +896,7 @@ void MainWindow::licenseDialog()
     gvtree_license.setupUi(lDialog);
     connect(gvtree_license.pbOK, SIGNAL(clicked()), lDialog, SLOT(close()));
 
-    QFile file(":/html/GNU_GPL_v3.0.html");
+    QFile file(":/doc/GNU_GPL_v3.0.html");
     file.open(QFile::ReadOnly | QFile::Text);
     QTextStream stream(&file);
     gvtree_license.textBrowser->setHtml(stream.readAll());
