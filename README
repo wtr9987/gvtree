@@ -59,7 +59,7 @@ After installation
 gvtree -h 
 will give you the following information:
 
-gvtree V1.1-0
+gvtree-1.1-0
 
 Tool to display git log graph
 
@@ -76,13 +76,13 @@ gvtree Copyright (C) 2021 Wolfgang Trummer
 --------------------------------------------------------------------------------
 Parameters:
 [path]
-   Set a file constraint. Only the version tree of the file will
+   Set a file constraint. The version tree of the file will
    be displayed.
 
 -r [local git repository directory]
    If not specified the current path is checked for a valid repository
    or the repository used in the previous session is displayed.
-   Which one to use can be controlled by preferences setting.
+   Which one is used can be controlled by the preferences setting.
 
 --version Version string is printed to stdout
 
@@ -102,7 +102,7 @@ Parameters:
 -f [gitlog] 
    Testing:
    Load a file created with 
-     git log --graph --decorate --pretty="#%H#%at#%an#%d#"
+     git log --graph --decorate --pretty="#%h#%an#%at#%d#"
    This has been helpful during development to import constraint and
    complex repository data.
 

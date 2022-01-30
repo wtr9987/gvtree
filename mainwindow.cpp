@@ -219,7 +219,9 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
         }
         else if (_argv.at(i) == "--version")
         {
-            cout << "gvtree V1.1-0" << endl;
+            cout << VERSION_NAME << endl;
+            QCoreApplication::exit(0);
+            exit(0);
         }
         else if (_argv.at(i) == "--css")
         {
@@ -228,7 +230,7 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
         }
         else if (_argv.at(i) == "-h")
         {
-            cout << "gvtree V1.1-0" << endl;
+            cout << VERSION_NAME << endl;
             cout << endl;
             cout << "Tool to display git log graph" << endl;
             cout << endl;
@@ -882,7 +884,8 @@ void MainWindow::helpDialog()
 {
     QMessageBox help(QMessageBox::Information, tr("Help"), tr(""), QMessageBox::NoButton, this);
     QString msg = "For more detailed information, please refer to<br/><br/><b><i>"
-            + QString(INSTALLATION_PATH) + "/share/doc/gvtree-1.1-0.pdf</b></i>";
+            + QString(INSTALLATION_PATH) + "/share/doc/"
+            + QString(VERSION_NAME) + ".pdf</b></i>";
     help.information(this,"Help", msg);
 }
 

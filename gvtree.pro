@@ -12,7 +12,8 @@ isEmpty(PREFIX) {
 PREFIX="."
 }
 
-DEFINES += INSTALLATION_PATH=\"\\\"$${PREFIX}\\\"\"
+DEFINES += INSTALLATION_PATH=\"\\\"$${PREFIX}\\\"\" 
+DEFINES += VERSION_NAME=\"\\\"$${TARGET}$${VERSION}\\\"\"
 
 RESOURCES += gvtree.qrc
 
