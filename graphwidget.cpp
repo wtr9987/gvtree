@@ -1416,10 +1416,12 @@ void GraphWidget::restoreFromToHashes()
         if (v->getHash().isEmpty() == false && fromHashSave.contains(v->getHash()))
         {
             fromVersions.push_back(v);
+            v->setMatched(true);
         }
         if (toHashSave.isEmpty() == false && v->getHash() == toHashSave)
         {
             toVersion = v;
+            v->setMatched(true);
         }
     }
 
@@ -1427,5 +1429,12 @@ void GraphWidget::restoreFromToHashes()
     {
         fromToInfo->setFromToPosition(fromVersions, toVersion);
         fromToInfo->show();
+
+        // restore comparetree from combo box
+        mwin->getFromComboBox()->clear();
+        foreach(Version * it, fromVersions)
+        {
+            mwin->getFromComboBox()->addItem(it->getCommitDate(), QVariant::fromValue(VersionPointer(it)));
+        }
     }
 }
