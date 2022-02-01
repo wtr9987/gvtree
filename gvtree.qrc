@@ -7,13 +7,10 @@
   <file>images/gvt_del.png</file>
   <file>images/gvt_mod.png</file>
   <file>images/gvtree_logo_128.png</file>
-  <file>images/gvtree_logo_256.png</file>
-  <file>images/gvtree_logo_512.png</file>
   <file>images/gvtree_title_512.png</file>
   <file>images/gvt_pointer.png</file>
   <file>images/gvt_refresh.png</file>
   <file>images/gvt_ren.png</file>
-  <file>images/gvt_text_512.png</file>
   <file>doc/GNU_GPL_v3.0.html</file>
 </qresource>
 </RCC>
