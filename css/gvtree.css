@@ -1,30 +1,138 @@
-Mainwindow { font-size: 8pt; color: black; background-color: #cccccc; }
-QAction { font-size: 8pt;  color: black; background-color: white; } 
-QHeaderView::section { font-size: 10pt; color: black; background-color: #dddddd; } 
-QLabel { font-size: 8pt; color: black; background-color: white; }
-QListView { font-size: 8pt; color: black; background-color: white; }
-QListWidget::item { font-size: 8pt; color: black; background-color: white; }
-QComboBox { 
-        padding: 1px 0px 1px 3px;
-        font-size: 8pt; selection-color: black; color: black; background-color: white; }
-QMainWindow { font-size: 8pt;  color: black; background-color: white; } 
-QWidget { font-size: 8pt;  color: black; background-color: #cccccc; } 
-tagWidget { font-size: 8pt;  color: black; background-color: #cccccc; } 
-QTabBar::tab { font-size: 8pt;  color: black; background-color: #cccccc; } 
-QTabBar::tab::selected { font-size: 8pt;  color: black; background-color: #eeeeee; } 
-QMenu::item { font-size: 8pt;  color: black; background-color: white; } 
-QMenu::item::selected { font-size: 8pt;  color: black; background-color: white; } 
-QMenu::item::disabled { font-size: 8pt;  color: gray; background-color: white; } 
-QMenuBar::item { font-size: 8pt;  color: black; background-color: #cccccc; } 
-QPushButton { font-size: 8pt; color: black; background-color: #cccccc; }
-QStandardItem { font-size: 8pt; color: black; background-color: white; }
-QTabWidget { font-size: 14pt; color: black; background-color: white; }
-QTableView { font-size: 8pt; color: black; background-color: white; }
-QTreeView { font-size: 8pt; color: black; background-color: white; }
-Scoretable { font-size: 8pt; color: black; background-color: white; }
-QLineEdit { font-size: 8pt; color: black; background-color: white; } 
-QScrollBar { font-size: 8pt; color: #444444; background-color: #cccccc; } 
-QFileDialog { font-size: 8pt; color: #444444; background-color: #cccccc; } 
-QTextBrowser { font-size: 12pt; color: #000000; background-color: #ffffff; } 
-QTextEdit { font-size: 8pt; color: #000000; background-color: #ffffff; } 
-QMessageBox { font-size: 8pt; color: #444444; background-color: #cccccc; } 
+QObject {
+    color: black;
+    background-color: white;
+}
+QWidget {
+    color: black;
+    background-color: white;
+}
+QAction {
+		color: black;
+    background-color: white;
+}
+QHeaderView::section {
+		color: black;
+    background-color: #eeeeee;
+}
+QLabel {
+		color: black;
+    background-color: white;
+}
+QListView {
+		color: black;
+    background-color: white;
+}
+QListWidget::item {
+		color: black;
+    background-color: white;
+}
+QComboBox {
+    padding: 1px 0px 1px 3px;
+    selection-color: black;
+		color: black;
+    background-color: white;
+}
+QMainWindow {
+		color: black;
+    background-color: white;
+}
+tagWidget {
+		color: black;
+    background-color: #eeeeee;
+}
+QTabBar::tab {
+		color: black;
+    background-color: white;
+}
+QTabBar::tab::selected {
+		color: black;
+    background-color: #eeeeee;
+}
+QMenu::item {
+		color: black;
+    background-color: white;
+}
+QMenu::item::selected {
+		color: black;
+    background-color: #eeeeee;
+}
+QMenu::item::disabled {
+		color: gray;
+    background-color: white;
+}
+QMenuBar::item {
+		color: black;
+    background-color: white;
+}
+QPushButton {
+		color: black;
+    background-color: #eeeeee;
+}
+QStandardItem {
+		color: black;
+    background-color: white;
+}
+QTabWidget {
+		color: black;
+    background-color: white;
+}
+QTableView {
+		color: black;
+    background-color: white;
+}
+QTreeView {
+		color: black;
+    background-color: white;
+}
+QLineEdit {
+		color: black;
+    background-color: white;
+}
+QScrollBar {
+		color: black;
+    background-color: #eeeeee;
+}
+QFileDialog {
+		color: black;
+    background-color: #eeeeee;
+}
+QTextBrowser {
+		color: black;
+    background-color: white;
+}
+QTextEdit {
+		color: black;
+    background-color: white;
+}
+QMessageBox {
+		color: black;
+    background-color: white;
+}
+QCheckBox::indicator {
+    width: 10px;
+    height: 10px;
+}
+QRadioButton::indicator {
+width: 10px;
+    height 10px;
+    border-radius: 7px;
+}
+QRadioButton::indicator::checked {
+    background-color:       black;
+    border:                 2px solid #dddddd;
+}
+QRadioButton::indicator::unchecked {
+    background-color:       white;
+    border:                 2px solid #dddddd;
+}
+QCheckBox::indicator::checked {
+    background-color:       black;
+    border:                 2px solid #dddddd;
+}
+QCheckBox::indicator::unchecked {
+    background-color:       white;
+    border:                 2px solid #dddddd;
+}
+QToolTip {
+    padding: 1px 0px 1px 3px;
+}

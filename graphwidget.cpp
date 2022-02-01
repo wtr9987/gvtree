@@ -853,6 +853,10 @@ void GraphWidget::focusFromVersion()
     {
         resetMatches();
         v->setMatched(true);
+        if (v->ensureUnfolded())
+        {
+            updateGraphFolding();
+        }
         focusVersion(v);
     }
 }
@@ -863,6 +867,10 @@ void GraphWidget::focusToVersion()
     {
         resetMatches();
         toVersion->setMatched(true);
+        if (toVersion->ensureUnfolded())
+        {
+            updateGraphFolding();
+        }
         focusVersion(toVersion);
     }
 }

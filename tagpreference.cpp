@@ -16,23 +16,24 @@
 /* --------------------------------------------- */
 
 #include <QFontDialog>
+#include <QApplication>
 #include "tagpreference.h"
 
 TagPreference::TagPreference(int _row,
-                const QString& _name,
-                const QString& _regexDefault,
-                QGridLayout* _layout) : QObject(NULL)
+                             const QString& _name,
+                             const QString& _regexDefault,
+                             QGridLayout* _layout) : QObject(NULL)
 {
     tagType = new QLabel(_name);
-    _layout->addWidget(tagType, _row,0,1,1);
+    _layout->addWidget(tagType, _row, 0, 1, 1);
 
-    fontButton = new QPushButton("Courier,10,-1,5,50,0,0,0,0,0");
+    fontButton = new QPushButton(QApplication::font().toString());
     connect(fontButton, SIGNAL(clicked()), this, SLOT(setFont()));
-    _layout->addWidget(fontButton,_row,1,1,1);
+    _layout->addWidget(fontButton, _row, 1, 1, 1);
 
     regularExpression = new QLineEdit();
     connect(regularExpression, SIGNAL(returnPressed()), this, SLOT(setRegularExpression()));
-    _layout->addWidget(regularExpression,_row,2,1,1);
+    _layout->addWidget(regularExpression, _row, 2, 1, 1);
 
     QString lookupRegexp = _name + "/regExp";
     QSettings settings;
@@ -70,16 +71,15 @@ const QRegExp& TagPreference::getRegExp() const
 
 void TagPreference::setFont()
 {
-    bool ok;
-    QFont result = QFontDialog::getFont(&ok, font, NULL);
+    QFontDialog dialog(font, NULL);
 
-    if (ok)
+    if (dialog.exec())
     {
-        font = result;
-        fontButton->setText(result.key());
+        font = dialog.selectedFont();
+        fontButton->setText(font.toString());
         QString settingsKey = tagType->text() + "/font";
         QSettings settings;
-        settings.setValue(settingsKey, result.key());
+        settings.setValue(settingsKey, font.toString());
     }
 }
 

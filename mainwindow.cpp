@@ -1162,7 +1162,10 @@ void MainWindow::colorDialogCommon(QString _key, QPushButton* _pb)
     QColor tmpColor = settings.value(_key).value<QColor>();
 
     tmpColor = QColorDialog::getColor(tmpColor);
-    restoreColorSettingsHelper(_pb, _key, tmpColor, true);
+    if (tmpColor.isValid())
+    {
+      restoreColorSettingsHelper(_pb, _key, tmpColor, true);
+    }
 }
 
 void MainWindow::colorDialogBackground()

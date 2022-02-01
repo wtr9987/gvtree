@@ -414,13 +414,9 @@ bool Version::findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatc
     if (newmatched != oldmatched
         || localVersionInfo != oldLocalVersionInfo)
     {
-        if (_exactMatch == true && newmatched == true && !isFolder())
+        if (_exactMatch == true && newmatched == true)
         {
-            Version* folder = lookupFolderVersion();
-            if (folder && folder->isFolded())
-            {
-                folder->foldAction();
-            }
+            ensureUnfolded();
         }
 
         setMatched(newmatched);
@@ -838,4 +834,20 @@ void Version::setKeyInformation(const QMap<QString, QStringList>& _data)
 bool Version::isSelected() const
 {
     return selected;
+}
+
+bool Version::ensureUnfolded()
+{
+    bool changed = false;
+
+    if (!isFolder())
+    {
+        Version* folder = lookupFolderVersion();
+        if (folder && folder->isFolded())
+        {
+            folder->foldAction();
+            changed = true;
+        }
+    }
+    return changed;
 }

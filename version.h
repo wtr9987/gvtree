@@ -158,6 +158,13 @@ public:
     QList<Edge*>& getFileConstraintInEdgeList();
     QList<Edge*>& getFileConstraintOutEdgeList();
 
+    /**
+     * \brief If version is folded away, ensure its visiblity.
+     *
+     * \return true, if folding has changed
+     */
+    bool ensureUnfolded();
+
 protected:
     virtual void mouseMoveEvent(QGraphicsSceneMouseEvent* _event);
 
