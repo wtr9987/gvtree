@@ -16,6 +16,7 @@
 /* --------------------------------------------- */
 
 #include <QApplication>
+#include <QTextCodec>
 #include <QColorDialog>
 #include <QCoreApplication>
 #include <QDesktopWidget>
@@ -414,6 +415,10 @@ void MainWindow::restorePreferencesSettings()
     if (!settings.contains("gitLogLines"))
         settings.setValue("gitLogLines", "1000");
     gvtree_preferences.git_log_lines->setText(settings.value("gitLogLines").toString());
+
+    if (!settings.contains("codecForCStrings"))
+        settings.setValue("codecForCStrings", "UTF-8");
+    initCbCodecForCStrings(settings.value("codecForCStrings").toString());
 
     if (!settings.contains("xfactor"))
         settings.setValue("xfactor", 10);
@@ -884,9 +889,10 @@ void MainWindow::helpDialog()
 {
     QMessageBox help(QMessageBox::Information, tr("Help"), tr(""), QMessageBox::NoButton, this);
     QString msg = "For more detailed information, please refer to<br/><br/><b><i>"
-            + QString(INSTALLATION_PATH) + "/share/doc/"
-            + QString(VERSION_NAME) + ".pdf</b></i>";
-    help.information(this,"Help", msg);
+        + QString(INSTALLATION_PATH) + "/share/doc/"
+        + QString(VERSION_NAME) + ".pdf</b></i>";
+
+    help.information(this, "Help", msg);
 }
 
 void MainWindow::licenseDialog()
@@ -1079,6 +1085,16 @@ void MainWindow::saveChangedSettings()
     QSettings settings;
 
     settings.setValue("gitLogLines", gvtree_preferences.git_log_lines->text());
+
+    bool forceUpdate = false;
+
+    QString codec = gvtree_preferences.cbCodecForCStrings->currentText();
+    if (settings.value("codecForCStrings").toString() != codec)
+    {
+        settings.setValue("codecForCStrings", codec);
+        QTextCodec::setCodecForCStrings(QTextCodec::codecForName(codec.toUtf8().data()));
+        forceUpdate = true;
+    }
     settings.setValue("topDownView", gvtree_preferences.top_down_view->isChecked());
     settings.setValue("gitShortHashes", gvtree_preferences.git_short_hashes->isChecked());
     settings.setValue("openGLRendering", gvtree_preferences.open_gl_rendering->isChecked());
@@ -1100,7 +1116,7 @@ void MainWindow::saveChangedSettings()
 
     pwin->hide();
 
-    graphwidget->preferencesUpdated();
+    graphwidget->preferencesUpdated(forceUpdate);
 }
 
 bool MainWindow::getXYFactor(int& _xfactor, int& _yfactor)
@@ -1164,7 +1180,7 @@ void MainWindow::colorDialogCommon(QString _key, QPushButton* _pb)
     tmpColor = QColorDialog::getColor(tmpColor);
     if (tmpColor.isValid())
     {
-      restoreColorSettingsHelper(_pb, _key, tmpColor, true);
+        restoreColorSettingsHelper(_pb, _key, tmpColor, true);
     }
 }
 
@@ -1278,4 +1294,24 @@ void MainWindow::updateGitStatus(const QString& _repoPath)
         gitstatus->insertPlainText(str);
     }
     gitstatus->moveCursor(QTextCursor::Start);
+}
+
+bool MainWindow::initCbCodecForCStrings(QString _default)
+{
+    gvtree_preferences.cbCodecForCStrings->clear();
+    gvtree_preferences.cbCodecForCStrings->addItem(QString());
+    foreach (QByteArray codec, QTextCodec::availableCodecs())
+    {
+        gvtree_preferences.cbCodecForCStrings->addItem(QString(codec));
+    }
+
+    int index = gvtree_preferences.cbCodecForCStrings->findText(_default, Qt::MatchExactly);
+    if (index < 0)
+    {
+        gvtree_preferences.cbCodecForCStrings->setCurrentIndex(0);
+        return false;
+    }
+
+    gvtree_preferences.cbCodecForCStrings->setCurrentIndex(index);
+    return true;
 }

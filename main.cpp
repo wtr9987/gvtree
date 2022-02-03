@@ -20,9 +20,10 @@
 
 #include "mainwindow.h"
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     QApplication app(argc, argv);
+
     app.setWindowIcon(QIcon(":/images/gvtree_logo_128.png"));
 
     app.setOrganizationName("gvtree");
@@ -56,6 +57,16 @@ int main(int argc, char **argv)
             QString style(styleFile.readAll());
             app.setStyleSheet(style);
         }
+    }
+
+    // Codec for git log output
+    if (settings.contains("codecForCStrings"))
+    {
+        QTextCodec::setCodecForCStrings(QTextCodec::codecForName(settings.value("codecForCStrings").toString().toUtf8().data()));
+    }
+    else
+    {
+        QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
     }
 
     // main window

@@ -1099,7 +1099,7 @@ const QString& GraphWidget::getLocalRepositoryPath() const
     return localRepositoryPath;
 }
 
-void GraphWidget::preferencesUpdated()
+void GraphWidget::preferencesUpdated(bool _forceUpdate)
 {
     bool updateAll = mwin->getXYFactor(xfactor, yfactor);
 
@@ -1140,7 +1140,7 @@ void GraphWidget::preferencesUpdated()
         adjustAllEdges();
     }
 
-    if (updateAll && currentLines > 0)
+    if (_forceUpdate || (updateAll && currentLines > 0))
     {
         gitlog();
     }

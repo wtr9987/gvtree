@@ -156,6 +156,9 @@ protected:
     // create main window menus
     void createMenus();
 
+    // combo box with all codecs
+    bool initCbCodecForCStrings(QString _default);
+
     // restore information from QSettings
     void restorePreferencesSettings();
     void restoreWindowSettings();
@@ -177,7 +180,7 @@ protected:
     void updateGitStatus(const QString& _repoPath);
 
     TagWidget* tagwidget;
-    
+
     QTextBrowser* gitstatus;
 
     // menu

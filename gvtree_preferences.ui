@@ -37,7 +37,7 @@
    <item row="1" column="1" colspan="2">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tabWidgetPage1">
       <property name="statusTip">
@@ -79,7 +79,7 @@
          </layout>
         </widget>
        </item>
-       <item row="17" column="1">
+       <item row="21" column="1">
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -92,27 +92,14 @@
          </property>
         </spacer>
        </item>
-       <item row="4" column="1">
+       <item row="6" column="1">
         <widget class="QLabel" name="lbGitLogLength">
          <property name="text">
           <string>git log length</string>
          </property>
         </widget>
        </item>
-       <item row="5" column="1">
-        <widget class="QCheckBox" name="diff_local_files">
-         <property name="focusPolicy">
-          <enum>Qt::NoFocus</enum>
-         </property>
-         <property name="toolTip">
-          <string>If checked, the current local file is added to the comparison of different versions. </string>
-         </property>
-         <property name="text">
-          <string>add local version to diff</string>
-         </property>
-        </widget>
-       </item>
-       <item row="7" column="1">
+       <item row="10" column="1">
         <widget class="QCheckBox" name="remotes">
          <property name="toolTip">
           <string>Add the --remotes option to git log calls.</string>
@@ -122,7 +109,7 @@
          </property>
         </widget>
        </item>
-       <item row="8" column="1">
+       <item row="11" column="1">
         <widget class="QCheckBox" name="git_short_hashes">
          <property name="toolTip">
           <string>This option controls if %h or %H is used to retrieve hash values from git. </string>
@@ -132,7 +119,7 @@
          </property>
         </widget>
        </item>
-       <item row="9" column="1">
+       <item row="12" column="1">
         <widget class="QCheckBox" name="top_down_view">
          <property name="toolTip">
           <string>In git log the latest version is printed on the top. To print the earliest node (root node) at the top, choose the top down view here.</string>
@@ -142,7 +129,7 @@
          </property>
         </widget>
        </item>
-       <item row="4" column="2">
+       <item row="6" column="2">
         <widget class="QLineEdit" name="git_log_lines">
          <property name="focusPolicy">
           <enum>Qt::ClickFocus</enum>
@@ -155,7 +142,7 @@
          </property>
         </widget>
        </item>
-       <item row="3" column="1">
+       <item row="4" column="1">
         <widget class="QLabel" name="lbTempPath">
          <property name="font">
           <font>
@@ -168,7 +155,7 @@
          </property>
         </widget>
        </item>
-       <item row="3" column="2" colspan="2">
+       <item row="4" column="2" colspan="2">
         <widget class="QPushButton" name="pbTempPath">
          <property name="toolTip">
           <string>The path to store temporary files to. When comparing files a temporary copy is created in this directory with the file name pattern [git-hash]_[process id].[file extension]. When the program exits (regulary) the temporary files are cleaned up. The recommended path is /tmp.</string>
@@ -178,7 +165,7 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="1">
+       <item row="2" column="1">
         <widget class="QLabel" name="lbCurrentLocalRepositoryPath">
          <property name="font">
           <font>
@@ -191,7 +178,7 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="2" colspan="2">
+       <item row="2" column="2" colspan="2">
         <widget class="QPushButton" name="pbLocalRepositoryPath">
          <property name="toolTip">
           <string>The path of the current local repository.</string>
@@ -201,7 +188,7 @@
          </property>
         </widget>
        </item>
-       <item row="4" column="3">
+       <item row="6" column="3">
         <spacer name="horizontalSpacer_2">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -214,7 +201,7 @@
          </property>
         </spacer>
        </item>
-       <item row="10" column="1">
+       <item row="14" column="1">
         <widget class="QCheckBox" name="print_cmd_to_stdout">
          <property name="toolTip">
           <string>If an external program is called from gvtree the used commandline is echoed to stdout.</string>
@@ -224,14 +211,14 @@
          </property>
         </widget>
        </item>
-       <item row="2" column="2" colspan="2">
+       <item row="3" column="2" colspan="2">
         <widget class="QPushButton" name="pbCssPath">
          <property name="text">
           <string>css path</string>
          </property>
         </widget>
        </item>
-       <item row="2" column="1">
+       <item row="3" column="1">
         <widget class="QLabel" name="lbCssPath">
          <property name="font">
           <font>
@@ -243,6 +230,51 @@
           <string>CSS Style Sheet Path</string>
          </property>
         </widget>
+       </item>
+       <item row="5" column="3">
+        <spacer name="horizontalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="5" column="1">
+        <widget class="QLabel" name="lbCodecForCStrings">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="toolTip">
+          <string>Restart of the application is necessary.</string>
+         </property>
+         <property name="text">
+          <string>Codec for C strings</string>
+         </property>
+        </widget>
+       </item>
+       <item row="13" column="1">
+        <widget class="QCheckBox" name="diff_local_files">
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="toolTip">
+          <string>If checked, the current local file is added to the comparison of different versions. </string>
+         </property>
+         <property name="text">
+          <string>add local version to diff</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="2">
+        <widget class="QComboBox" name="cbCodecForCStrings"/>
        </item>
       </layout>
      </widget>

@@ -90,7 +90,7 @@ public:
     const QList<Version*>& getPredecessors() const;
     Version* getVersionByHash(const QString& _hash);
     Version* getSelectedVersion();
-    void preferencesUpdated();
+    void preferencesUpdated(bool _forceUpdate = false);
     void restoreFromToHashes();
     void saveFromToHashes();
 
