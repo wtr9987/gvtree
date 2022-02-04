@@ -16,7 +16,11 @@
 /* --------------------------------------------- */
 
 #include <QApplication>
+
+#if QT_VERSION < 0x050000
 #include <QTextCodec>
+#endif
+
 #include <QColorDialog>
 #include <QCoreApplication>
 #include <QDesktopWidget>
@@ -743,6 +747,8 @@ void MainWindow::reloadCurrentRepository()
 void MainWindow::changeCssFilePath()
 {
     QFileDialog dialog(this, tr("Change Path to CSS Style Sheet File"), gvtree_preferences.pbCssPath->text());
+    dialog.setFilter(QDir::Hidden | QDir::AllEntries);
+    dialog.setFileMode(QFileDialog::ExistingFile);
 
     if (dialog.exec())
     {
@@ -753,12 +759,12 @@ void MainWindow::changeCssFilePath()
 void MainWindow::changeTempPath()
 {
     QFileDialog dialog(this, tr("Change Path for Temporary Files"), gvtree_preferences.pbTempPath->text());
-    QStringList directoryNames;
 
+    dialog.setFilter(QDir::Hidden | QDir::AllDirs);
     dialog.setFileMode(QFileDialog::DirectoryOnly);
     if (dialog.exec())
     {
-        directoryNames = dialog.selectedFiles();
+        QStringList directoryNames = dialog.selectedFiles();
         QString selDir = directoryNames.at(0);
 
         if (checkForValidTempPath(selDir))
@@ -782,13 +788,13 @@ void MainWindow::setGitLocalRepository()
 {
     QFileDialog dialog(this, tr("Change Local git Repository Path"), gvtree_preferences.pbLocalRepositoryPath->text());
 
-    QStringList directoryNames;
     QString oldRepositoryPath = repositoryPath;
 
+    dialog.setFilter(QDir::Hidden | QDir::AllDirs);
     dialog.setFileMode(QFileDialog::DirectoryOnly);
     if (dialog.exec())
     {
-        directoryNames = dialog.selectedFiles();
+        QStringList directoryNames = dialog.selectedFiles();
         QString selDir = directoryNames.at(0);
         if (checkGitLocalRepository(directoryNames.at(0), repositoryPath, fileConstraintPath, false))
         {
@@ -1088,6 +1094,7 @@ void MainWindow::saveChangedSettings()
 
     bool forceUpdate = false;
 
+#if QT_VERSION < 0x050000
     QString codec = gvtree_preferences.cbCodecForCStrings->currentText();
     if (settings.value("codecForCStrings").toString() != codec)
     {
@@ -1095,6 +1102,7 @@ void MainWindow::saveChangedSettings()
         QTextCodec::setCodecForCStrings(QTextCodec::codecForName(codec.toUtf8().data()));
         forceUpdate = true;
     }
+#endif
     settings.setValue("topDownView", gvtree_preferences.top_down_view->isChecked());
     settings.setValue("gitShortHashes", gvtree_preferences.git_short_hashes->isChecked());
     settings.setValue("openGLRendering", gvtree_preferences.open_gl_rendering->isChecked());
@@ -1299,6 +1307,10 @@ void MainWindow::updateGitStatus(const QString& _repoPath)
 bool MainWindow::initCbCodecForCStrings(QString _default)
 {
     gvtree_preferences.cbCodecForCStrings->clear();
+#if QT_VERSION >= 0x050000
+    gvtree_preferences.cbCodecForCStrings->addItem(QString("UTF-8"));
+    gvtree_preferences.cbCodecForCStrings->setCurrentIndex(0);
+#else
     gvtree_preferences.cbCodecForCStrings->addItem(QString());
     foreach (QByteArray codec, QTextCodec::availableCodecs())
     {
@@ -1313,5 +1325,6 @@ bool MainWindow::initCbCodecForCStrings(QString _default)
     }
 
     gvtree_preferences.cbCodecForCStrings->setCurrentIndex(index);
+#endif
     return true;
 }

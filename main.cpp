@@ -59,6 +59,7 @@ int main(int argc, char** argv)
         }
     }
 
+#if QT_VERSION < 0x050000
     // Codec for git log output
     if (settings.contains("codecForCStrings"))
     {
@@ -68,6 +69,7 @@ int main(int argc, char** argv)
     {
         QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
     }
+#endif
 
     // main window
     MainWindow* win = new MainWindow(QCoreApplication::arguments());

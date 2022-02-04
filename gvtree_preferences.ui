@@ -253,7 +253,7 @@
           </font>
          </property>
          <property name="toolTip">
-          <string>Restart of the application is necessary.</string>
+          <string>Obsolete in Qt5. If changed restart might be necessary.</string>
          </property>
          <property name="text">
           <string>Codec for C strings</string>
