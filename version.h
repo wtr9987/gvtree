@@ -68,9 +68,13 @@ public:
     bool isFolder() const;
     bool isFolded() const;
 
+    bool isFoldable() const;
+    void setIsFoldable(bool _val);
+
     void setIsMain(bool _val);
 
     Version* lookupFolderVersion();
+    Version* lookupBranchBaseline();
 
     const QMap<QString, QStringList>& getKeyInformation() const;
 
@@ -140,6 +144,7 @@ public:
     void compareToSelected();
     void compareToPrevious();
     void compareToLocalHead();
+    void compareToBranchBaseline();
     void viewThisVersion();
     void focusNeighbourBox();
     // all elements in linear will then get Node::height = 0
@@ -153,7 +158,7 @@ public:
     void setFileConstraint(bool _val);
     bool getFileConstraint() const;
 
-    void reduceToFileConstraint(Version* _parent, bool _merge=false);
+    void reduceToFileConstraint(Version* _parent, bool _merge = false);
     void clearFileConstraintEdgeList();
     QList<Edge*>& getFileConstraintInEdgeList();
     QList<Edge*>& getFileConstraintOutEdgeList();
@@ -166,6 +171,7 @@ public:
     bool ensureUnfolded();
 
 protected:
+    bool hasBranch() const;
     virtual void mouseMoveEvent(QGraphicsSceneMouseEvent* _event);
 
     bool getTextBoundingBox(const QString& _key, const QStringList& _values, int& _height, QRectF& _updatedBox) const;
@@ -209,6 +215,9 @@ private:
     // if the versions in linear are folded, the flag of the list owner
     // 'folded' is set. Initial value is true.
     bool folded;
+
+    // flag to control if the version can be folded away
+    bool foldable;
 
     // rootnode
     bool rootnode;

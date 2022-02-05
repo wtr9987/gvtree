@@ -41,6 +41,7 @@ Version::Version(GraphWidget* _graphWidget, QGraphicsItem* _parent) :
     globalVersionInfo(dummy),
     matched(false),
     folded(false),
+    foldable(true),
     rootnode(true),
     subtreeHidden(false),
     blockItemChanged(false),
@@ -64,6 +65,7 @@ Version::Version(const QStringList& _globalVersionInfo,
     globalVersionInfo(_globalVersionInfo),
     matched(false),
     folded(true),
+    foldable(true),
     rootnode(false),
     subtreeHidden(false),
     blockItemChanged(false),
@@ -93,6 +95,11 @@ void Version::compareToPrevious()
 void Version::compareToLocalHead()
 {
     graph->compareToLocalHead(this);
+}
+
+void Version::compareToBranchBaseline()
+{
+    graph->compareToBranchBaseline(this);
 }
 
 void Version::viewThisVersion()
@@ -547,6 +554,41 @@ int Version::numEdges() const
     return edgeList.size();
 }
 
+Version* Version::lookupBranchBaseline()
+{
+    Version* parent = NULL;
+
+    foreach(Edge * it, edgeList)
+    {
+        if (it->getMerge() == false
+            && it->getInfo() == false
+            && it->destVersion() == this)
+        {
+            parent = dynamic_cast<Version*>(it->sourceVersion());
+            break;
+        }
+    }
+    if (parent && parent->hasBranch())
+        return parent;
+
+    if (parent == NULL)
+        return this;
+
+    return parent->lookupBranchBaseline();
+}
+
+bool Version::hasBranch() const
+{
+    int i = 0;
+
+    foreach (const Edge * edge, outEdges)
+    {
+        i += (edge->getInfo() == false && edge->getMerge() == false) ? 1 : 0;
+    }
+
+    return (i > 1);
+}
+
 void Version::collectFolderVersions(Version* _rootNode, Version* _parent)
 {
     if (_parent
@@ -554,6 +596,7 @@ void Version::collectFolderVersions(Version* _rootNode, Version* _parent)
         && _parent->getNumOutEdges() == 1
         && getNumOutEdges() <= 1
         && (numEdges() - getNumOutEdges() <= 1)
+        && isFoldable()
        )
     {
         addToFolder(_parent);
@@ -850,4 +893,13 @@ bool Version::ensureUnfolded()
         }
     }
     return changed;
+}
+
+bool Version::isFoldable() const
+{
+    return foldable;
+}
+void Version::setIsFoldable(bool _val)
+{
+    foldable = _val;
 }

@@ -73,6 +73,7 @@ GraphWidget::GraphWidget(MainWindow* _parent)
     shortHashes(false),
     topDownView(false),
     remotes(false),
+    foldHead(false),
     xfactor(1),
     yfactor(1),
     selectedVersion(NULL)
@@ -85,6 +86,7 @@ GraphWidget::GraphWidget(MainWindow* _parent)
         shortHashes = mwin->getShortHashes();
         topDownView = mwin->getTopDownView();
         remotes = mwin->getRemotes();
+        foldHead = mwin->getFoldHead();
     }
 
     // scene
@@ -654,6 +656,9 @@ void GraphWidget::process(QList<QString> _cache)
         previousBranchslots = branchslots;
     }
 
+    if (localHeadVersion)
+        localHeadVersion->setIsFoldable(foldHead);
+
     rootVersion->collectFolderVersions(rootVersion, NULL);
     normalizeGraph();
     setMinSize();
@@ -785,6 +790,14 @@ void GraphWidget::compareToSelected(Version* _v)
 void GraphWidget::compareToLocalHead(Version* _v)
 {
     compareVersions(_v, localHeadVersion);
+}
+
+void GraphWidget::compareToBranchBaseline(Version* _v)
+{
+    Version* baseline = _v->lookupBranchBaseline();
+
+    if (baseline)
+        compareVersions(baseline, _v);
 }
 
 void GraphWidget::compareToPrevious(Version* _v)
@@ -1134,6 +1147,12 @@ void GraphWidget::preferencesUpdated(bool _forceUpdate)
         updateAll = true;
     }
 
+    if (foldHead != mwin->getFoldHead())
+    {
+        foldHead = mwin->getFoldHead();
+        updateAll = true;
+    }
+
     if (connectorStyle != mwin->getConnectorStyle())
     {
         connectorStyle = mwin->getConnectorStyle();
@@ -1249,6 +1268,12 @@ void GraphWidget::contextMenuEvent(QContextMenuEvent* _event)
             {
                 action = menu.addAction(QString("Compare to local HEAD"));
                 connect(action, SIGNAL(triggered()), &adapter, SLOT(compareToLocalHead()));
+            }
+            Version* branchBaseline = v->lookupBranchBaseline();
+            if (branchBaseline && v != branchBaseline)
+            {
+                action = menu.addAction(QString("Compare to branch baseline"));
+                connect(action, SIGNAL(triggered()), &adapter, SLOT(compareToBranchBaseline()));
             }
             action = menu.addAction(QString("View this version"));
             connect(action, SIGNAL(triggered()), &adapter, SLOT(viewThisVersion()));

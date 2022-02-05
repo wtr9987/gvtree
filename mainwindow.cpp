@@ -465,6 +465,11 @@ void MainWindow::restorePreferencesSettings()
     else
         gvtree_preferences.remotes->setChecked(false);
 
+    if (settings.contains("foldHead") && settings.value("foldHead").toBool())
+        gvtree_preferences.fold_head->setChecked(true);
+    else
+        gvtree_preferences.fold_head->setChecked(false);
+
     if (settings.contains("defaultLastRepo")
         && settings.value("defaultLastRepo").toInt())
     {
@@ -1076,6 +1081,11 @@ bool MainWindow::getRemotes() const
     return gvtree_preferences.remotes->isChecked();
 }
 
+bool MainWindow::getFoldHead() const
+{
+    return gvtree_preferences.fold_head->isChecked();
+}
+
 bool MainWindow::getOpenGLRendering() const
 {
     return gvtree_preferences.open_gl_rendering->isChecked();
@@ -1108,6 +1118,7 @@ void MainWindow::saveChangedSettings()
     settings.setValue("openGLRendering", gvtree_preferences.open_gl_rendering->isChecked());
     settings.setValue("diffLocalFile", gvtree_preferences.diff_local_files->isChecked());
     settings.setValue("remotes", gvtree_preferences.remotes->isChecked());
+    settings.setValue("foldHead", gvtree_preferences.fold_head->isChecked());
     settings.setValue("connectorStyle", getConnectorStyle());
     settings.setValue("defaultLastRepo", gvtree_preferences.rbLastRepo->isChecked() ? 1 : 0);
     settings.setValue("printCmdToStdout", gvtree_preferences.print_cmd_to_stdout->isChecked());

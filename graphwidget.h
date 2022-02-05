@@ -62,6 +62,7 @@ public:
     void compareToSelected(Version* _v);
     void compareToPrevious(Version* _v);
     void compareToLocalHead(Version* _v);
+    void compareToBranchBaseline(Version* _v);
     void viewThisVersion(Version* _v);
     void compareVersions(Version* _v1, Version* _v2);
 
@@ -232,6 +233,7 @@ private:
     bool shortHashes;
     bool topDownView;
     bool remotes;
+    bool foldHead;
     int xfactor;
     int yfactor;
 

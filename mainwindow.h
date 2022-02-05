@@ -73,6 +73,7 @@ public:
     bool getShortHashes() const;
     bool getTopDownView() const;
     bool getRemotes() const;
+    bool getFoldHead() const;
     bool getOpenGLRendering() const;
     bool getDiffLocalFiles() const;
     int getConnectorStyle() const;

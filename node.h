@@ -56,6 +56,7 @@ public:
     QList<class Edge*>& getOutEdges();
 
     int getNumOutEdges() const;
+    bool isLeaf() const;
 
 protected:
     QList<class Edge*> outEdges;

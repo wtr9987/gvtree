@@ -17,9 +17,9 @@
 
 #include "versionadapter.h"
 
-VersionAdapter::VersionAdapter(Version* _v, QWidget* _parent):
-        QWidget(_parent),
-        v(_v)
+VersionAdapter::VersionAdapter(Version* _v, QWidget* _parent) :
+    QWidget(_parent),
+    v(_v)
 {
 }
 
@@ -36,6 +36,11 @@ void VersionAdapter::compareToPrevious()
 void VersionAdapter::compareToLocalHead()
 {
     v->compareToLocalHead();
+}
+
+void VersionAdapter::compareToBranchBaseline()
+{
+    v->compareToBranchBaseline();
 }
 
 void VersionAdapter::viewThisVersion()
@@ -56,10 +61,10 @@ void VersionAdapter::foldAction()
 
 void VersionAdapter::hideSubtree()
 {
-  v->setSubtreeVisible(false);
+    v->setSubtreeVisible(false);
 }
 
 void VersionAdapter::showSubtree()
 {
-  v->setSubtreeVisible(true);
+    v->setSubtreeVisible(true);
 }
