@@ -318,18 +318,26 @@ void CompareTree::onCustomContextMenu(const QPoint& point)
         }
 
         QMenu* menu = new QMenu(this);
-        QAction* act = new QAction("Show version diff", this);
+        QAction* act = NULL;
         QStringList tmp;
-        tmp << "ACT1" << path << status << path_old;
-        act->setData(QVariant(tmp));
-        tmp.clear();
-        menu->addAction(act);
 
-        act = new QAction("Edit current version", this);
-        tmp << "ACT2" << path;
-        act->setData(QVariant(tmp));
-        tmp.clear();
-        menu->addAction(act);
+        if (status == "M" || status == "R" || status == "D")
+        {
+            act = new QAction("Show version diff", this);
+            tmp << "ACT1" << path << status << path_old;
+            act->setData(QVariant(tmp));
+            tmp.clear();
+            menu->addAction(act);
+        }
+
+        if (status == "M" || status == "R" || status == "A")
+        {
+            act = new QAction("Edit current version", this);
+            tmp << "ACT2" << path;
+            act->setData(QVariant(tmp));
+            tmp.clear();
+            menu->addAction(act);
+        }
 
         if (graph->getFileConstraint() != path)
         {
@@ -339,7 +347,7 @@ void CompareTree::onCustomContextMenu(const QPoint& point)
             tmp.clear();
             menu->addAction(act);
         }
-        else 
+        else
         {
             act = new QAction("Remove filter", this);
             tmp << "ACT4";
