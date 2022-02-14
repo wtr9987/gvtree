@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.1-0                */
+/*                  gvtree V1.2-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -49,6 +49,7 @@ public:
 
     // Get real git log information of a local repository
     void gitlog(bool _dirChanged = false);
+    Version* gitloghead();
 
     // Get hashes of one file and markup versions
     void setGitLogFileConstraint(const QString& _fileConstraint = QString());
@@ -91,8 +92,16 @@ public:
     const QList<Version*>& getPredecessors() const;
     Version* getVersionByHash(const QString& _hash);
     Version* getSelectedVersion();
+    void setSelectedVersion(Version* _version);
     void preferencesUpdated(bool _forceUpdate = false);
-    void restoreFromToHashes();
+
+    /**
+     * \brief After reload or refresh check if the current
+     *        versions are contained in the new version tree.
+     *        If not false is returned and the compare widget
+     *        can be cleared, too.
+     */
+    bool restoreFromToHashes();
     void saveFromToHashes();
 
     float getXFactor() const;
@@ -183,6 +192,7 @@ protected:
     void scaleView(qreal scaleFactor);
     void focusVersion(const Version* _v);
     void expandTree();
+    void fillCompareWidgetFromToInfo();
 
 private:
 

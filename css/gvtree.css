@@ -26,6 +26,10 @@ QListWidget::item {
 		color: black;
     background-color: white;
 }
+QListWidget::item::selected {
+		color: black;
+    background-color: #eeeeee;
+}
 QComboBox {
     padding: 1px 0px 1px 3px;
     selection-color: black;

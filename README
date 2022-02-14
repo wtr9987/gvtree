@@ -59,7 +59,7 @@ After installation
 gvtree -h 
 will give you the following information:
 
-gvtree-1.1-0
+gvtree-1.2-0
 
 Tool to display git log graph
 
@@ -102,7 +102,7 @@ Parameters:
 -f [gitlog] 
    Testing:
    Load a file created with 
-     git log --graph --decorate --pretty="#%h#%an#%at#%d#"
+     git log --graph --pretty="#%h#%an#%at#%d#"
    This has been helpful during development to import constraint and
    complex repository data.
 
@@ -110,5 +110,5 @@ Parameters:
 
 --------------------------------------------------------------------------------
 
-For more details please refer to doc/gvtree-1.1-0.pdf
+For more details please refer to doc/gvtree-1.2-0.pdf
 

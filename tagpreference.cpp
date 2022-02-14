@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.1-0                */
+/*                  gvtree V1.2-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -18,6 +18,9 @@
 #include <QFontDialog>
 #include <QApplication>
 #include "tagpreference.h"
+
+#include <iostream>
+using namespace std;
 
 TagPreference::TagPreference(int _row,
                              const QString& _name,
@@ -55,7 +58,7 @@ TagPreference::TagPreference(int _row,
     }
     else
     {
-        font.fromString(settings.value(fontButton->text()).toString());
+        font.fromString(fontButton->text());
     }
 }
 

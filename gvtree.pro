@@ -2,7 +2,7 @@ TEMPLATE = app
 TARGET = gvtree
 DEPENDPATH += . 
 INCLUDEPATH += . 
-VERSION = -1.1-0
+VERSION = -1.2-0
 RC_ICONS = gvtree.ico
 CPPFLAGS += -O3
 QT += opengl widgets
@@ -31,6 +31,7 @@ HEADERS += \
         tagprefgridlayout.h \
         taglist.h \
         tagwidget.h \
+        branchlist.h \
         mimetable.h \
         fromtoinfo.h 
 
@@ -55,6 +56,7 @@ SOURCES += \
         tagprefgridlayout.cpp \
         taglist.cpp \
         tagwidget.cpp \
+        branchlist.cpp \
         mimetable.cpp \
         fromtoinfo.cpp
 
@@ -65,8 +67,8 @@ DISTFILES += $$SOURCEFILES \
   ChangeLog \
   css/gvtree.css \
   doc/GNU_GPL_v3.0.html \
-  doc/gvtree-1.1-0.odt \
-  doc/gvtree-1.1-0.pdf \
+  doc/gvtree-1.2-0.odt \
+  doc/gvtree-1.2-0.pdf \
   images/connectorStyle0.png \
   images/connectorStyle1.png \
   images/gvt_add.png \
@@ -89,4 +91,4 @@ target.path = $$PREFIX/bin
 source.files = $$SOURCES $$HEADERS $$RESOURCES *.pro
 
 documentation.path = $$PREFIX/share/doc/gvtree
-documentation.files = doc/gvtree-1.1-0.pdf
+documentation.files = doc/gvtree-1.2-0.pdf

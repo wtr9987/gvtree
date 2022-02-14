@@ -1,13 +1,13 @@
 /* --------------------------------------------- */
 /*                                               */
-/*   Copyright (C) 2021 Wolfgang Trummer         */
+/*   Copyright (C) 2022 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
 /*                  gvtree V1.2-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
-/*   28. December 2021                           */
+/*   13. February 2022                           */
 /*                                               */
 /*         This program is licensed under        */
 /*           GNU GENERAL PUBLIC LICENSE          */
@@ -15,39 +15,31 @@
 /*                                               */
 /* --------------------------------------------- */
 
-#ifndef __TAGWIDGET_H__
-#define __TAGWIDGET_H__
+#ifndef __BRANCHLIST_H__
+#define __BRANCHLIST_H__
 
-#include "taglist.h"
-
+#include <QListWidget>
 #include <QTabWidget>
-#include <QWidget>
-#include <QMap>
-#include <QString>
+#include <QSet>
 #include <QStringList>
+#include <QWidget>
+#include <QString>
 
-#include <iostream>
-
-class TagWidget : public QTabWidget
+class BranchList : public QListWidget
 {
     Q_OBJECT
 
 public:
-    TagWidget(class MainWindow* _parent = NULL);
+    BranchList(class MainWindow* _parent = NULL);
 
-    virtual void clear();
+    void refresh(const QString& _localRepositoryPath);
+    const QString& getCurrentLocalBranch() const;
+    QString getSelectedBranch() const;
 
-    void addData(const QMap<QString, QStringList>& _data);
-    void setDefault();
-
-public slots:
-    void lookupId(QListWidgetItem* _item);
-    void currentChanged(int _val);
-
-private:
-    QMap<QString, int> labelToIndex;
+protected:
     class MainWindow* mwin;
-    QString restoreTab;
+    QString currentLocalBranch;
+    QString selectedBranch;
 };
 
 #endif

@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.1-0                */
+/*                  gvtree V1.2-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -33,6 +33,7 @@
 #include "graphwidget.h"
 #include "tagprefgridlayout.h"
 #include "tagwidget.h"
+#include "branchlist.h"
 #include "ui_gvtree_comparetree.h"
 #include "ui_gvtree_difftool.h"
 #include "ui_gvtree_help.h"
@@ -59,6 +60,7 @@ public:
     QLineEdit* getSearchWidget() const;
     QDockWidget* getSearchDock();
     TagWidget* getTagWidget() const;
+    QString getSelectedBranch();
 
     // dialog to store tools for a certain file type
     void getMimeTypeTools(const QString& _mimeType,
@@ -88,8 +90,7 @@ public:
 public slots:
 
     // Watchdog if there are changes in the local repository
-    void fileChanged(const QString& _path);
-    void directoryChanged(const QString& _path);
+    void showRefreshButton(const QString& _path);
 
     // color preference changed
     void colorDialogBackground();
@@ -201,6 +202,7 @@ protected:
     QTreeView* compareTree;
     QLineEdit* search;
     TagPrefGridLayout* gridLayout;
+    BranchList* branchList;
 
     // preferences dialog
     QDialog* pwin;

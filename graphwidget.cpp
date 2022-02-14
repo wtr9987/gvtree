@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.1-0                */
+/*                  gvtree V1.2-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -338,6 +338,9 @@ void GraphWidget::setGitLogFileConstraint(const QString& _fileConstraint)
         if (remotes)
             cmd += " --remotes";
 
+        if (mwin->getSelectedBranch().size())
+            cmd += " " + mwin->getSelectedBranch();
+
         if (fileConstraint.size())
             cmd += " -- " + fileConstraint;
 
@@ -375,6 +378,46 @@ void GraphWidget::setGitLogFileConstraint(const QString& _fileConstraint)
     update();
 }
 
+Version* GraphWidget::gitloghead()
+{
+    QString cmd = "git -C "
+        + localRepositoryPath
+        + " log --graph -1 --pretty=\"#"
+        + (shortHashes ? "%h" : "%H")
+        + "#%at#%an#%d#\"";
+
+    QList<QString> cache;
+    execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
+
+    QString line = cache.front();
+
+    QStringList parts = line.split(QChar('#'));
+
+    // abort, if too short...
+    if (parts.size() < 5)
+    {
+        std::cerr << "Error: Input too short " << line.toUtf8().data() << std::endl;
+        return NULL;
+    }
+    // check if the Version object already exists
+    QString hash = parts.at(1);
+    Version* v = new Version(globalVersionInfo, this);
+
+    // if the key information has already been parsed, use it
+    v->setKeyInformation(keyInformationCache.value(hash, QMap<QString, QStringList>()));
+
+    // init or update
+    if (v->processGitLogInfo(line, parts))
+    {
+        keyInformationCache[hash] = v->getKeyInformation();
+    }
+
+    mwin->getTagWidget()->addData(v->getKeyInformation());
+
+    scene()->addItem(v);
+    return v;
+}
+
 void GraphWidget::gitlog(bool _changed)
 {
     if (_changed)
@@ -384,16 +427,21 @@ void GraphWidget::gitlog(bool _changed)
 
     saveFromToHashes();
 
+    selectedVersion = NULL;
+
     clear();
 
     QString cmd = "git -C "
         + localRepositoryPath
-        + " log --graph --decorate --pretty=\"#"
+        + " log --graph --pretty=\"#"
         + (shortHashes ? "%h" : "%H")
         + "#%at#%an#%d#\"";
 
     if (remotes)
         cmd += " --remotes";
+
+    if (mwin->getSelectedBranch().size())
+        cmd += " " + mwin->getSelectedBranch();
 
     QList<QString> cache;
     execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
@@ -450,6 +498,7 @@ void GraphWidget::process(QList<QString> _cache)
 
     clear();
 
+    mwin->getTagWidget()->blockSignals(true);
     mwin->getTagWidget()->clear();
 
     int linecount = 0;
@@ -656,13 +705,24 @@ void GraphWidget::process(QList<QString> _cache)
         previousBranchslots = branchslots;
     }
 
+    // TODO : get hash value of HEAD
+
     if (localHeadVersion)
-        localHeadVersion->setIsFoldable(foldHead);
+    {
+        if (localHeadVersion->getKeyInformation().contains("HEAD") == false)
+        {
+            localHeadVersion = gitloghead();
+            localHeadVersion->hide();
+        }
+        else
+            localHeadVersion->setIsFoldable(foldHead);
+    }
 
     rootVersion->collectFolderVersions(rootVersion, NULL);
     normalizeGraph();
     setMinSize();
 
+    mwin->getTagWidget()->blockSignals(false);
     mwin->getTagWidget()->setDefault();
 
     // std::cerr << "process end " << timestamp() << std::endl;
@@ -690,7 +750,7 @@ void GraphWidget::clear()
 void GraphWidget::commitInfo(const Version* _v, QTextEdit* _tedi)
 {
     // get data
-    QString cmd = "git -C " + localRepositoryPath + " log -1 " + _v->getHash() + " --decorate";
+    QString cmd = "git -C " + localRepositoryPath + " log -1 " + _v->getHash();
 
     _tedi->clear();
     QList<QString> cache;
@@ -702,84 +762,95 @@ void GraphWidget::commitInfo(const Version* _v, QTextEdit* _tedi)
     _tedi->moveCursor(QTextCursor::Start);
 }
 
+void GraphWidget::fillCompareWidgetFromToInfo()
+{
+    // from version part
+    mwin->getFromComboBox()->clear();
+    mwin->getCompareTreeFromTextEdit()->clear();
+    foreach(Version * it, fromVersions)
+    {
+        it->setMatched(true);
+        mwin->getFromComboBox()->addItem(it->getCommitDate(), QVariant::fromValue(VersionPointer(it)));
+    }
+    mwin->getCompareTreeFromPushButton()->setEnabled(fromVersions.size() > 0);
+
+    // to version part
+    mwin->getCompareTreeToTextEdit()->clear();
+    if (toVersion)
+    {
+        toVersion->setMatched(true);
+        mwin->getToDateLabel()->setText(toVersion->getCommitDate());
+        mwin->getCompareTreeToPushButton()->setEnabled(true);
+        commitInfo(toVersion, mwin->getCompareTreeToTextEdit());
+    }
+    else
+    {
+        mwin->getToDateLabel()->setText(QString());
+        mwin->getCompareTreeToPushButton()->setEnabled(false);
+    }
+}
+
 void GraphWidget::viewThisVersion(Version* _v)
 {
     resetMatches();
-    _v->setMatched(true);
 
     fromVersions = QList<Version*>();
     fromVersions.push_back(_v);
-
-    fromToInfo->setFromToPosition(fromVersions, NULL);
-    fromToInfo->show();
-
-    mwin->getFromComboBox()->clear();
-    mwin->getFromComboBox()->addItem(_v->getCommitDate(), QVariant::fromValue(VersionPointer(_v)));
-    mwin->getCompareTreeFromPushButton()->setEnabled(true);
-
-    mwin->getCompareTreeToPushButton()->setEnabled(false);
-    mwin->getToDateLabel()->setText(QString("Local Changes"));
     toVersion = NULL;
-    mwin->getCompareTreeToTextEdit()->clear();
+
+    fillCompareWidgetFromToInfo();
 
     compareTree->viewThisVersion(_v->getHash());
 
     // ensure visibility of Compare Versions dock
     mwin->getCompareTreeDock()->show();
+
+    // cursor
+    fromToInfo->setFromToPosition(fromVersions, NULL);
+    fromToInfo->show();
 }
 
 void GraphWidget::diffLocalChanges()
 {
     resetMatches();
-    localHeadVersion->setMatched(true);
 
     fromVersions = QList<Version*>();
     fromVersions.push_back(localHeadVersion);
-    fromToInfo->setFromToPosition(fromVersions, NULL);
-    fromToInfo->show();
-
-    mwin->getFromComboBox()->clear();
-    mwin->getFromComboBox()->addItem(localHeadVersion->getCommitDate(), QVariant::fromValue(VersionPointer(localHeadVersion)));
-    mwin->getCompareTreeFromPushButton()->setEnabled(true);
-
-    mwin->getCompareTreeToPushButton()->setEnabled(false);
-    mwin->getToDateLabel()->setText(QString("Local Changes"));
     toVersion = NULL;
-    mwin->getCompareTreeToTextEdit()->clear();
+
+    fillCompareWidgetFromToInfo();
+    mwin->getToDateLabel()->setText(QString("Local Changes"));
 
     compareTree->viewLocalChanges();
 
     // Force visibility of compare files window
     mwin->getCompareTreeDock()->show();
+
+    // cursor
+    fromToInfo->setFromToPosition(fromVersions, NULL);
+    fromToInfo->show();
 }
 
 void GraphWidget::compareVersions(Version* _v1, Version* _v2)
 {
     resetMatches();
-    _v1->setMatched(true);
-    _v2->setMatched(true);
 
     fromVersions = QList<Version*>();
     fromVersions.push_back(_v1);
+    toVersion = _v2;
+
+    fillCompareWidgetFromToInfo();
+
     QStringList fromVersionHashes;
     fromVersionHashes.push_back(_v1->getHash());
-    fromToInfo->setFromToPosition(fromVersions, _v2);
-    fromToInfo->show();
-
-    mwin->getFromComboBox()->clear();
-    mwin->getFromComboBox()->addItem(_v1->getCommitDate(), QVariant::fromValue(VersionPointer(_v1)));
-    mwin->getCompareTreeFromPushButton()->setEnabled(true);
-
-    mwin->getCompareTreeToPushButton()->setEnabled(true);
-    mwin->getToDateLabel()->setText(_v2->getCommitDate());
-
-    toVersion = _v2;
-    commitInfo(_v2, mwin->getCompareTreeToTextEdit());
-
     compareTree->compareHashes(fromVersionHashes, _v2->getHash());
 
     // ensure visibility of Compare Versions dock
     mwin->getCompareTreeDock()->show();
+
+    // cursor
+    fromToInfo->setFromToPosition(fromVersions, _v2);
+    fromToInfo->show();
 }
 
 void GraphWidget::compareToSelected(Version* _v)
@@ -804,33 +875,11 @@ void GraphWidget::compareToPrevious(Version* _v)
 {
     // more complex because multiple predecessors are possible
     resetMatches();
-    _v->setMatched(true);
 
-    // reset "from" version info
-    mwin->getCompareTreeFromTextEdit()->clear();
-    mwin->getFromComboBox()->clear();
-    mwin->getCompareTreeFromPushButton()->setEnabled(false);
-
-    // add "to" version info to button and text info
-    mwin->getCompareTreeToPushButton()->setEnabled(true);
-    mwin->getToDateLabel()->setText(_v->getCommitDate());
-    commitInfo(_v, mwin->getCompareTreeToTextEdit());
+    _v->getPredecessors(fromVersions);
     toVersion = _v;
 
-    // do we have predecessors?
-    if (_v->getPredecessors(fromVersions) == 0)
-        return;
-
-    foreach(Version * it, fromVersions)
-    {
-        it->setMatched(true);
-        mwin->getFromComboBox()->addItem(it->getCommitDate(), QVariant::fromValue(VersionPointer(it)));
-    }
-    mwin->getCompareTreeFromPushButton()->setEnabled(true);
-
-    // view cursor
-    fromToInfo->setFromToPosition(fromVersions, _v);
-    fromToInfo->show();
+    fillCompareWidgetFromToInfo();
 
     // compare to previous...
     QStringList fromVersionHashes;
@@ -839,6 +888,10 @@ void GraphWidget::compareToPrevious(Version* _v)
 
     // ensure visibility of Compare Versions dock
     mwin->getCompareTreeDock()->show();
+
+    // view cursor
+    fromToInfo->setFromToPosition(fromVersions, _v);
+    fromToInfo->show();
 }
 
 void GraphWidget::focusVersion(const Version* _v)
@@ -1245,6 +1298,7 @@ void GraphWidget::contextMenuEvent(QContextMenuEvent* _event)
                 menu.addSeparator();
             }
             /*
+             * TODO check if it does make sense to hide/show subtrees
                if (v->getSubtreeHidden())
                {
                 action = menu.addAction(QString("Show subtree"));
@@ -1383,6 +1437,18 @@ Version* GraphWidget::getSelectedVersion()
     return selectedVersion;
 }
 
+void GraphWidget::setSelectedVersion(Version* _version)
+{
+    foreach(QGraphicsItem * it, scene()->items())
+    {
+        if (it == _version)
+        {
+            selectedVersion = _version;
+            break;
+        }
+    }
+}
+
 Version* GraphWidget::getLocalHeadVersion() const
 {
     return localHeadVersion;
@@ -1424,15 +1490,12 @@ void GraphWidget::saveFromToHashes()
     {
         fromHashSave.push_back(it->getHash());
     }
-    if (toVersion)
-    {
-        toHashSave = toVersion->getHash();
-    }
+    toHashSave = toVersion ? toVersion->getHash() : QString();
     fromVersions.clear();
     toVersion = NULL;
 }
 
-void GraphWidget::restoreFromToHashes()
+bool GraphWidget::restoreFromToHashes()
 {
     fromVersions.clear();
     toVersion = NULL;
@@ -1458,16 +1521,24 @@ void GraphWidget::restoreFromToHashes()
         }
     }
 
-    if (fromToInfo)
-    {
-        fromToInfo->setFromToPosition(fromVersions, toVersion);
-        fromToInfo->show();
+    // everything restored ?
+    bool success = (fromVersions.size() == fromHashSave.size())
+        && (toHashSave.isEmpty() || toVersion != NULL);
 
-        // restore comparetree from combo box
-        mwin->getFromComboBox()->clear();
-        foreach(Version * it, fromVersions)
-        {
-            mwin->getFromComboBox()->addItem(it->getCommitDate(), QVariant::fromValue(VersionPointer(it)));
-        }
+    if (success == false)
+    {
+        resetDiff();
     }
+    else
+    {
+        if (fromToInfo)
+        {
+            fromToInfo->setFromToPosition(fromVersions, toVersion);
+            fromToInfo->setVisible(success);
+        }
+
+        fillCompareWidgetFromToInfo();
+    }
+
+    return success;
 }

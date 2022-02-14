@@ -4,3 +4,11 @@ ChangeLog gvtree V1.1-0
 6. February 2022 : Released gvtree V1.1-0
 
 
+ChangeLog gvtree V1.2-0 dev_1.2
+-------------------------------
+
+13. February 2022 : 
+	- added dock widget to view other branches
+	- fixed font initialization problem
+	- fixed compare widget when changing branch or
+	  in case of reload

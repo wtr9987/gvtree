@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.1-0                */
+/*                  gvtree V1.2-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -26,7 +26,6 @@
 FromToInfo::FromToInfo(GraphWidget* _graph, QGraphicsItem* _parent) : QGraphicsItem(_parent), v(NULL), graph(_graph)
 {
     setFlag(ItemSendsGeometryChanges);
-    //setCacheMode(DeviceCoordinateCache);
     setZValue(1);
 }
 
@@ -40,6 +39,8 @@ void FromToInfo::setFromToPosition(QList<Version*> _from, Version* _v)
     from = _from;
     v = _v;
     if (v==NULL && from.size())
+      v = from.front();
+    else if (v && v->isVisible() == false && from.size())
       v = from.front();
     update();
 }

@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.1-0                */
+/*                  gvtree V1.2-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -60,8 +60,8 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
 
     // watchdog for the local repository directory
     watcher = new QFileSystemWatcher();
-    connect(watcher, SIGNAL(directoryChanged(const QString&)), this, SLOT(directoryChanged(const QString&)));
-    connect(watcher, SIGNAL(fileChanged(const QString&)), this, SLOT(fileChanged(const QString&)));
+    connect(watcher, SIGNAL(directoryChanged(const QString&)), this, SLOT(showRefreshButton(const QString&)));
+    connect(watcher, SIGNAL(fileChanged(const QString&)), this, SLOT(showRefreshButton(const QString&)));
 
     // current repository path
     lbRepositoryPath = new QLabel("");
@@ -168,6 +168,18 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
     searchDock = dock;
     dock->hide();
 
+    // -- list of all branches
+    branchList = new BranchList(this);
+
+    dock = new QDockWidget(tr("Branch List"), this);
+    dock-> setObjectName("Branch List");
+    dock->setWidget(branchList);
+    addDockWidget(Qt::RightDockWidgetArea, dock);
+    windowmenu->addAction(dock->toggleViewAction());
+    searchDock = dock;
+    dock->hide();
+    connect(branchList, SIGNAL(itemSelectionChanged()), this, SLOT(reloadCurrentRepository()));
+
     connect(gvtree_comparetree.fromComboBox, SIGNAL(currentIndexChanged(int)),
             gvtree_comparetree.compareTree, SLOT(currentIndexChanged(int)));
     connect(gvtree_comparetree.toButton, SIGNAL(pressed()), graphwidget, SLOT(focusToVersion()));
@@ -201,6 +213,7 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
                 QSettings settings;
                 settings.setValue("localRepositoryPath", repositoryPath);
                 graphwidget->setLocalRepositoryPath(repositoryPath);
+                branchList->refresh(repositoryPath);
 
                 QString path, fname;
                 splitRepositoryPath(repositoryPath, path, fname);
@@ -278,7 +291,7 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
             cout << "-f [gitlog] " << endl;
             cout << "   Testing:" << endl;
             cout << "   Load a file created with " << endl;
-            cout << "     git log --graph --decorate --pretty=\"#%h#%an#%at#%d#\"" << endl;
+            cout << "     git log --graph --pretty=\"#%h#%an#%at#%d#\"" << endl;
             cout << "   This has been helpful during development to import constraint and" << endl;
             cout << "   complex repository data." << endl;
             cout << endl;
@@ -559,6 +572,7 @@ void MainWindow::restoreLocalRepository()
             gvtree_preferences.pbLocalRepositoryPath->setText(repositoryPath);
 
             graphwidget->setLocalRepositoryPath(repositoryPath);
+            branchList->refresh(repositoryPath);
             graphwidget->gitlog();
             refreshRepo->setEnabled(true);
         }
@@ -744,6 +758,7 @@ void MainWindow::reloadCurrentRepository()
 
             // restore selection
             restoreVersion->setSelected(true);
+            graphwidget->setSelectedVersion(restoreVersion);
         }
     }
     pbRepositoryRefresh->hide();
@@ -806,6 +821,7 @@ void MainWindow::setGitLocalRepository()
             QSettings settings;
             settings.setValue("localRepositoryPath", repositoryPath);
             graphwidget->setLocalRepositoryPath(repositoryPath);
+            branchList->refresh(repositoryPath);
             gvtree_comparetree.compareTree->resetCompareTree();
 
             QString path, fname;
@@ -1290,12 +1306,7 @@ Ui_Dialog& MainWindow::getPreferences()
     return gvtree_preferences;
 }
 
-void MainWindow::directoryChanged(const QString&)
-{
-    pbRepositoryRefresh->show();
-}
-
-void MainWindow::fileChanged(const QString&)
+void MainWindow::showRefreshButton(const QString&)
 {
     pbRepositoryRefresh->show();
 }
@@ -1338,4 +1349,9 @@ bool MainWindow::initCbCodecForCStrings(QString _default)
     gvtree_preferences.cbCodecForCStrings->setCurrentIndex(index);
 #endif
     return true;
+}
+
+QString MainWindow::getSelectedBranch()
+{
+  return branchList->getSelectedBranch();
 }
