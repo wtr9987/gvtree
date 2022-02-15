@@ -756,9 +756,6 @@ void MainWindow::reloadCurrentRepository()
             graphwidget->horizontalScrollBar()->setValue(shift.x());
             graphwidget->verticalScrollBar()->setValue(shift.y());
 
-            // restore selection
-            restoreVersion->setSelected(true);
-            graphwidget->setSelectedVersion(restoreVersion);
         }
     }
     pbRepositoryRefresh->hide();

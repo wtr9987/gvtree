@@ -49,7 +49,7 @@ public:
 
     // Get real git log information of a local repository
     void gitlog(bool _dirChanged = false);
-    Version* gitloghead();
+    Version* gitlogSingle(QString _hash = QString());
 
     // Get hashes of one file and markup versions
     void setGitLogFileConstraint(const QString& _fileConstraint = QString());
@@ -67,11 +67,13 @@ public:
     void viewThisVersion(Version* _v);
     void compareVersions(Version* _v1, Version* _v2);
 
+    // focus
     void focusNeighbourBox(const QRectF& _rect);
+    bool focusElement(const QString& _text, bool _exactMatch = false);
+
     void clear();
     void resetMatches();
     void setMinSize(bool _resize = true);
-    bool focusElement(const QString& _text, bool _exactMatch = false);
 
     // change the position of HEAD
     void flipY();
@@ -92,7 +94,6 @@ public:
     const QList<Version*>& getPredecessors() const;
     Version* getVersionByHash(const QString& _hash);
     Version* getSelectedVersion();
-    void setSelectedVersion(Version* _version);
     void preferencesUpdated(bool _forceUpdate = false);
 
     /**
@@ -101,8 +102,8 @@ public:
      *        If not false is returned and the compare widget
      *        can be cleared, too.
      */
-    bool restoreFromToHashes();
-    void saveFromToHashes();
+    bool restoreImportantVersions();
+    void saveImportantVersions();
 
     float getXFactor() const;
     float getYFactor() const;
@@ -193,6 +194,7 @@ protected:
     void focusVersion(const Version* _v);
     void expandTree();
     void fillCompareWidgetFromToInfo();
+    Version* findVersion(const QString& _hash);
 
 private:
 
@@ -248,6 +250,7 @@ private:
     int yfactor;
 
     Version* selectedVersion;
+    QString selectedVersionHash;
 
     //
     QMap<QString, QMap<QString, QStringList> > keyInformationCache;

@@ -206,21 +206,17 @@ void GraphWidget::mousePressEvent(QMouseEvent* _event)
             }
         }
 
-        foreach(QGraphicsItem * it, scene()->items())
+        if (selectedVersion)
         {
-            Version* v = dynamic_cast<Version*>(it);
-
-            if (v && v->isSelected())
-            {
-                v->setSelected(false);
-                v->update();
-            }
+          selectedVersion->setSelected(false);
+          selectedVersion->update();
+          selectedVersion = NULL;
         }
 
-        if (sv)
+        if (sv && sv->isSelected() == false)
         {
-            selectedVersion = sv->isSelected() ? NULL : sv;
-            sv->setSelected(!sv->isSelected());
+            selectedVersion = sv;
+            sv->setSelected(true);
             sv->update();
         }
     }
@@ -378,13 +374,16 @@ void GraphWidget::setGitLogFileConstraint(const QString& _fileConstraint)
     update();
 }
 
-Version* GraphWidget::gitloghead()
+Version* GraphWidget::gitlogSingle(QString _hash)
 {
     QString cmd = "git -C "
         + localRepositoryPath
         + " log --graph -1 --pretty=\"#"
         + (shortHashes ? "%h" : "%H")
         + "#%at#%an#%d#\"";
+
+    if (_hash.isEmpty() == false)
+        cmd += " " + _hash;
 
     QList<QString> cache;
     execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
@@ -421,13 +420,14 @@ Version* GraphWidget::gitloghead()
 void GraphWidget::gitlog(bool _changed)
 {
     if (_changed)
+    {
         keyInformationCache.clear();
+        selectedVersion = NULL;
+    }
 
     setUpdatesEnabled(false);
 
-    saveFromToHashes();
-
-    selectedVersion = NULL;
+    saveImportantVersions();
 
     clear();
 
@@ -447,7 +447,7 @@ void GraphWidget::gitlog(bool _changed)
     execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
     process(cache);
 
-    restoreFromToHashes();
+    restoreImportantVersions();
     setUpdatesEnabled(true);
 }
 
@@ -711,7 +711,7 @@ void GraphWidget::process(QList<QString> _cache)
     {
         if (localHeadVersion->getKeyInformation().contains("HEAD") == false)
         {
-            localHeadVersion = gitloghead();
+            localHeadVersion = gitlogSingle();
             localHeadVersion->hide();
         }
         else
@@ -1035,6 +1035,20 @@ void GraphWidget::setBlockItemChanged(bool _val)
         if (v)
             v->setBlockItemChanged(_val);
     }
+}
+
+Version* GraphWidget::findVersion(const QString& _hash)
+{
+    foreach(QGraphicsItem * it, scene()->items())
+    {
+        if (it->type() != QGraphicsItem::UserType + 1)
+            continue;
+
+        Version* v = dynamic_cast<Version*>(it);
+        if (v && v->getHash() == _hash)
+            return v;
+    }
+    return NULL;
 }
 
 void GraphWidget::updateGraphFolding(Version* _v)
@@ -1437,18 +1451,6 @@ Version* GraphWidget::getSelectedVersion()
     return selectedVersion;
 }
 
-void GraphWidget::setSelectedVersion(Version* _version)
-{
-    foreach(QGraphicsItem * it, scene()->items())
-    {
-        if (it == _version)
-        {
-            selectedVersion = _version;
-            break;
-        }
-    }
-}
-
 Version* GraphWidget::getLocalHeadVersion() const
 {
     return localHeadVersion;
@@ -1483,7 +1485,7 @@ bool GraphWidget::getTopDownView() const
     return topDownView;
 }
 
-void GraphWidget::saveFromToHashes()
+void GraphWidget::saveImportantVersions()
 {
     fromHashSave.clear();
     foreach(Version * it, fromVersions)
@@ -1493,12 +1495,16 @@ void GraphWidget::saveFromToHashes()
     toHashSave = toVersion ? toVersion->getHash() : QString();
     fromVersions.clear();
     toVersion = NULL;
+
+    selectedVersionHash = selectedVersion ? selectedVersion->getHash() : QString();
+    selectedVersion = NULL;
 }
 
-bool GraphWidget::restoreFromToHashes()
+bool GraphWidget::restoreImportantVersions()
 {
     fromVersions.clear();
     toVersion = NULL;
+    selectedVersion = NULL;
 
     foreach(QGraphicsItem * it, scene()->items())
     {
@@ -1506,10 +1512,10 @@ bool GraphWidget::restoreFromToHashes()
             continue;
 
         Version* v = dynamic_cast<Version*>(it);
-        if (!v)
+        if (!v || v->getHash().isEmpty())
             continue;
 
-        if (v->getHash().isEmpty() == false && fromHashSave.contains(v->getHash()))
+        if (fromHashSave.contains(v->getHash()))
         {
             fromVersions.push_back(v);
             v->setMatched(true);
@@ -1518,6 +1524,27 @@ bool GraphWidget::restoreFromToHashes()
         {
             toVersion = v;
             v->setMatched(true);
+        }
+        if (selectedVersionHash.isEmpty() == false && selectedVersionHash == v->getHash())
+        {
+            selectedVersion = v;
+            selectedVersion->setSelected(true);
+        }
+    }
+
+    if (selectedVersion == NULL && selectedVersionHash.isEmpty() == false)
+    {
+        // previous selection, but no new node is matching
+        selectedVersion = findVersion(selectedVersionHash);
+        if (!selectedVersion)
+        {
+            selectedVersion = gitlogSingle(selectedVersionHash);
+            selectedVersion->hide();
+            scene()->addItem(selectedVersion);
+            if (fromHashSave.contains(selectedVersionHash))
+            {
+                fromVersions.push_back(selectedVersion);
+            }
         }
     }
 
