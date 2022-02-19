@@ -30,7 +30,7 @@ void BranchList::refresh(const QString& _localRepositoryPath)
 
     QListWidget::clear();
 
-    QString cmd = "git -C " + _localRepositoryPath + " branch --list";
+    QString cmd = "git -C " + _localRepositoryPath + " branch -a";
 
     QList<QString> cache;
     execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
@@ -40,6 +40,8 @@ void BranchList::refresh(const QString& _localRepositoryPath)
     QListWidgetItem* item = NULL;
     foreach(const QString &it, cache)
     {
+      if (it.indexOf("->")>0)
+        continue;
         if (it.at(0) == '*')
         {
             currentLocalBranch = it.mid(1).trimmed();

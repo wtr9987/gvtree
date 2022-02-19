@@ -165,6 +165,7 @@ public:
 public slots:
     void diffLocalChanges();
     void resetDiff();
+    void resetSelection();
     void focusCurrent();
     void fitInView();
     void foldAll();
@@ -210,6 +211,7 @@ private:
     // root version node
     Version* rootVersion;
     Version* localHeadVersion; // local HEAD version
+    Version* branchVersion;    // top version element
 
     QStringList globalVersionInfo;
 

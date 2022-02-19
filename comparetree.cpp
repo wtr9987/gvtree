@@ -321,7 +321,7 @@ void CompareTree::onCustomContextMenu(const QPoint& point)
         QAction* act = NULL;
         QStringList tmp;
 
-        if (status == "M" || status == "R" || status == "D")
+        if (status == "X" || status == "M" || status == "R" || status == "D")
         {
             act = new QAction("Show version diff", this);
             tmp << "ACT1" << path << status << path_old;
@@ -330,7 +330,7 @@ void CompareTree::onCustomContextMenu(const QPoint& point)
             menu->addAction(act);
         }
 
-        if (status == "M" || status == "R" || status == "A")
+        if (status == "X" || status == "M" || status == "R" || status == "A")
         {
             act = new QAction("Edit current version", this);
             tmp << "ACT2" << path;

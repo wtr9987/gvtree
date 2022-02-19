@@ -55,6 +55,7 @@ string timestamp()
     gettimeofday(&tv, &tz);
 
     stringstream str;
+
     str << tv.tv_sec << " : " << tv.tv_usec << "  ";
     return str.str();
 }
@@ -65,6 +66,7 @@ GraphWidget::GraphWidget(MainWindow* _parent)
     fromToInfo(NULL),
     rootVersion(NULL),
     localHeadVersion(NULL),
+    branchVersion(NULL),
     mwin(_parent),
     compareTree(NULL),
     connectorStyle(0),
@@ -91,12 +93,14 @@ GraphWidget::GraphWidget(MainWindow* _parent)
 
     // scene
     QGraphicsScene* scene = new QGraphicsScene(this);
+
     scene->setItemIndexMethod(QGraphicsScene::NoIndex);
     setScene(scene);
 
     // try to get hardware acceleration
     QSettings settings;
     QGLWidget* gl = new QGLWidget();
+
     if (gl->isValid() && mwin->getOpenGLRendering())
     {
         setViewport(gl);
@@ -128,10 +132,11 @@ void GraphWidget::test()
     QMap<QString, Version*> nodes;
 
     QStringList nodeNames;
+
     nodeNames << "A" << "B" << "C" << "D" << "E" << "F" << "G" << "H"
               << "I" << "J" << "K" << "L" << "M" << "N" << "O";
 
-    foreach (const QString &n, nodeNames)
+    foreach (const QString& n, nodeNames)
     {
         QString line = "#0#0##(tag: " + n + ")#";
         QStringList parts = line.split(QChar('#'));
@@ -143,10 +148,11 @@ void GraphWidget::test()
     }
 
     QStringList edgeData;
+
     edgeData << "OE" << "OF" << "ON" << "EA" << "ED" << "DB" << "DC" << "NG"
              << "NM" << "MH" << "MI" << "MJ" << "MK" << "ML";
 
-    foreach (const QString &e, edgeData)
+    foreach (const QString& e, edgeData)
     {
         scene()->addItem(new Edge(nodes[QString(e[0])],
                                   nodes[QString(e[1])],
@@ -196,6 +202,7 @@ void GraphWidget::mousePressEvent(QMouseEvent* _event)
                 continue;
 
             Version* v = dynamic_cast<Version*>(it);
+
             if (!v)
                 continue;
 
@@ -206,15 +213,9 @@ void GraphWidget::mousePressEvent(QMouseEvent* _event)
             }
         }
 
-        if (selectedVersion)
-        {
-          selectedVersion->setSelected(false);
-          selectedVersion->update();
-          selectedVersion = NULL;
-        }
-
         if (sv && sv->isSelected() == false)
         {
+            resetSelection();
             selectedVersion = sv;
             sv->setSelected(true);
             sv->update();
@@ -222,6 +223,16 @@ void GraphWidget::mousePressEvent(QMouseEvent* _event)
     }
 
     QGraphicsView::mousePressEvent(_event);
+}
+
+void GraphWidget::resetSelection()
+{
+    if (selectedVersion)
+    {
+        selectedVersion->setSelected(false);
+        selectedVersion->update();
+        selectedVersion = NULL;
+    }
 }
 
 void GraphWidget::mouseMoveEvent(QMouseEvent* _event)
@@ -356,11 +367,13 @@ void GraphWidget::setGitLogFileConstraint(const QString& _fileConstraint)
             continue;
 
         Version* v = dynamic_cast<Version*>(it);
+
         if (!v)
             continue;
 
         v->clearFileConstraintEdgeList();
         bool stat = v->getHash().size() && fileConstraintHashes.contains(v->getHash());
+
         v->setFileConstraint(stat);
     }
 
@@ -386,6 +399,7 @@ Version* GraphWidget::gitlogSingle(QString _hash)
         cmd += " " + _hash;
 
     QList<QString> cache;
+
     execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
 
     QString line = cache.front();
@@ -413,7 +427,6 @@ Version* GraphWidget::gitlogSingle(QString _hash)
 
     mwin->getTagWidget()->addData(v->getKeyInformation());
 
-    scene()->addItem(v);
     return v;
 }
 
@@ -422,7 +435,7 @@ void GraphWidget::gitlog(bool _changed)
     if (_changed)
     {
         keyInformationCache.clear();
-        selectedVersion = NULL;
+        resetSelection();
     }
 
     setUpdatesEnabled(false);
@@ -444,6 +457,7 @@ void GraphWidget::gitlog(bool _changed)
         cmd += " " + mwin->getSelectedBranch();
 
     QList<QString> cache;
+
     execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
     process(cache);
 
@@ -472,6 +486,7 @@ void GraphWidget::load(const QString& _path)
     QFile file(_path);
 
     QList<QString> cache;
+
     if (file.open(QFile::ReadOnly | QFile::Text))
     {
         char buffer[65536];
@@ -492,7 +507,7 @@ void GraphWidget::process(QList<QString> _cache)
     // std::cerr << "process start " << timestamp() << std::endl;
 
     // reset local head
-    localHeadVersion = NULL;
+    branchVersion = NULL;
 
     connectorStyle = mwin->getConnectorStyle();
 
@@ -514,7 +529,8 @@ void GraphWidget::process(QList<QString> _cache)
     //            |
 
     QList<QString> swap_cache;
-    foreach (const QString &line, _cache)
+
+    foreach (const QString& line, _cache)
     {
         swap_cache.push_front(line);
         linecount++;
@@ -527,7 +543,7 @@ void GraphWidget::process(QList<QString> _cache)
     QString previousTree;
     QRegExp treePattern("^([*\\\\/\\. |\\-_]*[*\\\\/\\.|\\-_]+)");
 
-    foreach (const QString &line, swap_cache)
+    foreach (const QString& line, swap_cache)
     {
         int offset = 0;
         int pos = treePattern.indexIn(line, offset);
@@ -538,6 +554,7 @@ void GraphWidget::process(QList<QString> _cache)
         QString tree = treePattern.cap(1);
 
         int len = treePattern.matchedLength();
+
         offset = pos + len;
 
         if (previousTree.isEmpty())
@@ -623,7 +640,7 @@ void GraphWidget::process(QList<QString> _cache)
                     // replace parent
                     branchslots[i] = v;
                     // the last line contains the local HEAD version
-                    localHeadVersion = v;
+                    branchVersion = v;
                 }
                 break;
                 case '\\':
@@ -707,15 +724,19 @@ void GraphWidget::process(QList<QString> _cache)
 
     // TODO : get hash value of HEAD
 
-    if (localHeadVersion)
+    if (branchVersion)
     {
-        if (localHeadVersion->getKeyInformation().contains("HEAD") == false)
+        if (branchVersion->getKeyInformation().contains("HEAD") == false)
         {
             localHeadVersion = gitlogSingle();
             localHeadVersion->hide();
+            scene()->addItem(localHeadVersion);
         }
         else
+        {
+            localHeadVersion = branchVersion;
             localHeadVersion->setIsFoldable(foldHead);
+        }
     }
 
     rootVersion->collectFolderVersions(rootVersion, NULL);
@@ -754,8 +775,9 @@ void GraphWidget::commitInfo(const Version* _v, QTextEdit* _tedi)
 
     _tedi->clear();
     QList<QString> cache;
+
     execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
-    foreach(const QString &str, cache)
+    foreach(const QString& str, cache)
     {
         _tedi->insertPlainText(str);
     }
@@ -842,6 +864,7 @@ void GraphWidget::compareVersions(Version* _v1, Version* _v2)
     fillCompareWidgetFromToInfo();
 
     QStringList fromVersionHashes;
+
     fromVersionHashes.push_back(_v1->getHash());
     compareTree->compareHashes(fromVersionHashes, _v2->getHash());
 
@@ -883,6 +906,7 @@ void GraphWidget::compareToPrevious(Version* _v)
 
     // compare to previous...
     QStringList fromVersionHashes;
+
     _v->getPredecessorHashes(fromVersionHashes);
     compareTree->compareHashes(fromVersionHashes, _v->getHash());
 
@@ -901,7 +925,13 @@ void GraphWidget::focusVersion(const Version* _v)
 
 void GraphWidget::focusCurrent()
 {
-    if (localHeadVersion)
+    if (branchVersion)
+    {
+        resetMatches();
+        branchVersion->setMatched(true);
+        focusVersion(branchVersion);
+    }
+    else if (localHeadVersion)
     {
         resetMatches();
         localHeadVersion->setMatched(true);
@@ -975,6 +1005,7 @@ void GraphWidget::calculateGraphicsViewPosition()
             continue;
 
         Version* n = dynamic_cast<Version*>(it);
+
         if (n)
         {
             n->calculateCoordinates(getXFactor(), getYFactor());
@@ -1019,6 +1050,7 @@ void GraphWidget::adjustAllEdges()
             continue;
 
         Edge* e = dynamic_cast<Edge*>(it);
+
         if (e)
             e->adjust();
     }
@@ -1032,6 +1064,7 @@ void GraphWidget::setBlockItemChanged(bool _val)
             continue;
 
         Version* v = dynamic_cast<Version*>(it);
+
         if (v)
             v->setBlockItemChanged(_val);
     }
@@ -1045,6 +1078,7 @@ Version* GraphWidget::findVersion(const QString& _hash)
             continue;
 
         Version* v = dynamic_cast<Version*>(it);
+
         if (v && v->getHash() == _hash)
             return v;
     }
@@ -1082,6 +1116,7 @@ void GraphWidget::resetMatches()
             continue;
 
         Version* v = dynamic_cast<Version*>(it);
+
         if (v)
             v->setMatched(false);
     }
@@ -1106,6 +1141,7 @@ bool GraphWidget::focusElement(const QString& _text, bool _exactMatch)
             continue;
 
         Version* n = dynamic_cast<Version*>(it);
+
         if (n && n->findMatch(pattern, _text, _exactMatch))
         {
             hits.push_back(it);
@@ -1268,6 +1304,7 @@ void GraphWidget::contextMenuEvent(QContextMenuEvent* _event)
 
     QGraphicsItem* it = NULL;
     qreal zval = -1;
+
     foreach(QGraphicsItem * uit, underCursor)
     {
         if (uit->type() == QGraphicsItem::UserType + 1)
@@ -1387,6 +1424,7 @@ void GraphWidget::contextMenuEvent(QContextMenuEvent* _event)
 
     QMenu menu(this);
     QAction* action = NULL;
+
     action = menu.addAction(QString("Focus local HEAD"));
     connect(action, SIGNAL(triggered()), this, SLOT(focusCurrent()));
     action = menu.addAction(QString("Fit in view"));
@@ -1403,6 +1441,14 @@ void GraphWidget::contextMenuEvent(QContextMenuEvent* _event)
     connect(action, SIGNAL(triggered()), this, SLOT(foldAll()));
     action = menu.addAction(QString("Unfold all"));
     connect(action, SIGNAL(triggered()), this, SLOT(unfoldAll()));
+
+    if (selectedVersion)
+    {
+        menu.addSeparator();
+        action = menu.addAction(QString("Reset selection"));
+        connect(action, SIGNAL(triggered()), this, SLOT(resetSelection()));
+    }
+
     menu.exec(_event->globalPos());
 }
 
@@ -1440,6 +1486,7 @@ Version* GraphWidget::getVersionByHash(const QString& _hash)
             continue;
 
         Version* v = dynamic_cast<Version*>(it);
+
         if (v && v->getHash() == _hash)
             return v;
     }
@@ -1512,6 +1559,7 @@ bool GraphWidget::restoreImportantVersions()
             continue;
 
         Version* v = dynamic_cast<Version*>(it);
+
         if (!v || v->getHash().isEmpty())
             continue;
 
