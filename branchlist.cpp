@@ -76,7 +76,9 @@ const QString& BranchList::getCurrentLocalBranch() const
 QString BranchList::getSelectedBranch() const
 {
     if (selectedItems().size() < 1)
-        return currentLocalBranch;
+        return QString();
+    if (row(selectedItems().front())==0)
+      return QString();
 
     return selectedItems().front()->text();
 }

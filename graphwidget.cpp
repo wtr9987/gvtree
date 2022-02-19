@@ -722,8 +722,6 @@ void GraphWidget::process(QList<QString> _cache)
         previousBranchslots = branchslots;
     }
 
-    // TODO : get hash value of HEAD
-
     if (branchVersion)
     {
         if (branchVersion->getKeyInformation().contains("HEAD") == false)
