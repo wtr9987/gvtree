@@ -12,3 +12,11 @@ ChangeLog gvtree V1.2-0 dev_1.2
 	- fixed font initialization problem
 	- fixed compare widget when changing branch or
 	  in case of reload
+
+20. February 2022 :
+	- fixed -r
+	- fixed branchlist, now ignoring "->" branches if not current
+	- fixed branchlist, detached HEAD issue
+	- selection is kept until RMB context menu "Reset selection" is activated
+	- selection of root version blocked
+	- removed compiler warnings

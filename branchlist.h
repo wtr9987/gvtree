@@ -39,6 +39,7 @@ public:
 protected:
     class MainWindow* mwin;
     QString currentLocalBranch;
+    int currentLocalBranchIndex;
     QString selectedBranch;
 };
 

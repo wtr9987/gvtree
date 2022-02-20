@@ -17,9 +17,12 @@
 
 #include <QApplication>
 
-#if QT_VERSION < 0x050000
+#if QT_VERSION >= 0x050000
+#include <QScreen>
+#else
 #include <QTextCodec>
 #endif
+
 
 #include <QColorDialog>
 #include <QCoreApplication>
@@ -97,6 +100,7 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
 
     setCentralWidget(centralWidget);
     QHBoxLayout* centralLayout = new QHBoxLayout(centralWidget);
+
     centralLayout->setSpacing(0);
     centralLayout->setContentsMargins(0, 0, 0, 0);
 
@@ -172,7 +176,7 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
     branchList = new BranchList(this);
 
     dock = new QDockWidget(tr("Branch List"), this);
-    dock-> setObjectName("Branch List");
+    dock->setObjectName("Branch List");
     dock->setWidget(branchList);
     addDockWidget(Qt::RightDockWidgetArea, dock);
     windowmenu->addAction(dock->toggleViewAction());
@@ -192,6 +196,7 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
     QString fileConstraint;
 
     bool fromfile = false;
+
     for (int i = 0; i < _argv.size(); i++)
     {
         if (_argv.at(i) == "-t")
@@ -220,6 +225,7 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
                 lbRepositoryPath->setText(path);
                 pbRepositoryName->setText(fname);
                 gvtree_preferences.pbLocalRepositoryPath->setText(repositoryPath);
+                graphwidget->gitlog();
                 refreshRepo->setEnabled(true);
             }
             else
@@ -414,6 +420,7 @@ void MainWindow::splitRepositoryPath(const QString& _input,
     _pathTo = fi.absoluteFilePath();
 
     QStringList path_elements = _pathTo.split(QChar('/'));
+
     _repoName = path_elements.back();
     _pathTo.chop(_repoName.size());
 }
@@ -518,11 +525,23 @@ void MainWindow::restoreWindowSettings()
         // results in an effective negative x and/or y offset for the window.
         move(0, 0);
 
+#if QT_VERSION >= 0x050000
+        QRect rootRect;
+        QList<QScreen*> screens = QGuiApplication::screens();
+        if (screens.size() > 0)
+        {
+            QRect rootRect = screens.front()->availableGeometry();
+            pos.setX((pos.x() < 0 ? 0 : pos.x()) % rootRect.width());
+            pos.setY((pos.y() < 0 ? 0 : pos.y()) % rootRect.height());
+            move(pos);
+        }
+#else
         // force negative top left position to visible screen area
         QRect rootRect = QApplication::desktop()->availableGeometry();
         pos.setX((pos.x() < 0 ? 0 : pos.x()) % rootRect.width());
         pos.setY((pos.y() < 0 ? 0 : pos.y()) % rootRect.height());
         move(pos);
+#endif
     }
 
     if (settings.contains("mainwindow/state"))
@@ -594,6 +613,7 @@ void MainWindow::createMenus()
     filemenu = menuBar()->addMenu(tr("File"));
 
     QAction* setGitRepo = new QAction(tr("Set git repository"), this);
+
     setGitRepo->setStatusTip(tr("Set path to git repository."));
     connect(setGitRepo, SIGNAL(triggered()), this, SLOT(setGitLocalRepository()));
     connect(gvtree_preferences.pbLocalRepositoryPath, SIGNAL(pressed()), this, SLOT(setGitLocalRepository()));
@@ -608,6 +628,7 @@ void MainWindow::createMenus()
     filemenu->addSeparator();
 
     QAction* action = new QAction(tr("Quit"), this);
+
     action->setStatusTip(tr("Exit gvtree..."));
     connect(action, SIGNAL(triggered()), this, SLOT(quit()));
     filemenu->addAction(action);
@@ -643,6 +664,7 @@ void MainWindow::createMenus()
     QSettings settings;
 
     QStringList nodeInfo;
+
     nodeInfo << "HEAD" << "Commit Date" << "User Name" << "Hash" << "Branch" << "Release Label" << "Baseline Label" << "FIX/PQT Label" << "HO Label" << "Other Tags";
 
     foreach (const QString it, nodeInfo)
@@ -699,6 +721,7 @@ void MainWindow::changeGlobalVersionInfo(QAction* _act)
 {
     graphwidget->setGlobalVersionInfo(_act->text(), _act->isChecked());
     QSettings settings;
+
     settings.setValue(_act->text(), _act->isChecked());
     graphwidget->forceUpdate();
 }
@@ -755,7 +778,6 @@ void MainWindow::reloadCurrentRepository()
             QPoint shift = graphwidget->mapFromScene(restoreVersion->pos()) - restoreVersionPosition;
             graphwidget->horizontalScrollBar()->setValue(shift.x());
             graphwidget->verticalScrollBar()->setValue(shift.y());
-
         }
     }
     pbRepositoryRefresh->hide();
@@ -764,6 +786,7 @@ void MainWindow::reloadCurrentRepository()
 void MainWindow::changeCssFilePath()
 {
     QFileDialog dialog(this, tr("Change Path to CSS Style Sheet File"), gvtree_preferences.pbCssPath->text());
+
     dialog.setFilter(QDir::NoDotAndDotDot | QDir::Hidden | QDir::AllEntries);
     dialog.setFileMode(QFileDialog::ExistingFile);
 
@@ -851,14 +874,15 @@ bool MainWindow::checkGitLocalRepository(const QString& _path,
 
     QString lookup_path;
 
-    foreach(const QString &str, path_elements)
+    foreach(const QString& str, path_elements)
     {
         lookup_path = lookup_path + str + QString("/");
         QString lookup_git = lookup_path + QString(".git");
+
         check_for_repo.push_front(lookup_git);
     }
 
-    foreach(const QString &str, check_for_repo)
+    foreach(const QString& str, check_for_repo)
     {
         QFileInfo fi(str);
 
@@ -930,8 +954,10 @@ void MainWindow::licenseDialog()
     connect(gvtree_license.pbOK, SIGNAL(clicked()), lDialog, SLOT(close()));
 
     QFile file(":/doc/GNU_GPL_v3.0.html");
+
     file.open(QFile::ReadOnly | QFile::Text);
     QTextStream stream(&file);
+
     gvtree_license.textBrowser->setHtml(stream.readAll());
 
     lDialog->exec();
@@ -1041,6 +1067,7 @@ void MainWindow::getMimeTypeTools(const QString& _mimeType,
         return;
 
     QDialog* mimeTypeDialog = new QDialog;
+
     gvtree_difftool.setupUi(mimeTypeDialog);
     gvtree_difftool.mimeType->setText(_mimeType);
     gvtree_difftool.leDiffTool->setText(_diff);
@@ -1066,7 +1093,7 @@ void MainWindow::addToCleanupFiles(const QString& _path)
 
 void MainWindow::doCleanupFiles()
 {
-    foreach(const QString &str, cleanupFiles)
+    foreach(const QString& str, cleanupFiles)
     {
         // tempPath must contain an absolute path
         if (str[0].toLatin1() == '/')
@@ -1198,9 +1225,11 @@ void MainWindow::restoreColorSettingsHelper(
         settings.setValue(_settingsKey, QVariant(tmpColor));
 
     QColor fgColor = QColor(0, 0, 0);
+
     if (tmpColor.lightness() < 128)
         fgColor = QColor(255, 255, 255);
     QString css = "background-color: " + tmpColor.name() + "; color: " + fgColor.name() + ";";
+
     _pb->setStyleSheet(css);
 }
 
@@ -1315,8 +1344,9 @@ void MainWindow::updateGitStatus(const QString& _repoPath)
     // get data
     QString cmd = "git -C " + _repoPath + " status";
     QList<QString> cache;
+
     execute_cmd(cmd.toUtf8().data(), cache, getPrintCmdToStdout());
-    foreach(const QString &str, cache)
+    foreach(const QString& str, cache)
     {
         gitstatus->insertPlainText(str);
     }
@@ -1327,6 +1357,7 @@ bool MainWindow::initCbCodecForCStrings(QString _default)
 {
     gvtree_preferences.cbCodecForCStrings->clear();
 #if QT_VERSION >= 0x050000
+    Q_UNUSED(_default);
     gvtree_preferences.cbCodecForCStrings->addItem(QString("UTF-8"));
     gvtree_preferences.cbCodecForCStrings->setCurrentIndex(0);
 #else
@@ -1350,5 +1381,5 @@ bool MainWindow::initCbCodecForCStrings(QString _default)
 
 QString MainWindow::getSelectedBranch()
 {
-  return branchList->getSelectedBranch();
+    return branchList->getSelectedBranch();
 }

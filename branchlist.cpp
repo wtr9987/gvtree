@@ -19,7 +19,8 @@
 #include "branchlist.h"
 #include "mainwindow.h"
 
-BranchList::BranchList(MainWindow* _parent) : QListWidget(_parent), mwin(_parent)
+BranchList::BranchList(MainWindow* _parent) : QListWidget(_parent), mwin(_parent),
+    currentLocalBranchIndex(-1)
 {
     setSelectionMode(QAbstractItemView::SingleSelection);
 }
@@ -33,15 +34,15 @@ void BranchList::refresh(const QString& _localRepositoryPath)
     QString cmd = "git -C " + _localRepositoryPath + " branch -a";
 
     QList<QString> cache;
+
     execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
 
     bool selectedBranchPresent = false;
 
     QListWidgetItem* item = NULL;
-    foreach(const QString &it, cache)
+
+    foreach(const QString& it, cache)
     {
-      if (it.indexOf("->")>0)
-        continue;
         if (it.at(0) == '*')
         {
             currentLocalBranch = it.mid(1).trimmed();
@@ -52,9 +53,13 @@ void BranchList::refresh(const QString& _localRepositoryPath)
             item = new QListWidgetItem(it.mid(1).trimmed());
             addItem(item);
             item->setSelected(1);
+            currentLocalBranchIndex = row(item);
         }
         else
         {
+            if (it.indexOf("->") > 0)
+                continue;
+
             if (selectedBranch == it.trimmed())
                 selectedBranchPresent = true;
             item = new QListWidgetItem(it.trimmed());
@@ -77,8 +82,9 @@ QString BranchList::getSelectedBranch() const
 {
     if (selectedItems().size() < 1)
         return QString();
-    if (row(selectedItems().front())==0)
-      return QString();
+
+    if (row(selectedItems().front()) == currentLocalBranchIndex)
+        return QString();
 
     return selectedItems().front()->text();
 }

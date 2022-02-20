@@ -213,7 +213,7 @@ void GraphWidget::mousePressEvent(QMouseEvent* _event)
             }
         }
 
-        if (sv && sv->isSelected() == false)
+        if (sv && sv->isSelected() == false && sv != rootVersion)
         {
             resetSelection();
             selectedVersion = sv;
@@ -257,7 +257,11 @@ void GraphWidget::mouseReleaseEvent(QMouseEvent* _event)
 void GraphWidget::wheelEvent(QWheelEvent* event)
 {
     pan = false;
+#if QT_VERSION < 0x050000
     scaleView(pow((double) 1.3, event->delta() / 240.0));
+#else
+    scaleView(pow((double) 1.3, event->angleDelta().y() / 240.0));
+#endif
 }
 
 void GraphWidget::keyPressEvent(QKeyEvent* _event)

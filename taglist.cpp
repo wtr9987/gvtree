@@ -15,19 +15,24 @@
 /*                                               */
 /* --------------------------------------------- */
 
+#include <algorithm>
 #include "taglist.h"
 
 TagList::TagList(QWidget* _parent) : QListWidget(_parent)
 {
-  setSelectionMode(QAbstractItemView::SingleSelection);
+    setSelectionMode(QAbstractItemView::SingleSelection);
 }
 
 void TagList::addData(const QStringList& _data)
 {
+#if QT_VERSION >= 0x050000
+    QSet<QString> add(_data.begin(), _data.end());
+#else
     QSet<QString> add = _data.toSet();
+#endif
     raw.unite(add);
-    QStringList current = raw.toList();
-    qSort(current.begin(), current.end(), qGreater<QString>()); 
+    QStringList current = raw.values();
+    std::sort(current.begin(), current.end(), std::greater<QString>());
     QListWidget::clear();
     addItems(current);
 }
