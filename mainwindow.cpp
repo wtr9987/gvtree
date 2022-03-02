@@ -183,6 +183,7 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
     searchDock = dock;
     dock->hide();
     connect(branchList, SIGNAL(itemSelectionChanged()), this, SLOT(reloadCurrentRepository()));
+    connect(branchList, SIGNAL(itemSelectionChanged()), graphwidget, SLOT(focusCurrent()));
 
     connect(gvtree_comparetree.fromComboBox, SIGNAL(currentIndexChanged(int)),
             gvtree_comparetree.compareTree, SLOT(currentIndexChanged(int)));

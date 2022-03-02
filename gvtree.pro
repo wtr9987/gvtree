@@ -63,12 +63,52 @@ SOURCES += \
 DISTFILES += $$SOURCEFILES \
   README \
   LICENSE \
-  TODO \
   ChangeLog \
   css/gvtree.css \
   doc/GNU_GPL_v3.0.html \
   doc/gvtree-1.2-0.odt \
   doc/gvtree-1.2-0.pdf \
+  doc/images/f1.png \
+  doc/images/f2.png \
+  doc/images/f3.png \
+  doc/images/f4.png \
+  doc/images/f5.png \
+  doc/images/f6.png \
+  doc/images/f7.png \
+  doc/images/f8.png \
+  doc/images/f10.png \
+  doc/images/f11.png \
+  doc/images/f12.png \
+  doc/images/f13.png \
+  doc/images/f14.png \
+  doc/images/f15.png \
+  doc/images/f16.png \
+  doc/images/f17.png \
+  doc/images/f18.png \
+  doc/images/f20.png \
+  doc/images/f21.png \
+  doc/images/f22.png \
+  doc/images/f23.png \
+  doc/images/f24.png \
+  doc/images/f25.png \
+  doc/images/f27.png \
+  doc/images/f28.png \
+  doc/images/f29.png \
+  doc/images/f30.png \
+  doc/images/f31.png \
+  doc/images/f32.png \
+  doc/images/f33.png \
+  doc/images/f34.png \
+  doc/images/f35.png \
+  doc/images/f36.png \
+  doc/images/f37.png \
+  doc/images/f38.png \
+  doc/images/f39.png \
+  doc/images/f40.png \
+  doc/images/f41.png \
+  doc/images/f42.png \
+  doc/images/f43.png \
+  doc/images/f44.png \
   images/connectorStyle0.png \
   images/connectorStyle1.png \
   images/gvt_add.png \
