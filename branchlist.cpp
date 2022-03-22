@@ -31,7 +31,7 @@ void BranchList::refresh(const QString& _localRepositoryPath)
 
     QListWidget::clear();
 
-    QString cmd = "git -C " + _localRepositoryPath + " branch -a";
+    QString cmd = "git -C " + _localRepositoryPath + " branch -a --sort=-committerdate";
 
     QList<QString> cache;
 
