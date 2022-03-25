@@ -39,6 +39,7 @@
 #include "ui_gvtree_help.h"
 #include "ui_gvtree_license.h"
 #include "ui_gvtree_preferences.h"
+#include "ui_gvtree_branchlist.h"
 
 class MainWindow : public QMainWindow
 {
@@ -199,6 +200,7 @@ protected:
     // docks
     GraphWidget* graphwidget;
     QWidget* ctwin;
+    QWidget* blwin;
     QTreeView* compareTree;
     QLineEdit* search;
     TagPrefGridLayout* gridLayout;
@@ -216,6 +218,7 @@ private:
     Ui_HelpDialog gvtree_help;
     Ui_LicenseDialog gvtree_license;
     Ui_CompareTreeForm gvtree_comparetree;
+    Ui_BranchListForm gvtree_branchlist;
     QLabel* lbRepositoryPath;
     QPushButton* pbRepositoryName;
     QPushButton* pbFileConstraint;

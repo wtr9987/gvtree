@@ -18,29 +18,43 @@
 #ifndef __BRANCHLIST_H__
 #define __BRANCHLIST_H__
 
-#include <QListWidget>
-#include <QTabWidget>
-#include <QSet>
-#include <QStringList>
+#include <QStandardItem>
+#include <QStandardItemModel>
+#include <QItemSelection>
+#include <QListView>
 #include <QWidget>
 #include <QString>
 
-class BranchList : public QListWidget
+class BranchList : public QListView
 {
     Q_OBJECT
 
 public:
-    BranchList(class MainWindow* _parent = NULL);
+    BranchList(class QWidget* _parent = NULL);
 
+    /**
+     * \brief Get branch information of current local repository
+     */
     void refresh(const QString& _localRepositoryPath);
-    const QString& getCurrentLocalBranch() const;
     QString getSelectedBranch() const;
+    void setMainWindow(class MainWindow* _mwin);
+
+public slots:
+        void setSort(int _val);
+    void resetSelection();
+
+    void selectionChanged(const QItemSelection& _selected, const QItemSelection& _deselected);
 
 protected:
     class MainWindow* mwin;
-    QString currentLocalBranch;
-    int currentLocalBranchIndex;
-    QString selectedBranch;
+    QStandardItem* currentBranch;
+
+    int sortRole;
+    Qt::SortOrder sortOrder;
+    QStandardItemModel* blModel;
+
+signals:
+    void itemSelectionChanged();
 };
 
 #endif

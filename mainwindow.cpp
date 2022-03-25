@@ -53,7 +53,7 @@
 
 using namespace std;
 
-MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL), pwin(NULL)
+MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL), blwin(NULL), pwin(NULL)
 {
     // setup preferences dialog first
     pwin = new QDialog;
@@ -159,6 +159,11 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
     compareTreeDock = dock;
     dock->hide();
 
+    connect(gvtree_comparetree.fromComboBox, SIGNAL(currentIndexChanged(int)),
+            gvtree_comparetree.compareTree, SLOT(currentIndexChanged(int)));
+    connect(gvtree_comparetree.toButton, SIGNAL(pressed()), graphwidget, SLOT(focusToVersion()));
+    connect(gvtree_comparetree.fromButton, SIGNAL(pressed()), graphwidget, SLOT(focusFromVersion()));
+
     // -- line dialog to search nodes by hash, date, tag or branch information
     search = new QLineEdit(this);
     connect(search, SIGNAL(textEdited(const QString&)), this, SLOT(lookupId(const QString&)));
@@ -173,22 +178,27 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
     dock->hide();
 
     // -- list of all branches
-    branchList = new BranchList(this);
+    blwin = new QWidget;
+    gvtree_branchlist.setupUi(blwin);
+    gvtree_branchlist.branchList->setMainWindow(this);
 
     dock = new QDockWidget(tr("Branch List"), this);
     dock->setObjectName("Branch List");
-    dock->setWidget(branchList);
+    dock->setWidget(blwin);
     addDockWidget(Qt::RightDockWidgetArea, dock);
     windowmenu->addAction(dock->toggleViewAction());
     searchDock = dock;
     dock->hide();
-    connect(branchList, SIGNAL(itemSelectionChanged()), this, SLOT(reloadCurrentRepository()));
-    connect(branchList, SIGNAL(itemSelectionChanged()), graphwidget, SLOT(focusCurrent()));
+    connect(gvtree_branchlist.branchList, SIGNAL(itemSelectionChanged()), this, SLOT(reloadCurrentRepository()));
+    connect(gvtree_branchlist.branchList, SIGNAL(itemSelectionChanged()), graphwidget, SLOT(focusCurrent()));
+    connect(gvtree_branchlist.cbSort, SIGNAL(currentIndexChanged(int)), 
+                    gvtree_branchlist.branchList, SLOT(setSort(int)));
+    connect(gvtree_branchlist.pbReset, SIGNAL(reset(bool)), 
+                    gvtree_branchlist.branchList, SLOT(changeSortMode(bool)));
 
-    connect(gvtree_comparetree.fromComboBox, SIGNAL(currentIndexChanged(int)),
-            gvtree_comparetree.compareTree, SLOT(currentIndexChanged(int)));
-    connect(gvtree_comparetree.toButton, SIGNAL(pressed()), graphwidget, SLOT(focusToVersion()));
-    connect(gvtree_comparetree.fromButton, SIGNAL(pressed()), graphwidget, SLOT(focusFromVersion()));
+
+    connect(gvtree_branchlist.pbReset, SIGNAL(pressed()), 
+                    gvtree_branchlist.branchList, SLOT(resetSelection()));
 
     show();
     restoreWindowSettings();
@@ -219,7 +229,7 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
                 QSettings settings;
                 settings.setValue("localRepositoryPath", repositoryPath);
                 graphwidget->setLocalRepositoryPath(repositoryPath);
-                branchList->refresh(repositoryPath);
+                gvtree_branchlist.branchList->refresh(repositoryPath);
 
                 QString path, fname;
                 splitRepositoryPath(repositoryPath, path, fname);
@@ -592,7 +602,7 @@ void MainWindow::restoreLocalRepository()
             gvtree_preferences.pbLocalRepositoryPath->setText(repositoryPath);
 
             graphwidget->setLocalRepositoryPath(repositoryPath);
-            branchList->refresh(repositoryPath);
+            gvtree_branchlist.branchList->refresh(repositoryPath);
             graphwidget->gitlog();
             refreshRepo->setEnabled(true);
         }
@@ -842,7 +852,7 @@ void MainWindow::setGitLocalRepository()
             QSettings settings;
             settings.setValue("localRepositoryPath", repositoryPath);
             graphwidget->setLocalRepositoryPath(repositoryPath);
-            branchList->refresh(repositoryPath);
+            gvtree_branchlist.branchList->refresh(repositoryPath);
             gvtree_comparetree.compareTree->resetCompareTree();
 
             QString path, fname;
@@ -1382,5 +1392,5 @@ bool MainWindow::initCbCodecForCStrings(QString _default)
 
 QString MainWindow::getSelectedBranch()
 {
-    return branchList->getSelectedBranch();
+    return gvtree_branchlist.branchList->getSelectedBranch();
 }
