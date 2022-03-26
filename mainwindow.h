@@ -60,6 +60,7 @@ public:
     QLabel* getToDateLabel();
     QLineEdit* getSearchWidget() const;
     QDockWidget* getSearchDock();
+    QDockWidget* getBranchDock();
     TagWidget* getTagWidget() const;
     QString getSelectedBranch();
 
@@ -164,6 +165,7 @@ protected:
 
     // restore information from QSettings
     void restorePreferencesSettings();
+    void restoreBranchListSettings();
     void restoreWindowSettings();
     void restoreLocalRepository();
     void restoreColorSettings();
@@ -228,6 +230,7 @@ private:
     QPushButton* pbRepositoryRefresh;
     QDockWidget* compareTreeDock;
     QDockWidget* searchDock;
+    QDockWidget* branchDock;
 };
 
 #endif

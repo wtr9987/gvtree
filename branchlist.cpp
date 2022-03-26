@@ -15,6 +15,7 @@
 /*                                               */
 /* --------------------------------------------- */
 
+#include <QSettings>
 #include "execute_cmd.h"
 #include "branchlist.h"
 #include "mainwindow.h"
@@ -32,6 +33,7 @@ BranchList::BranchList(QWidget* _parent) : QListView(_parent),
     connect (selectionModel(),
              SIGNAL(selectionChanged(const QItemSelection &_selected,const QItemSelection &_deselected)),
              this, SLOT(selectionChanged(const QItemSelection &_selected,const QItemSelection &_deselected)));
+
 }
 
 void BranchList::setMainWindow(MainWindow* _mwin)
@@ -49,7 +51,7 @@ void BranchList::refresh(const QString& _localRepositoryPath)
     blModel->clear();
 
     // default sort is latest committed branch on top
-    QString cmd = "git -C " + _localRepositoryPath + " branch -a --sort=-committerdate";
+    QString cmd = "git -C " + _localRepositoryPath + " branch -a --sort=committerdate";
 
     QList<QString> cache;
 
@@ -126,8 +128,12 @@ void BranchList::setSort(int _val)
             sortOrder = Qt::DescendingOrder;
             break;
     }
+
     blModel->setSortRole(sortRole);
     blModel->sort(0, sortOrder);
+
+    QSettings settings;
+    settings.setValue("branchList/sort", _val);
 }
 
 void BranchList::selectionChanged(const QItemSelection&, const QItemSelection&)

@@ -187,18 +187,16 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
     dock->setWidget(blwin);
     addDockWidget(Qt::RightDockWidgetArea, dock);
     windowmenu->addAction(dock->toggleViewAction());
-    searchDock = dock;
+    branchDock = dock;
     dock->hide();
+
     connect(gvtree_branchlist.branchList, SIGNAL(itemSelectionChanged()), this, SLOT(reloadCurrentRepository()));
     connect(gvtree_branchlist.branchList, SIGNAL(itemSelectionChanged()), graphwidget, SLOT(focusCurrent()));
     connect(gvtree_branchlist.cbSort, SIGNAL(currentIndexChanged(int)), 
                     gvtree_branchlist.branchList, SLOT(setSort(int)));
-    connect(gvtree_branchlist.pbReset, SIGNAL(reset(bool)), 
-                    gvtree_branchlist.branchList, SLOT(changeSortMode(bool)));
-
-
     connect(gvtree_branchlist.pbReset, SIGNAL(pressed()), 
                     gvtree_branchlist.branchList, SLOT(resetSelection()));
+    restoreBranchListSettings();
 
     show();
     restoreWindowSettings();
@@ -404,6 +402,11 @@ QDockWidget* MainWindow::getSearchDock()
     return searchDock;
 }
 
+QDockWidget* MainWindow::getBranchDock()
+{
+    return branchDock;
+}
+
 bool MainWindow::applyStyleSheetFile(QString _path)
 {
     QFile styleFile(_path);
@@ -513,6 +516,12 @@ void MainWindow::restorePreferencesSettings()
         gvtree_preferences.rbLastRepo->setChecked(false);
         gvtree_preferences.rbCurrentPathRepo->setChecked(true);
     }
+}
+
+void MainWindow::restoreBranchListSettings()
+{
+    QSettings settings;
+    gvtree_branchlist.cbSort->setCurrentIndex(settings.value("branchList/sort").toInt());
 }
 
 void MainWindow::restoreWindowSettings()
