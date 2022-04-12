@@ -69,6 +69,7 @@ DISTFILES += $$SOURCEFILES \
   doc/GNU_GPL_v3.0.html \
   doc/gvtree-1.2-0.odt \
   doc/gvtree-1.2-0.pdf \
+  doc/doc_test_repository.sh \
   doc/images/f1.png \
   doc/images/f2.png \
   doc/images/f3.png \
@@ -110,6 +111,10 @@ DISTFILES += $$SOURCEFILES \
   doc/images/f42.png \
   doc/images/f43.png \
   doc/images/f44.png \
+  doc/images/f45.png \
+  doc/images/f46.png \
+  doc/images/f47.png \
+  doc/images/f48.png \
   images/connectorStyle0.png \
   images/connectorStyle1.png \
   images/gvt_add.png \
