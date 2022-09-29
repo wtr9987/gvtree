@@ -163,6 +163,7 @@ public:
     }
 
 public slots:
+    void diffStagedChanges();
     void diffLocalChanges();
     void resetDiff();
     void resetSelection();

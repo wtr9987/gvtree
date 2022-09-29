@@ -373,10 +373,10 @@ void CompareTree::setGraphWidget(class GraphWidget* _graph)
     graph = _graph;
 }
 
-void CompareTree::viewLocalChanges()
+void CompareTree::viewLocalChanges(bool _staged)
 {
     // get data
-    QString cmd = "git -C " + graph->getLocalRepositoryPath() + " ls-files -m";
+    QString cmd = "git -C " + graph->getLocalRepositoryPath() + (_staged==true?" diff --cached --name-only":" ls-files -m");
 
     QList<QString> cache;
     execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());

@@ -42,7 +42,7 @@ public:
     void viewThisVersion(const QString& _hash);
 
     // show the local changes
-    void viewLocalChanges();
+    void viewLocalChanges(bool _staged);
 
     // show differences of the fromVersions and the toVersion in an editor
     void compareFileVersions(const QString& _path, const QString& _status, const QString& _path_old);

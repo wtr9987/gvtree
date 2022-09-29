@@ -957,7 +957,7 @@ void MainWindow::helpDialog()
 {
     QMessageBox help(QMessageBox::Information, tr("Help"), tr(""), QMessageBox::NoButton, this);
     QString msg = "For more detailed information, please refer to<br/><br/><b><i>"
-        + QString(INSTALLATION_PATH) + "/share/doc/"
+        + QString(INSTALLATION_PATH) + "/share/doc/gvtree/"
         + QString(VERSION_NAME) + ".pdf</b></i>";
 
     help.information(this, "Help", msg);
@@ -979,6 +979,7 @@ void MainWindow::licenseDialog()
     QTextStream stream(&file);
 
     gvtree_license.textBrowser->setHtml(stream.readAll());
+    file.close();
 
     lDialog->exec();
 }

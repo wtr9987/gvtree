@@ -814,6 +814,27 @@ void GraphWidget::fillCompareWidgetFromToInfo()
     }
 }
 
+void GraphWidget::diffStagedChanges()
+{
+    resetMatches();
+
+    fromVersions = QList<Version*>();
+    fromVersions.push_back(localHeadVersion);
+    toVersion = NULL;
+
+    fillCompareWidgetFromToInfo();
+    mwin->getToDateLabel()->setText(QString("Staged Changes"));
+
+    compareTree->viewLocalChanges(true);
+
+    // Force visibility of compare files window
+    mwin->getCompareTreeDock()->show();
+
+    // cursor
+    fromToInfo->setFromToPosition(fromVersions, NULL);
+    fromToInfo->show();
+}
+
 void GraphWidget::viewThisVersion(Version* _v)
 {
     resetMatches();
@@ -845,7 +866,7 @@ void GraphWidget::diffLocalChanges()
     fillCompareWidgetFromToInfo();
     mwin->getToDateLabel()->setText(QString("Local Changes"));
 
-    compareTree->viewLocalChanges();
+    compareTree->viewLocalChanges(false);
 
     // Force visibility of compare files window
     mwin->getCompareTreeDock()->show();
@@ -1438,6 +1459,8 @@ void GraphWidget::contextMenuEvent(QContextMenuEvent* _event)
     connect(action, SIGNAL(triggered()), this, SLOT(resetDiff()));
     action = menu.addAction(QString("Diff local changes"));
     connect(action, SIGNAL(triggered()), this, SLOT(diffLocalChanges()));
+    action = menu.addAction(QString("Diff staged changes"));
+    connect(action, SIGNAL(triggered()), this, SLOT(diffStagedChanges()));
     menu.addSeparator();
     action = menu.addAction(QString("Fold all"));
     connect(action, SIGNAL(triggered()), this, SLOT(foldAll()));
