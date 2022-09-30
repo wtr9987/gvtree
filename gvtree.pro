@@ -4,7 +4,7 @@ DEPENDPATH += .
 INCLUDEPATH += . 
 VERSION = -1.2-0
 RC_ICONS = gvtree.ico
-CPPFLAGS += -O3
+CPPFLAGS += -g
 QT += opengl widgets
 INSTALLS += target documentation
 

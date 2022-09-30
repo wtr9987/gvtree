@@ -23,14 +23,22 @@ TagPrefGridLayout::TagPrefGridLayout(QWidget* _parent) : QGridLayout(_parent), l
 
 const TagPreference* TagPrefGridLayout::getTagPreference(const QString& _item) const
 {
-  if (tp.contains(_item))
-    return tp[_item];
-  return NULL;
+    if (tp.contains(_item))
+        return tp[_item];
+
+    return NULL;
 }
 
-void TagPrefGridLayout::addTagPreference(const QString& _name, const QString& _regexDefault)
+void TagPrefGridLayout::addTagPreference(const QString& _name, const QString& _regexpDefault)
 {
-  TagPreference* tpw = new TagPreference(line, _name, _regexDefault, this);
-  tp[_name] = tpw;
-  line++;
+    TagPreference* tpw = new TagPreference(line, _name, _regexpDefault, this);
+
+    connect(tpw, SIGNAL(regexpChanged()), this, SLOT(regexpChangedProxy()));
+    tp[_name] = tpw;
+    line++;
+}
+
+void TagPrefGridLayout::regexpChangedProxy()
+{
+    emit regexpChanged();
 }

@@ -20,3 +20,12 @@ ChangeLog gvtree V1.2-0 dev_1.2
 	- selection is kept until RMB context menu "Reset selection" is activated
 	- selection of root version blocked
 	- removed compiler warnings
+
+30. September 2022 :
+	- fixed git log --graph parsing error
+	- fixed -f parameter
+	- add commit comment to node
+	- fixed update of version information regexp
+	- sorted version information tabs
+	- TODO: width of commit comment to prefernces
+	- TODO: maximum length of commit comment to preferences

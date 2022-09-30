@@ -136,7 +136,7 @@ void GraphWidget::test()
     nodeNames << "A" << "B" << "C" << "D" << "E" << "F" << "G" << "H"
               << "I" << "J" << "K" << "L" << "M" << "N" << "O";
 
-    foreach (const QString& n, nodeNames)
+    foreach (const QString &n, nodeNames)
     {
         QString line = "#0#0##(tag: " + n + ")#";
         QStringList parts = line.split(QChar('#'));
@@ -152,7 +152,7 @@ void GraphWidget::test()
     edgeData << "OE" << "OF" << "ON" << "EA" << "ED" << "DB" << "DC" << "NG"
              << "NM" << "MH" << "MI" << "MJ" << "MK" << "ML";
 
-    foreach (const QString& e, edgeData)
+    foreach (const QString &e, edgeData)
     {
         scene()->addItem(new Edge(nodes[QString(e[0])],
                                   nodes[QString(e[1])],
@@ -393,11 +393,16 @@ void GraphWidget::setGitLogFileConstraint(const QString& _fileConstraint)
 
 Version* GraphWidget::gitlogSingle(QString _hash)
 {
+    if (localRepositoryPath.isEmpty())
+    {
+        return NULL;
+    }
+
     QString cmd = "git -C "
         + localRepositoryPath
         + " log --graph -1 --pretty=\"#"
         + (shortHashes ? "%h" : "%H")
-        + "#%at#%an#%d#\"";
+        + "#%at#%an#%d#%s\"";
 
     if (_hash.isEmpty() == false)
         cmd += " " + _hash;
@@ -413,7 +418,7 @@ Version* GraphWidget::gitlogSingle(QString _hash)
     // abort, if too short...
     if (parts.size() < 5)
     {
-        std::cerr << "Error: Input too short " << line.toUtf8().data() << std::endl;
+        cerr << "Error: Input too short " << line.toUtf8().data() << endl;
         return NULL;
     }
     // check if the Version object already exists
@@ -452,7 +457,7 @@ void GraphWidget::gitlog(bool _changed)
         + localRepositoryPath
         + " log --graph --pretty=\"#"
         + (shortHashes ? "%h" : "%H")
-        + "#%at#%an#%d#\"";
+        + "#%at#%an#%d#%s#\"";
 
     if (remotes)
         cmd += " --remotes";
@@ -487,8 +492,8 @@ const MainWindow* GraphWidget::getMainWindow() const
 void GraphWidget::load(const QString& _path)
 {
     setUpdatesEnabled(false);
-    QFile file(_path);
 
+    QFile file(_path);
     QList<QString> cache;
 
     if (file.open(QFile::ReadOnly | QFile::Text))
@@ -508,7 +513,7 @@ void GraphWidget::load(const QString& _path)
 
 void GraphWidget::process(QList<QString> _cache)
 {
-    // std::cerr << "process start " << timestamp() << std::endl;
+    // cerr << "process start " << timestamp() << endl;
 
     // reset local head
     branchVersion = NULL;
@@ -534,7 +539,7 @@ void GraphWidget::process(QList<QString> _cache)
 
     QList<QString> swap_cache;
 
-    foreach (const QString& line, _cache)
+    foreach (const QString &line, _cache)
     {
         swap_cache.push_front(line);
         linecount++;
@@ -547,7 +552,7 @@ void GraphWidget::process(QList<QString> _cache)
     QString previousTree;
     QRegExp treePattern("^([*\\\\/\\. |\\-_]*[*\\\\/\\.|\\-_]+)");
 
-    foreach (const QString& line, swap_cache)
+    foreach (const QString &line, swap_cache)
     {
         int offset = 0;
         int pos = treePattern.indexIn(line, offset);
@@ -598,7 +603,7 @@ void GraphWidget::process(QList<QString> _cache)
                     // abort, if too short...
                     if (parts.size() < 5)
                     {
-                        std::cerr << "Error: Input too short " << line.toUtf8().data() << std::endl;
+                        cerr << "Error: Input too short " << line.toUtf8().data() << endl;
                         break;
                     }
                     // check if the Version object already exists
@@ -666,6 +671,10 @@ void GraphWidget::process(QList<QString> _cache)
 
                         branchslots[i + 1] = previousBranchslots[i + 1 - k];
                     }
+                    else if ((i % 2) == 1 && tree[i + 1].toLatin1() == '|' && previousTree[i - 1].toLatin1() == '/')
+                    {
+                        branchslots[i + 1] = branchslots[i - 1];
+                    }
                     break;
                 case '_':
                     if (skipUnderscore == false)
@@ -731,8 +740,11 @@ void GraphWidget::process(QList<QString> _cache)
         if (branchVersion->getKeyInformation().contains("HEAD") == false)
         {
             localHeadVersion = gitlogSingle();
-            localHeadVersion->hide();
-            scene()->addItem(localHeadVersion);
+            if (localHeadVersion)
+            {
+                localHeadVersion->hide();
+                scene()->addItem(localHeadVersion);
+            }
         }
         else
         {
@@ -748,7 +760,7 @@ void GraphWidget::process(QList<QString> _cache)
     mwin->getTagWidget()->blockSignals(false);
     mwin->getTagWidget()->setDefault();
 
-    // std::cerr << "process end " << timestamp() << std::endl;
+    // cerr << "process end " << timestamp() << endl;
 }
 
 void GraphWidget::clear()
@@ -779,7 +791,7 @@ void GraphWidget::commitInfo(const Version* _v, QTextEdit* _tedi)
     QList<QString> cache;
 
     execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
-    foreach(const QString& str, cache)
+    foreach(const QString &str, cache)
     {
         _tedi->insertPlainText(str);
     }

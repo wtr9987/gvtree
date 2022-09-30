@@ -112,6 +112,7 @@ public slots:
 
     // File menu
     void reloadCurrentRepository();
+    void resetCurrentRepository();
     void setGitLocalRepository();
     void quit();
 
@@ -139,6 +140,9 @@ public slots:
 
     //
     void updatePbFileConstraint(const QString& _fileConstraint);
+
+    //
+    const QStringList& getNodeInfo() const;
 
 protected:
 
@@ -231,6 +235,7 @@ private:
     QDockWidget* compareTreeDock;
     QDockWidget* searchDock;
     QDockWidget* branchDock;
+    QStringList nodeInfo;
 };
 
 #endif

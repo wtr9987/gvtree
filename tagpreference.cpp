@@ -35,7 +35,6 @@ TagPreference::TagPreference(int _row,
     _layout->addWidget(fontButton, _row, 1, 1, 1);
 
     regularExpression = new QLineEdit();
-    connect(regularExpression, SIGNAL(returnPressed()), this, SLOT(setRegularExpression()));
     _layout->addWidget(regularExpression, _row, 2, 1, 1);
 
     QString lookupRegexp = _name + "/regExp";
@@ -43,13 +42,16 @@ TagPreference::TagPreference(int _row,
     if (settings.contains(lookupRegexp))
     {
         regularExpression->setText(settings.value(lookupRegexp).toString());
-        setRegularExpression();
+        regExp = QRegExp(settings.value(lookupRegexp).toString());
     }
     else
     {
         regularExpression->setText(_regexDefault);
-        setRegularExpression();
+        regExp = QRegExp(_regexDefault);
     }
+
+    connect(regularExpression, SIGNAL(textChanged(const QString&)), this, SLOT(setRegularExpression(const QString&)));
+
     QString lookupFont = _name + "/font";
     if (settings.contains(lookupFont))
     {
@@ -86,16 +88,17 @@ void TagPreference::setFont()
     }
 }
 
-void TagPreference::setRegularExpression()
+void TagPreference::setRegularExpression(const QString& _regex)
 {
-    regExp = QRegExp(regularExpression->text());
+    regExp = QRegExp(_regex);
 
     if (regExp.isValid())
     {
         QSettings settings;
         QString lookupRegexp = tagType->text() + "/regExp";
-        settings.setValue(lookupRegexp, regularExpression->text());
+        settings.setValue(lookupRegexp, _regex);
         regularExpression->setStyleSheet("color: black;  background-color: white");
+        emit regexpChanged();
     }
     else
     {

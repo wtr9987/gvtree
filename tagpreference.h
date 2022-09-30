@@ -49,7 +49,10 @@ protected:
 
 private slots:
     void setFont();
-    void setRegularExpression();
+    void setRegularExpression(const QString& _regex);
+
+signals:
+    void regexpChanged();
 };
 
 #endif

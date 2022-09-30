@@ -27,6 +27,13 @@ void TagWidget::clear()
 {
     labelToIndex.clear();
     QTabWidget::clear();
+    foreach(const QString &info, mwin->getNodeInfo())
+    {
+            TagList* tmp = new TagList(this); 
+            tmp->setObjectName(info);
+            connect(tmp, SIGNAL(itemPressed(QListWidgetItem*)), this, SLOT(lookupId(QListWidgetItem*)));
+            labelToIndex[info] = addTab(tmp, info);
+    }
 }
 
 void TagWidget::addData(const QMap<QString, QStringList>& _data)
@@ -39,19 +46,14 @@ void TagWidget::addData(const QMap<QString, QStringList>& _data)
             continue;
         if (it.key().at(0) == QChar('_'))
             continue;
-        if (labelToIndex.find(it.key()) == labelToIndex.end())
-        {
-            TagList* tmp = new TagList(this);
-            tmp->setObjectName(it.key());
-            connect(tmp, SIGNAL(itemPressed(QListWidgetItem*)),
-                    this, SLOT(lookupId(QListWidgetItem*)));
-            tmp->addData(it.value());
-            labelToIndex[it.key()] = addTab(tmp, it.key());
-        }
-        else
+        if (labelToIndex.find(it.key()) != labelToIndex.end())
         {
             TagList* tmp = dynamic_cast<TagList*>(widget(labelToIndex[it.key()]));
             tmp->addData(it.value());
+        }
+        else
+        {
+          std::cerr << "Error " << it.key().toUtf8().data() << " is no defined tag/branch information." << std::endl;
         }
     }
 }

@@ -99,6 +99,7 @@ public:
      *        certain tag patterns.
      */
     void processGitLogTagInformation(const QString& _tagInfo);
+    void processGitLogCommentInformation(const QString& _tagInfo);
 
     //!> Edges
 

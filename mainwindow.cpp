@@ -192,10 +192,10 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
 
     connect(gvtree_branchlist.branchList, SIGNAL(itemSelectionChanged()), this, SLOT(reloadCurrentRepository()));
     connect(gvtree_branchlist.branchList, SIGNAL(itemSelectionChanged()), graphwidget, SLOT(focusCurrent()));
-    connect(gvtree_branchlist.cbSort, SIGNAL(currentIndexChanged(int)), 
-                    gvtree_branchlist.branchList, SLOT(setSort(int)));
-    connect(gvtree_branchlist.pbReset, SIGNAL(pressed()), 
-                    gvtree_branchlist.branchList, SLOT(resetSelection()));
+    connect(gvtree_branchlist.cbSort, SIGNAL(currentIndexChanged(int)),
+            gvtree_branchlist.branchList, SLOT(setSort(int)));
+    connect(gvtree_branchlist.pbReset, SIGNAL(pressed()),
+            gvtree_branchlist.branchList, SLOT(resetSelection()));
     restoreBranchListSettings();
 
     show();
@@ -521,6 +521,7 @@ void MainWindow::restorePreferencesSettings()
 void MainWindow::restoreBranchListSettings()
 {
     QSettings settings;
+
     gvtree_branchlist.cbSort->setCurrentIndex(settings.value("branchList/sort").toInt());
 }
 
@@ -569,6 +570,12 @@ void MainWindow::restoreWindowSettings()
         QByteArray state = settings.value("mainwindow/state", QByteArray()).toByteArray();
         restoreState(state);
     }
+}
+
+void MainWindow::resetCurrentRepository()
+{
+  graphwidget->gitlog(true);
+  refreshRepo->setEnabled(true);
 }
 
 void MainWindow::restoreLocalRepository()
@@ -668,7 +675,10 @@ void MainWindow::createMenus()
     gridLayout->addTagPreference("FIX/PQT Label", "tag: \\b((FIX_STR[0-9]+)|(PQT_STR[0-9]+))$");
     gridLayout->addTagPreference("HO Label", "tag: \\b(STR[0-9]+_HO[0-9]*)$");
     gridLayout->addTagPreference("Other Tags", "");
+    gridLayout->addTagPreference("Comment", "");
     gvtree_preferences.verticalLayout_3->addLayout(gridLayout);
+
+    connect(gridLayout, SIGNAL(regexpChanged()), this, SLOT(resetCurrentRepository()));
 
     connect(gvtree_preferences.pbOK, SIGNAL(pressed()), this, SLOT(saveChangedSettings()));
 
@@ -683,9 +693,8 @@ void MainWindow::createMenus()
 
     QSettings settings;
 
-    QStringList nodeInfo;
 
-    nodeInfo << "HEAD" << "Commit Date" << "User Name" << "Hash" << "Branch" << "Release Label" << "Baseline Label" << "FIX/PQT Label" << "HO Label" << "Other Tags";
+    nodeInfo << "HEAD" << "Commit Date" << "User Name" << "Hash" << "Branch" << "Release Label" << "Baseline Label" << "FIX/PQT Label" << "HO Label" << "Other Tags" << "Comment";
 
     foreach (const QString it, nodeInfo)
     {
@@ -894,7 +903,7 @@ bool MainWindow::checkGitLocalRepository(const QString& _path,
 
     QString lookup_path;
 
-    foreach(const QString& str, path_elements)
+    foreach(const QString &str, path_elements)
     {
         lookup_path = lookup_path + str + QString("/");
         QString lookup_git = lookup_path + QString(".git");
@@ -902,7 +911,7 @@ bool MainWindow::checkGitLocalRepository(const QString& _path,
         check_for_repo.push_front(lookup_git);
     }
 
-    foreach(const QString& str, check_for_repo)
+    foreach(const QString &str, check_for_repo)
     {
         QFileInfo fi(str);
 
@@ -1114,7 +1123,7 @@ void MainWindow::addToCleanupFiles(const QString& _path)
 
 void MainWindow::doCleanupFiles()
 {
-    foreach(const QString& str, cleanupFiles)
+    foreach(const QString &str, cleanupFiles)
     {
         // tempPath must contain an absolute path
         if (str[0].toLatin1() == '/')
@@ -1367,7 +1376,7 @@ void MainWindow::updateGitStatus(const QString& _repoPath)
     QList<QString> cache;
 
     execute_cmd(cmd.toUtf8().data(), cache, getPrintCmdToStdout());
-    foreach(const QString& str, cache)
+    foreach(const QString &str, cache)
     {
         gitstatus->insertPlainText(str);
     }
@@ -1403,4 +1412,9 @@ bool MainWindow::initCbCodecForCStrings(QString _default)
 QString MainWindow::getSelectedBranch()
 {
     return gvtree_branchlist.branchList->getSelectedBranch();
+}
+
+const QStringList& MainWindow::getNodeInfo() const
+{
+    return nodeInfo;
 }

@@ -229,15 +229,18 @@ void Version::paint(QPainter* _painter, const QStyleOptionGraphicsItem* _option,
         _painter->setPen(QPen(graph->getTextColor(), 0));
 
         int height = 0;
-        for (QMap<QString, QStringList>::iterator kit = keyInformation.begin();
-             kit != keyInformation.end();
-             kit++)
+
+        foreach(const QString &info, graph->getMainWindow()->getNodeInfo())
         {
-            if (globalVersionInfo.contains(kit.key())
-                || localVersionInfo.contains(kit.key())
-               )
+            if (globalVersionInfo.contains(info)
+                || localVersionInfo.contains(info))
             {
-                drawTextBox(kit.key(), kit.value(), height, _painter);
+                QMap<QString, QStringList>::iterator kit = keyInformation.find(info);
+                if (kit != keyInformation.end())
+                {
+                    drawTextBox(info, kit.value(), height, _painter);
+                    height += 1;
+                }
             }
         }
     }
@@ -303,7 +306,44 @@ bool Version::processGitLogInfo(const QString& _input, const QStringList& _parts
     // tag information
     processGitLogTagInformation(_parts.at(4));
 
+    if (_parts.size() > 5)
+    {
+        processGitLogCommentInformation(_parts.at(5));
+    }
+
     return true;
+}
+
+void Version::processGitLogCommentInformation(const QString& _comment)
+{
+    int maxlen = 40;
+    int len = 0;
+    QString part;
+    QStringList tmp = _comment.split(' ');
+    foreach (const QString &str, tmp)
+    {
+        if (len == 0)
+        {
+            part = str;
+            len += str.size();
+        }
+        else if (len < maxlen)
+        {
+            part = part + " " + str;
+            len += 1 + str.size();
+        }
+        else
+        {
+            keyInformation[QString("Comment")].push_back(part);
+            part = QString();
+            len = 0;
+        }
+    }
+
+    if (len != 0)
+    {
+        keyInformation[QString("Comment")].push_back(part);
+    }
 }
 
 void Version::processGitLogTagInformation(const QString& _tagInfo)
