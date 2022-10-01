@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.2-0                */
+/*                  gvtree V1.3-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -572,7 +572,7 @@ void CompareTree::compareFileVersions(
     // diffFiles will contain all temp file paths of the files to compare
     QStringList diffFiles;
 
-    QList<Version*> predecessors = graph->getPredecessors();
+    QSet<Version*> predecessors = graph->getPredecessors();
     foreach(Version * it, predecessors)
     {
         diffFiles.push_back(createTempVersionFile(it->getHash(), _path_old));

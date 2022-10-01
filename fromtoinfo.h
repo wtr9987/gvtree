@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.2-0                */
+/*                  gvtree V1.3-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -40,7 +40,7 @@ public:
     }
     virtual QRectF boundingRect() const;
 
-    void setFromToPosition(QList<Version*> _from, Version* _v);
+    void setFromToPosition(QSet<Version*> _from, Version* _v);
     virtual void update(const QRectF & rect = QRectF());
 
 protected:
@@ -48,7 +48,7 @@ protected:
 
 private:
     QRectF box;
-    QList<Version*> from;
+    QSet<Version*> from;
     Version* v;
     class GraphWidget* graph;
 };

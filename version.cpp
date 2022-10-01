@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.2-0                */
+/*                  gvtree V1.3-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -763,7 +763,7 @@ int Version::getPredecessorHashes(QStringList& _result)
 {
     _result.clear();
 
-    QList<Version*> predecessors;
+    QSet<Version*> predecessors;
     getPredecessors(predecessors);
     foreach(Version * it, predecessors)
     {
@@ -772,7 +772,7 @@ int Version::getPredecessorHashes(QStringList& _result)
     return _result.size();
 }
 
-int Version::getPredecessors(QList<Version*>& _result)
+int Version::getPredecessors(QSet<Version*>& _result)
 {
     _result.clear();
 
@@ -786,7 +786,7 @@ int Version::getPredecessors(QList<Version*>& _result)
         {
             Version* predecessor = dynamic_cast<Version*>(edge->sourceVersion());
             if (predecessor)
-                _result.push_back(predecessor);
+                _result.insert(predecessor);
         }
     }
 

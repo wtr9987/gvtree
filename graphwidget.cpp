@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.2-0                */
+/*                  gvtree V1.3-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -830,8 +830,8 @@ void GraphWidget::diffStagedChanges()
 {
     resetMatches();
 
-    fromVersions = QList<Version*>();
-    fromVersions.push_back(localHeadVersion);
+    fromVersions = QSet<Version*>();
+    fromVersions.insert(localHeadVersion);
     toVersion = NULL;
 
     fillCompareWidgetFromToInfo();
@@ -851,8 +851,8 @@ void GraphWidget::viewThisVersion(Version* _v)
 {
     resetMatches();
 
-    fromVersions = QList<Version*>();
-    fromVersions.push_back(_v);
+    fromVersions = QSet<Version*>();
+    fromVersions.insert(_v);
     toVersion = NULL;
 
     fillCompareWidgetFromToInfo();
@@ -871,8 +871,8 @@ void GraphWidget::diffLocalChanges()
 {
     resetMatches();
 
-    fromVersions = QList<Version*>();
-    fromVersions.push_back(localHeadVersion);
+    fromVersions = QSet<Version*>();
+    fromVersions.insert(localHeadVersion);
     toVersion = NULL;
 
     fillCompareWidgetFromToInfo();
@@ -892,8 +892,8 @@ void GraphWidget::compareVersions(Version* _v1, Version* _v2)
 {
     resetMatches();
 
-    fromVersions = QList<Version*>();
-    fromVersions.push_back(_v1);
+    fromVersions = QSet<Version*>();
+    fromVersions.insert(_v1);
     toVersion = _v2;
 
     fillCompareWidgetFromToInfo();
@@ -1510,7 +1510,7 @@ const QString& GraphWidget::getFileConstraint() const
     return fileConstraint;
 }
 
-const QList<Version*>& GraphWidget::getPredecessors() const
+const QSet<Version*>& GraphWidget::getPredecessors() const
 {
     return fromVersions;
 }
@@ -1546,7 +1546,7 @@ void GraphWidget::resetDiff()
 
     compareTree->resetCompareTree();
 
-    fromVersions = QList<Version*>();
+    fromVersions = QSet<Version*>();
     toVersion = NULL;
     fromToInfo->hide();
 
@@ -1602,7 +1602,7 @@ bool GraphWidget::restoreImportantVersions()
 
         if (fromHashSave.contains(v->getHash()))
         {
-            fromVersions.push_back(v);
+            fromVersions.insert(v);
             v->setMatched(true);
         }
         if (toHashSave.isEmpty() == false && v->getHash() == toHashSave)
@@ -1628,7 +1628,7 @@ bool GraphWidget::restoreImportantVersions()
             scene()->addItem(selectedVersion);
             if (fromHashSave.contains(selectedVersionHash))
             {
-                fromVersions.push_back(selectedVersion);
+                fromVersions.insert(selectedVersion);
             }
         }
     }

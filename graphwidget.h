@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.2-0                */
+/*                  gvtree V1.3-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -91,7 +91,7 @@ public:
     QString getToHash() const;
     const QString& getFileConstraint() const;
     void calculateGraphicsViewPosition();
-    const QList<Version*>& getPredecessors() const;
+    const QSet<Version*>& getPredecessors() const;
     Version* getVersionByHash(const QString& _hash);
     Version* getSelectedVersion();
     void preferencesUpdated(bool _forceUpdate = false);
@@ -201,7 +201,7 @@ protected:
 private:
 
     // from/to version cursor
-    QList<Version*> fromVersions;
+    QSet<Version*> fromVersions;
     Version* toVersion;
     FromToInfo* fromToInfo;
 

@@ -61,7 +61,7 @@
       <item row="0" column="0">
        <widget class="QComboBox" name="fromComboBox">
         <property name="duplicatesEnabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="frame">
          <bool>false</bool>
@@ -81,7 +81,7 @@
         </property>
         <property name="icon">
          <iconset>
-         <normaloff>:/images/gvt_pointer.png</normaloff>:/images/gvt_pointer.png</iconset>
+          <normaloff>:/images/gvt_pointer.png</normaloff>:/images/gvt_pointer.png</iconset>
         </property>
        </widget>
       </item>
@@ -98,8 +98,7 @@
         </property>
         <property name="icon">
          <iconset>
-           <normaloff>:/images/gvt_pointer.png</normaloff>:/images/gvt_pointer.png
-         </iconset>
+          <normaloff>:/images/gvt_pointer.png</normaloff>:/images/gvt_pointer.png</iconset>
         </property>
        </widget>
       </item>

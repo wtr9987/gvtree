@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.2-0                */
+/*                  gvtree V1.3-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -136,7 +136,7 @@ public:
     void clearFolderVersions();
 
     void updateFolderBox();
-    int getPredecessors(QList<Version*>& _result);
+    int getPredecessors(QSet<Version*>& _result);
     int getPredecessorHashes(QStringList& _result);
     void calculateLocalBoundingBox();
     bool getSubtreeHidden() const;
