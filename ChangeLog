@@ -30,6 +30,9 @@ ChangeLog gvtree V1.2-0 dev_1.2
 
 1. October 2022 :
 	- gvtree-1.3-0-beta.1
-	- TODO: still problem with git log --graph parsing...
-	- TODO: width of commit comment to prefernces
-	- TODO: maximum length of commit comment to preferences
+
+2. October 2022 :
+	- fixed problem with git log --graph parsing...
+	- width of commit comment to prefernces
+	- maximum length of commit comment to preferences
+	- TODO Stylesheet of QSpinBox not correct
