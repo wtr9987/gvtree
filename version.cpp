@@ -314,12 +314,31 @@ bool Version::processGitLogInfo(const QString& _input, const QStringList& _parts
     return true;
 }
 
-void Version::processGitLogCommentInformation(const QString& _comment)
+void Version::updateCommentInformation(int _columns, int _maxlen)
 {
-    int maxlen = 40;
+    QStringList& commentRaw = keyInformation[QString("CommentRaw")];
+
+    if (commentRaw.size() == 0)
+        return;
+
+    int columns = _columns;
+    int maxlen = _maxlen;
+
+    keyInformation[QString("Comment")] = QStringList();
+
+    QString comment = commentRaw.front();
+    QString info = comment;
+
+    if (maxlen)
+    {
+        info = comment.mid(0, maxlen);
+        if (comment.size() > maxlen)
+            info = info + "...";
+    }
+
     int len = 0;
     QString part;
-    QStringList tmp = _comment.split(' ');
+    QStringList tmp = info.split(' ');
     foreach (const QString &str, tmp)
     {
         if (len == 0)
@@ -327,7 +346,7 @@ void Version::processGitLogCommentInformation(const QString& _comment)
             part = str;
             len += str.size();
         }
-        else if (len < maxlen)
+        else if (columns == 0 || len < columns)
         {
             part = part + " " + str;
             len += 1 + str.size();
@@ -344,6 +363,15 @@ void Version::processGitLogCommentInformation(const QString& _comment)
     {
         keyInformation[QString("Comment")].push_back(part);
     }
+}
+
+void Version::processGitLogCommentInformation(const QString& _comment)
+{
+    keyInformation[QString("CommentRaw")].push_back(_comment);
+
+    int columns, maxlen;
+    graph->getMainWindow()->getCommentProperties(columns, maxlen);
+    updateCommentInformation(columns, maxlen);
 }
 
 void Version::processGitLogTagInformation(const QString& _tagInfo)
@@ -461,7 +489,10 @@ bool Version::findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatc
     if (newmatched != oldmatched
         || localVersionInfo != oldLocalVersionInfo)
     {
-        if (_exactMatch == true && newmatched == true)
+        // Changed to unfold all matching versions...
+        // if (_exactMatch == true && newmatched == true)
+
+        if (newmatched == true)
         {
             ensureUnfolded();
         }

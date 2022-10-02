@@ -51,10 +51,6 @@ void TagWidget::addData(const QMap<QString, QStringList>& _data)
             TagList* tmp = dynamic_cast<TagList*>(widget(labelToIndex[it.key()]));
             tmp->addData(it.value());
         }
-        else
-        {
-          std::cerr << "Error " << it.key().toUtf8().data() << " is no defined tag/branch information." << std::endl;
-        }
     }
 }
 

@@ -100,6 +100,7 @@ public:
      */
     void processGitLogTagInformation(const QString& _tagInfo);
     void processGitLogCommentInformation(const QString& _tagInfo);
+    void updateCommentInformation(int _columns, int _maxlen);
 
     //!> Edges
 

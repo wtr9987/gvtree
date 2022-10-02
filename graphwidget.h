@@ -180,6 +180,7 @@ public slots:
     void focusFromVersion();
     void focusToVersion();
     void removeFilter();
+    void adjustComments();
     void adjustAllEdges();
     void setBlockItemChanged(bool _val);
 
@@ -197,6 +198,8 @@ protected:
     void expandTree();
     void fillCompareWidgetFromToInfo();
     Version* findVersion(const QString& _hash);
+
+    void debugGraphParser(const QString& _tree, const QVector<Version*>& _slots);
 
 private:
 
@@ -251,6 +254,8 @@ private:
     bool foldHead;
     int xfactor;
     int yfactor;
+    int commentColumns;
+    int commentMaxlen;
 
     Version* selectedVersion;
     QString selectedVersionHash;

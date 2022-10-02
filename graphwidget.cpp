@@ -78,6 +78,8 @@ GraphWidget::GraphWidget(MainWindow* _parent)
     foldHead(false),
     xfactor(1),
     yfactor(1),
+    commentColumns(-1),
+    commentMaxlen(-1),
     selectedVersion(NULL)
 {
 
@@ -511,6 +513,18 @@ void GraphWidget::load(const QString& _path)
     setUpdatesEnabled(true);
 }
 
+void GraphWidget::debugGraphParser(
+    const QString& _tree,
+    const QVector<Version*>& _slots)
+{
+    std::cout << _tree.toUtf8().data() << std::endl;
+    foreach(const Version * v, _slots)
+    {
+        std::cout << v << "  ";
+    }
+    std::cout << std::endl;
+}
+
 void GraphWidget::process(QList<QString> _cache)
 {
     // cerr << "process start " << timestamp() << endl;
@@ -547,39 +561,34 @@ void GraphWidget::process(QList<QString> _cache)
             break;
     }
 
+    // now root node is in the first line...
     currentLines = linecount;
 
     QString previousTree;
     QRegExp treePattern("^([*\\\\/\\. |\\-_]*[*\\\\/\\.|\\-_]+)");
 
+    int linenumber = 0;
+
     foreach (const QString &line, swap_cache)
     {
-        int offset = 0;
-        int pos = treePattern.indexIn(line, offset);
+        // get the tree pattern
+        int pos = treePattern.indexIn(line, 0);
 
         if (pos == -1)
+        {
+            std::cerr << "No --graph pattern contained in line " << linenumber << " : " << line.toUtf8().data() << std::endl;
             continue;
+        }
 
+        // get --graph tree pattern
+        int len = treePattern.matchedLength();
         QString tree = treePattern.cap(1);
 
-        int len = treePattern.matchedLength();
-
-        offset = pos + len;
-
+        // allocate space
         if (previousTree.isEmpty())
         {
-            // initial setting
-            for (int i = 0; i < tree.size(); i++)
-            {
-                if (i % 2 != 0)
-                    branchslots.push_back(NULL);
-                else
-                    branchslots.push_back(rootVersion);
-            }
-            maxTreePatternLength = branchslots.size();
-            previousBranchslots = branchslots;
-            // +1
-            previousBranchslots.push_back(NULL);
+            branchslots = QVector<Version*>(tree.size());
+            maxTreePatternLength = len;
         }
         else if (maxTreePatternLength < len)
         {
@@ -587,152 +596,174 @@ void GraphWidget::process(QList<QString> _cache)
             maxTreePatternLength = len;
         }
 
-        bool skipUnderscore = false;
+        // shift versions:
+        // use previousTree and tree to shift the versions
+        // stored in previousBranchslots to branchslots
+
+        // position of new version '*'
+        int newVersion = -1;
 
         for (int i = 0; i < tree.size(); i++)
         {
-            switch (tree[i].toLatin1())
+            // current characters
+            // cll cl cm cr
+            // pll pl pm pr
+            char cll = (i > 1) ? tree[i - 2].toLatin1() : 0;
+            // char cl = (i > 0) ? tree[i - 1].toLatin1() : 0;
+            char cm = tree[i].toLatin1();
+            // char cr = (tree.size() >= i) ? tree[i + 1].toLatin1() : 0;
+            char pll = (i > 1 && previousTree.size() > i - 2) ? previousTree[i - 2].toLatin1() : 0;
+            char pl = (previousTree.size() >= i) ? previousTree[i - 1].toLatin1() : 0;
+            char pm = (previousTree.size() > i) ? previousTree[i].toLatin1() : 0;
+            char pr = (previousTree.size() > i + 1) ? previousTree[i + 1].toLatin1() : 0;
+
+            // hope' all cases are covered
+            switch (cm)
             {
-                case '*':
-                {
-                    Version* parent = branchslots[i];
-
-                    // tokenize
-                    QStringList parts = line.mid(offset).split(QChar('#'));
-
-                    // abort, if too short...
-                    if (parts.size() < 5)
-                    {
-                        cerr << "Error: Input too short " << line.toUtf8().data() << endl;
-                        break;
-                    }
-                    // check if the Version object already exists
-                    QString hash = parts.at(1);
-                    Version* v = new Version(globalVersionInfo, this);
-
-                    // if the key information has already been parsed, use it
-                    v->setKeyInformation(keyInformationCache.value(hash, QMap<QString, QStringList>()));
-
-                    // init or update
-                    if (v->processGitLogInfo(line.mid(offset), parts))
-                    {
-                        keyInformationCache[hash] = v->getKeyInformation();
-                    }
-
-                    mwin->getTagWidget()->addData(v->getKeyInformation());
-
-                    // main?
-                    v->setIsMain(i == 0);
-
-                    scene()->addItem(v);
-
-                    if (parent == NULL)
-                        parent = rootVersion;
-
-                    Edge* e = new Edge (parent, v, this, false, parent == rootVersion);
-
-                    scene()->addItem(e);
-
-                    // merge version node ?
-                    Version* merge = (tree.size() >= i + 1) ? branchslots[i + 1] : NULL;
-                    if (merge && previousTree[i + 1].toLatin1() == '\\' && (previousTree[i].toLatin1() == '|' || previousTree[i].toLatin1() == '*'))
-                    {
-                        Edge* mergeArrow = new Edge(merge, v, this, true, false);
-
-                        scene()->addItem(mergeArrow);
-
-                        for (int k = i + 1; k < maxTreePatternLength - i; k++)
-                        {
-                            branchslots[k] = (k % 2 == 0) ? branchslots[k + 1] : NULL;
-                        }
-                    }
-                    // replace parent
-                    branchslots[i] = v;
-                    // the last line contains the local HEAD version
-                    branchVersion = v;
-                }
-                break;
-                case '\\':
-                    if ((i % 2) == 1)
-                    {
+                case '|':
+                    if (pm == '|' || pm == '*')
+                        branchslots[i] = previousBranchslots[i];
+                    else if (pl == '/')
+                        branchslots[i] = previousBranchslots[i - 1];
+                    else if (pr == '\\')
                         branchslots[i] = previousBranchslots[i + 1];
-                    }
                     break;
                 case '/':
-                    if ((i % 2) == 1 && tree[i + 1].toLatin1() != '|')
-                    {
-                        int k = 2;
-                        while (tree[i - k].toLatin1() == '_')
-                        {
-                            k += 2;
-                        }
-                        if (k > 2)
-                            k += 2;
-
-                        branchslots[i + 1] = previousBranchslots[i + 1 - k];
-                    }
-                    else if ((i % 2) == 1 && tree[i + 1].toLatin1() == '|' && previousTree[i - 1].toLatin1() == '/')
-                    {
-                        branchslots[i + 1] = branchslots[i - 1];
-                    }
+                    if (cll == '_')
+                        branchslots[i] = branchslots[i - 2];
+                    else if (pll == '/')
+                        branchslots[i] = previousBranchslots[i - 2];
+                    else if (pl == '|' || pl == '*')
+                        branchslots[i] = previousBranchslots[i - 1];
+                    else if (pm == '\\')
+                        branchslots[i] = previousBranchslots[i];
                     break;
                 case '_':
-                    if (skipUnderscore == false)
-                    {
-                        skipUnderscore = true;
-                        // we have a _ , so check if
-                        // previousTree[i-2] is a backslash.
-                        // if so, walk right as long as there are
-                        // _ present. Transfer branchslots[i-1] to
-                        // branchslots[i+x].
-                        //
-                        // if not, walk right as long as there are
-                        // _ present, then take the parent from there
-                        // and transfer it into branchslots[i]
-                    }
-                    // ???
+                    if (cll == '_')
+                        branchslots[i] = branchslots[i - 2];
+                    else if (pll == '/')
+                        branchslots[i] = previousBranchslots[i - 2];
                     break;
-                case '|':
-                    if (previousTree[i + 1].toLatin1() == '\\' && previousTree[i].toLatin1() == ' ')
-                    {
+                case '\\':
+                    if (pm == '/')
+                        branchslots[i] = previousBranchslots[i];
+                    else if (pr == '|' || pr == '*')
                         branchslots[i] = previousBranchslots[i + 1];
-                    }
                     break;
                 case '.':
-                {
-                    // walk left until * is reached.
-                    // Add merge arrow to *
-                    int k = 2;
-                    while (i - k > 0 && tree[i - k].toLatin1() != '*')
-                    {
-                        k += 2;
-                    }
-
-                    if (i - k == 0 && tree[0] != '*')
-                    {
-                        // error TODO
-                    }
-                    else
-                    {
-                        Version* merge = branchslots[i];
-                        if (merge)
-                        {
-                            Edge* e = new Edge(merge, branchslots[i - k], this, true, false);
-
-                            scene()->addItem(e);
-                        }
-                    }
-                }
-                break;
+                case '-':
+                    if (pr == '\\')
+                        branchslots[i] = previousBranchslots[i + 1];
+                    break;
+                case '*':
+                    newVersion = i;
+                    break;
                 case ' ':
-                // do nothing
+                    break;
                 default:
+                    std::cerr << "Character " << cm << " not recognized." << std::endl;
                     break;
             }
         }
 
+        if (newVersion != -1)
+        {
+            // in each line at a maximum one new version '*' is contained
+            // this version has got one parent and n merge sources
+            Version* parent = rootVersion;
+            QList<Version*> mergeSources;
+
+            int i = newVersion;
+            // char cll = (i > 1) ? tree[i - 2].toLatin1() : 0;
+            // char cl = (i > 0) ? tree[i - 1].toLatin1() : 0;
+            // char cm = tree[i].toLatin1();
+            char cr = (tree.size() >= i) ? tree[i + 1].toLatin1() : 0;
+            // char pll = (i > 1 && previousTree.size() > i - 2) ? previousTree[i - 2].toLatin1() : 0;
+            char pl = (previousTree.size() >= i) ? previousTree[i - 1].toLatin1() : 0;
+            char pm = (previousTree.size() > i) ? previousTree[i].toLatin1() : 0;
+            char pr = (previousTree.size() > i + 1) ? previousTree[i + 1].toLatin1() : 0;
+
+            if (pl == '/')
+                parent = previousBranchslots[i - 1];
+            else if (pm == '*' || pm == '|')
+                parent = previousBranchslots[i];
+            else if (pl == '\\')
+                parent = previousBranchslots[i + 1];
+
+            // collect merge sources
+            if (pl == '/' && parent != previousBranchslots[i - 1])
+                mergeSources.push_back(previousBranchslots[i - 1]);
+            if ((pm == '|' || pm == '*') && parent != previousBranchslots[i])
+                mergeSources.push_back(previousBranchslots[i]);
+            if (pr == '\\' && parent != previousBranchslots[i + 1])
+                mergeSources.push_back(previousBranchslots[i + 1]);
+            if (cr == '-')
+            {
+                int j = i + 1;
+                while (j < tree.size() && (tree[j] == '-' || tree[j] == '.'))
+                {
+                    Version* tmp = branchslots[j];
+                    if (tmp != NULL && tmp != parent)
+                        mergeSources.push_back(tmp);
+                    j++;
+                }
+            }
+
+            // starting at pos+len the version information is contained
+            QString info = line.mid(pos + len);
+
+            // tokenize
+            QStringList parts = info.split(QChar('#'));
+
+            // abort, if too short...
+            if (parts.size() < 5)
+            {
+                cerr << "Error: Input too short " << line.toUtf8().data() << endl;
+                break;
+            }
+
+            // create version node
+            Version* v = new Version(globalVersionInfo, this);
+
+            // if the key information has already been parsed, use it
+            QString hash = parts.at(1);
+            v->setKeyInformation(keyInformationCache.value(hash, QMap<QString, QStringList>()));
+
+            // init or update
+            if (v->processGitLogInfo(info, parts))
+            {
+                keyInformationCache[hash] = v->getKeyInformation();
+            }
+
+            mwin->getTagWidget()->addData(v->getKeyInformation());
+
+            // main?
+            v->setIsMain(i == 0);
+            scene()->addItem(v);
+
+            Edge* e = new Edge (parent, v, this, false, parent == rootVersion);
+            scene()->addItem(e);
+
+            foreach(Version * merge, mergeSources)
+            {
+                Edge* mergeArrow = new Edge(merge, v, this, true, false);
+
+                scene()->addItem(mergeArrow);
+            }
+
+            // replace parent
+            branchslots[i] = v;
+            // the last line contains the local HEAD version
+            branchVersion = v;
+        }
+
+        // debugGraphParser(tree, branchslots);
         previousTree = tree;
         previousBranchslots = branchslots;
+        for (int i = 0; i < branchslots.size(); i++)
+        {
+            branchslots[i] = NULL;
+        }
     }
 
     if (branchVersion)
@@ -1077,6 +1108,20 @@ void GraphWidget::normalizeGraph()
     setBlockItemChanged(false);
 }
 
+void GraphWidget::adjustComments()
+{
+    foreach(QGraphicsItem * it, scene()->items())
+    {
+        if (it->type() != QGraphicsItem::UserType + 1)
+            continue;
+
+        Version* v = dynamic_cast<Version*>(it);
+
+        if (v)
+            v->updateCommentInformation(commentColumns, commentMaxlen);
+    }
+}
+
 void GraphWidget::adjustAllEdges()
 {
     foreach(QGraphicsItem * it, scene()->items())
@@ -1289,6 +1334,15 @@ void GraphWidget::preferencesUpdated(bool _forceUpdate)
     {
         foldHead = mwin->getFoldHead();
         updateAll = true;
+    }
+
+    int columns, maxlen;
+    mwin->getCommentProperties(columns, maxlen);
+    if (commentColumns != columns || commentMaxlen != maxlen)
+    {
+        commentColumns = columns;
+        commentMaxlen = maxlen;
+        adjustComments();
     }
 
     if (connectorStyle != mwin->getConnectorStyle())

@@ -19,7 +19,7 @@
 #define __BRANCHLIST_H__
 
 #include <QStandardItem>
-#include <QStandardItemModel>
+#include <QItemSelectionModel>
 #include <QItemSelection>
 #include <QListView>
 #include <QWidget>
@@ -40,7 +40,7 @@ public:
     void setMainWindow(class MainWindow* _mwin);
 
 public slots:
-        void setSort(int _val);
+    void setSort(int _val);
     void resetSelection();
 
     void selectionChanged(const QItemSelection& _selected, const QItemSelection& _deselected);

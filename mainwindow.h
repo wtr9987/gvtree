@@ -72,7 +72,6 @@ public:
     void addToCleanupFiles(const QString& _path);
 
     // get preferences
-    void getXYFactor(float& _xfactor, float& _yfactor) const;
     int getMaxLines() const;
     bool getShortHashes() const;
     bool getTopDownView() const;
@@ -85,6 +84,7 @@ public:
     QColor getPreferencesColor(QString _key);
     QString getTempPath() const;
     bool getPrintCmdToStdout() const;
+    void getCommentProperties(int& _columns, int& _limit) const;
 
     //
     Ui_Dialog& getPreferences();

@@ -458,6 +458,14 @@ void MainWindow::restorePreferencesSettings()
         settings.setValue("codecForCStrings", "UTF-8");
     initCbCodecForCStrings(settings.value("codecForCStrings").toString());
 
+    if (!settings.contains("comment_columns"))
+      settings.setValue("comment_columns", 0); // unlimited
+    gvtree_preferences.comment_columns->setValue(settings.value("comment_columns").toInt());
+
+    if (!settings.contains("comment_maxlen"))
+      settings.setValue("comment_maxlen", 0); // unlimited
+    gvtree_preferences.comment_maxlen->setValue(settings.value("comment_maxlen").toInt());
+
     if (!settings.contains("xfactor"))
         settings.setValue("xfactor", 10);
     gvtree_preferences.xfactor->setValue(settings.value("xfactor").toInt());
@@ -1203,9 +1211,28 @@ void MainWindow::saveChangedSettings()
         settings.setValue("yfactor", gvtree_preferences.yfactor->value());
     }
 
+    int comment_columns = settings.value("comment_columns").toInt();
+    if (comment_columns != gvtree_preferences.comment_columns->value())
+    {
+        settings.setValue("comment_columns", gvtree_preferences.comment_columns->value());
+    }
+    
+    int comment_maxlen = settings.value("comment_maxlen").toInt();
+    if (comment_maxlen != gvtree_preferences.comment_maxlen->value())
+    {
+        settings.setValue("comment_maxlen", gvtree_preferences.comment_maxlen->value());
+    }
+
     pwin->hide();
 
     graphwidget->preferencesUpdated(forceUpdate);
+}
+
+void MainWindow::getCommentProperties(int& _columns, int& _limit) const
+{
+    QSettings settings;
+    _columns = settings.value("comment_columns").toInt();
+    _limit = settings.value("comment_maxlen").toInt();
 }
 
 bool MainWindow::getXYFactor(int& _xfactor, int& _yfactor)

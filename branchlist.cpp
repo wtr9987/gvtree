@@ -29,11 +29,6 @@ BranchList::BranchList(QWidget* _parent) : QListView(_parent),
     setModel(blModel);
 
     setSelectionMode(QAbstractItemView::SingleSelection);
-
-    connect (selectionModel(),
-             SIGNAL(selectionChanged(const QItemSelection &_selected,const QItemSelection &_deselected)),
-             this, SLOT(selectionChanged(const QItemSelection &_selected,const QItemSelection &_deselected)));
-
 }
 
 void BranchList::setMainWindow(MainWindow* _mwin)

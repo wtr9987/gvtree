@@ -27,8 +27,9 @@ ChangeLog gvtree V1.2-0 dev_1.2
 	- add commit comment to node
 	- fixed update of version information regexp
 	- sorted version information tabs
-	- TODO: width of commit comment to prefernces
-	- TODO: maximum length of commit comment to preferences
 
 1. October 2022 :
 	- gvtree-1.3-0-beta.1
+	- TODO: still problem with git log --graph parsing...
+	- TODO: width of commit comment to prefernces
+	- TODO: maximum length of commit comment to preferences
