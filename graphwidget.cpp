@@ -670,7 +670,7 @@ void GraphWidget::process(QList<QString> _cache)
         {
             // in each line at a maximum one new version '*' is contained
             // this version has got one parent and n merge sources
-            Version* parent = rootVersion;
+            Version* parent = NULL;
             QList<Version*> mergeSources;
 
             int i = newVersion;
@@ -689,6 +689,9 @@ void GraphWidget::process(QList<QString> _cache)
                 parent = previousBranchslots[i];
             else if (pl == '\\')
                 parent = previousBranchslots[i + 1];
+
+            if (parent == NULL)
+              parent = rootVersion;
 
             // collect merge sources
             if (pl == '/' && parent != previousBranchslots[i - 1])
