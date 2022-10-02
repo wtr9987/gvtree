@@ -472,6 +472,8 @@ void GraphWidget::gitlog(bool _changed)
     execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
     process(cache);
 
+    adjustComments();
+
     restoreImportantVersions();
     setUpdatesEnabled(true);
 }
