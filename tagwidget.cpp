@@ -29,10 +29,11 @@ void TagWidget::clear()
     QTabWidget::clear();
     foreach(const QString &info, mwin->getNodeInfo())
     {
-            TagList* tmp = new TagList(this); 
-            tmp->setObjectName(info);
-            connect(tmp, SIGNAL(itemPressed(QListWidgetItem*)), this, SLOT(lookupId(QListWidgetItem*)));
-            labelToIndex[info] = addTab(tmp, info);
+        TagList* tmp = new TagList(this);
+
+        tmp->setObjectName(info);
+        connect(tmp, SIGNAL(itemPressed(QListWidgetItem*)), this, SLOT(lookupId(QListWidgetItem*)));
+        labelToIndex[info] = addTab(tmp, info);
     }
 }
 
@@ -42,13 +43,22 @@ void TagWidget::addData(const QMap<QString, QStringList>& _data)
          it != _data.end();
          it++)
     {
-        if (it.value().size() == 0)
+        if ((it.value().size() == 0)
+            || (it.key().at(0) == QChar('_'))
+            || (it.key() == QString("Comment"))
+           )
             continue;
-        if (it.key().at(0) == QChar('_'))
-            continue;
-        if (labelToIndex.find(it.key()) != labelToIndex.end())
+
+        // TODO improve "CommentRaw"/"Comment" processing.
+        // Without this replacement, only "Comment" fragments
+        // (separated lines) appear in the list view. 
+        // With "CommentRaw" the complete checkin comment is
+        // contained in the list.
+        QString key = (it.key() == QString("CommentRaw")) ? QString("Comment") : it.key();
+
+        if (labelToIndex.find(key) != labelToIndex.end())
         {
-            TagList* tmp = dynamic_cast<TagList*>(widget(labelToIndex[it.key()]));
+            TagList* tmp = dynamic_cast<TagList*>(widget(labelToIndex[key]));
             tmp->addData(it.value());
         }
     }
