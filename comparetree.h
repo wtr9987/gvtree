@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.2-0                */
+/*                  gvtree V1.3-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -42,7 +42,7 @@ public:
     void viewThisVersion(const QString& _hash);
 
     // show the local changes
-    void viewLocalChanges();
+    void viewLocalChanges(bool _staged);
 
     // show differences of the fromVersions and the toVersion in an editor
     void compareFileVersions(const QString& _path, const QString& _status, const QString& _path_old);

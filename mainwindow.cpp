@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.2-0                */
+/*                  gvtree V1.3-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -191,11 +191,11 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
     dock->hide();
 
     connect(gvtree_branchlist.branchList, SIGNAL(itemSelectionChanged()), this, SLOT(reloadCurrentRepository()));
-    connect(gvtree_branchlist.branchList, SIGNAL(itemSelectionChanged()), graphwidget, SLOT(focusCurrent()));
-    connect(gvtree_branchlist.cbSort, SIGNAL(currentIndexChanged(int)), 
-                    gvtree_branchlist.branchList, SLOT(setSort(int)));
-    connect(gvtree_branchlist.pbReset, SIGNAL(pressed()), 
-                    gvtree_branchlist.branchList, SLOT(resetSelection()));
+    connect(gvtree_branchlist.branchList, SIGNAL(itemSelectionChanged()), graphwidget, SLOT(focusBranch()));
+    connect(gvtree_branchlist.cbSort, SIGNAL(currentIndexChanged(int)),
+            gvtree_branchlist.branchList, SLOT(setSort(int)));
+    connect(gvtree_branchlist.pbReset, SIGNAL(pressed()),
+            gvtree_branchlist.branchList, SLOT(resetSelection()));
     restoreBranchListSettings();
 
     show();
@@ -458,6 +458,14 @@ void MainWindow::restorePreferencesSettings()
         settings.setValue("codecForCStrings", "UTF-8");
     initCbCodecForCStrings(settings.value("codecForCStrings").toString());
 
+    if (!settings.contains("comment_columns"))
+      settings.setValue("comment_columns", 0); // unlimited
+    gvtree_preferences.comment_columns->setValue(settings.value("comment_columns").toInt());
+
+    if (!settings.contains("comment_maxlen"))
+      settings.setValue("comment_maxlen", 0); // unlimited
+    gvtree_preferences.comment_maxlen->setValue(settings.value("comment_maxlen").toInt());
+
     if (!settings.contains("xfactor"))
         settings.setValue("xfactor", 10);
     gvtree_preferences.xfactor->setValue(settings.value("xfactor").toInt());
@@ -521,6 +529,7 @@ void MainWindow::restorePreferencesSettings()
 void MainWindow::restoreBranchListSettings()
 {
     QSettings settings;
+
     gvtree_branchlist.cbSort->setCurrentIndex(settings.value("branchList/sort").toInt());
 }
 
@@ -569,6 +578,12 @@ void MainWindow::restoreWindowSettings()
         QByteArray state = settings.value("mainwindow/state", QByteArray()).toByteArray();
         restoreState(state);
     }
+}
+
+void MainWindow::resetCurrentRepository()
+{
+  graphwidget->gitlog(true);
+  refreshRepo->setEnabled(true);
 }
 
 void MainWindow::restoreLocalRepository()
@@ -668,7 +683,10 @@ void MainWindow::createMenus()
     gridLayout->addTagPreference("FIX/PQT Label", "tag: \\b((FIX_STR[0-9]+)|(PQT_STR[0-9]+))$");
     gridLayout->addTagPreference("HO Label", "tag: \\b(STR[0-9]+_HO[0-9]*)$");
     gridLayout->addTagPreference("Other Tags", "");
+    gridLayout->addTagPreference("Comment", "");
     gvtree_preferences.verticalLayout_3->addLayout(gridLayout);
+
+    connect(gridLayout, SIGNAL(regexpChanged()), this, SLOT(resetCurrentRepository()));
 
     connect(gvtree_preferences.pbOK, SIGNAL(pressed()), this, SLOT(saveChangedSettings()));
 
@@ -683,9 +701,8 @@ void MainWindow::createMenus()
 
     QSettings settings;
 
-    QStringList nodeInfo;
 
-    nodeInfo << "HEAD" << "Commit Date" << "User Name" << "Hash" << "Branch" << "Release Label" << "Baseline Label" << "FIX/PQT Label" << "HO Label" << "Other Tags";
+    nodeInfo << "HEAD" << "Commit Date" << "User Name" << "Hash" << "Branch" << "Release Label" << "Baseline Label" << "FIX/PQT Label" << "HO Label" << "Other Tags" << "Comment";
 
     foreach (const QString it, nodeInfo)
     {
@@ -894,7 +911,7 @@ bool MainWindow::checkGitLocalRepository(const QString& _path,
 
     QString lookup_path;
 
-    foreach(const QString& str, path_elements)
+    foreach(const QString &str, path_elements)
     {
         lookup_path = lookup_path + str + QString("/");
         QString lookup_git = lookup_path + QString(".git");
@@ -902,7 +919,7 @@ bool MainWindow::checkGitLocalRepository(const QString& _path,
         check_for_repo.push_front(lookup_git);
     }
 
-    foreach(const QString& str, check_for_repo)
+    foreach(const QString &str, check_for_repo)
     {
         QFileInfo fi(str);
 
@@ -957,7 +974,7 @@ void MainWindow::helpDialog()
 {
     QMessageBox help(QMessageBox::Information, tr("Help"), tr(""), QMessageBox::NoButton, this);
     QString msg = "For more detailed information, please refer to<br/><br/><b><i>"
-        + QString(INSTALLATION_PATH) + "/share/doc/"
+        + QString(INSTALLATION_PATH) + "/share/doc/gvtree/"
         + QString(VERSION_NAME) + ".pdf</b></i>";
 
     help.information(this, "Help", msg);
@@ -979,6 +996,7 @@ void MainWindow::licenseDialog()
     QTextStream stream(&file);
 
     gvtree_license.textBrowser->setHtml(stream.readAll());
+    file.close();
 
     lDialog->exec();
 }
@@ -1113,7 +1131,7 @@ void MainWindow::addToCleanupFiles(const QString& _path)
 
 void MainWindow::doCleanupFiles()
 {
-    foreach(const QString& str, cleanupFiles)
+    foreach(const QString &str, cleanupFiles)
     {
         // tempPath must contain an absolute path
         if (str[0].toLatin1() == '/')
@@ -1193,9 +1211,28 @@ void MainWindow::saveChangedSettings()
         settings.setValue("yfactor", gvtree_preferences.yfactor->value());
     }
 
+    int comment_columns = settings.value("comment_columns").toInt();
+    if (comment_columns != gvtree_preferences.comment_columns->value())
+    {
+        settings.setValue("comment_columns", gvtree_preferences.comment_columns->value());
+    }
+    
+    int comment_maxlen = settings.value("comment_maxlen").toInt();
+    if (comment_maxlen != gvtree_preferences.comment_maxlen->value())
+    {
+        settings.setValue("comment_maxlen", gvtree_preferences.comment_maxlen->value());
+    }
+
     pwin->hide();
 
     graphwidget->preferencesUpdated(forceUpdate);
+}
+
+void MainWindow::getCommentProperties(int& _columns, int& _limit) const
+{
+    QSettings settings;
+    _columns = settings.value("comment_columns").toInt();
+    _limit = settings.value("comment_maxlen").toInt();
 }
 
 bool MainWindow::getXYFactor(int& _xfactor, int& _yfactor)
@@ -1366,7 +1403,7 @@ void MainWindow::updateGitStatus(const QString& _repoPath)
     QList<QString> cache;
 
     execute_cmd(cmd.toUtf8().data(), cache, getPrintCmdToStdout());
-    foreach(const QString& str, cache)
+    foreach(const QString &str, cache)
     {
         gitstatus->insertPlainText(str);
     }
@@ -1402,4 +1439,9 @@ bool MainWindow::initCbCodecForCStrings(QString _default)
 QString MainWindow::getSelectedBranch()
 {
     return gvtree_branchlist.branchList->getSelectedBranch();
+}
+
+const QStringList& MainWindow::getNodeInfo() const
+{
+    return nodeInfo;
 }

@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.2-0                */
+/*                  gvtree V1.3-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -29,7 +29,7 @@ class TagPrefGridLayout : public QGridLayout
 public:
     TagPrefGridLayout(QWidget* _parent = NULL);
 
-    void addTagPreference(const QString& _name, const QString& _regexDefault);
+    void addTagPreference(const QString& _name, const QString& _regexpDefault);
 
     const TagPreference* getTagPreference(const QString& _item) const;
 
@@ -37,6 +37,12 @@ protected:
     int line;
     QVBoxLayout* cl;
     QMap<QString, TagPreference*> tp;
+    
+public slots:
+    void regexpChangedProxy();
+
+signals:
+    void regexpChanged();
 };
 
 #endif

@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.2-0                */
+/*                  gvtree V1.3-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -91,7 +91,7 @@ public:
     QString getToHash() const;
     const QString& getFileConstraint() const;
     void calculateGraphicsViewPosition();
-    const QList<Version*>& getPredecessors() const;
+    const QSet<Version*>& getPredecessors() const;
     Version* getVersionByHash(const QString& _hash);
     Version* getSelectedVersion();
     void preferencesUpdated(bool _forceUpdate = false);
@@ -163,9 +163,11 @@ public:
     }
 
 public slots:
+    void diffStagedChanges();
     void diffLocalChanges();
     void resetDiff();
     void resetSelection();
+    void focusBranch();
     void focusCurrent();
     void fitInView();
     void foldAll();
@@ -179,6 +181,7 @@ public slots:
     void focusFromVersion();
     void focusToVersion();
     void removeFilter();
+    void adjustComments();
     void adjustAllEdges();
     void setBlockItemChanged(bool _val);
 
@@ -197,10 +200,12 @@ protected:
     void fillCompareWidgetFromToInfo();
     Version* findVersion(const QString& _hash);
 
+    void debugGraphParser(const QString& _tree, const QVector<Version*>& _slots);
+
 private:
 
     // from/to version cursor
-    QList<Version*> fromVersions;
+    QSet<Version*> fromVersions;
     Version* toVersion;
     FromToInfo* fromToInfo;
 
@@ -250,6 +255,8 @@ private:
     bool foldHead;
     int xfactor;
     int yfactor;
+    int commentColumns;
+    int commentMaxlen;
 
     Version* selectedVersion;
     QString selectedVersionHash;

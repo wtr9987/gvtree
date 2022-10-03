@@ -2,9 +2,9 @@ TEMPLATE = app
 TARGET = gvtree
 DEPENDPATH += . 
 INCLUDEPATH += . 
-VERSION = -1.2-0
+VERSION = -1.3-0
 RC_ICONS = gvtree.ico
-CPPFLAGS += -O3
+CPPFLAGS += -g
 QT += opengl widgets
 INSTALLS += target documentation
 
@@ -67,8 +67,8 @@ DISTFILES += $$SOURCEFILES \
   ChangeLog \
   css/gvtree.css \
   doc/GNU_GPL_v3.0.html \
-  doc/gvtree-1.2-0.odt \
-  doc/gvtree-1.2-0.pdf \
+  doc/gvtree-1.3-0.odt \
+  doc/gvtree-1.3-0.pdf \
   doc/doc_test_repository.sh \
   doc/images/f1.png \
   doc/images/f2.png \
@@ -93,6 +93,7 @@ DISTFILES += $$SOURCEFILES \
   doc/images/f23.png \
   doc/images/f24.png \
   doc/images/f25.png \
+  doc/images/f26.png \
   doc/images/f27.png \
   doc/images/f28.png \
   doc/images/f29.png \
@@ -137,4 +138,4 @@ target.path = $$PREFIX/bin
 source.files = $$SOURCES $$HEADERS $$RESOURCES *.pro
 
 documentation.path = $$PREFIX/share/doc/gvtree
-documentation.files = doc/gvtree-1.2-0.pdf
+documentation.files = doc/gvtree-1.3-0.pdf

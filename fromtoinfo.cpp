@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.2-0                */
+/*                  gvtree V1.3-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -34,14 +34,14 @@ QRectF FromToInfo::boundingRect() const
     return box;
 }
 
-void FromToInfo::setFromToPosition(QList<Version*> _from, Version* _v)
+void FromToInfo::setFromToPosition(QSet<Version*> _from, Version* _v)
 {
     from = _from;
     v = _v;
     if (v==NULL && from.size())
-      v = from.front();
+      v = *from.begin();
     else if (v && v->isVisible() == false && from.size())
-      v = from.front();
+      v = *from.begin();
     update();
 }
 

@@ -3,7 +3,7 @@
 /*   Copyright (C) 2022 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.2-0                */
+/*                  gvtree V1.3-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -19,7 +19,7 @@
 #define __BRANCHLIST_H__
 
 #include <QStandardItem>
-#include <QStandardItemModel>
+#include <QItemSelectionModel>
 #include <QItemSelection>
 #include <QListView>
 #include <QWidget>
@@ -40,7 +40,7 @@ public:
     void setMainWindow(class MainWindow* _mwin);
 
 public slots:
-        void setSort(int _val);
+    void setSort(int _val);
     void resetSelection();
 
     void selectionChanged(const QItemSelection& _selected, const QItemSelection& _deselected);

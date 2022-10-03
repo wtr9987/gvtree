@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.2-0                */
+/*                  gvtree V1.3-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -22,7 +22,7 @@
 
 #include <QTabWidget>
 #include <QWidget>
-#include <QMap>
+#include <QHash>
 #include <QString>
 #include <QStringList>
 

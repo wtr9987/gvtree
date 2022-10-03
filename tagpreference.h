@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.2-0                */
+/*                  gvtree V1.3-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -49,7 +49,10 @@ protected:
 
 private slots:
     void setFont();
-    void setRegularExpression();
+    void setRegularExpression(const QString& _regex);
+
+signals:
+    void regexpChanged();
 };
 
 #endif

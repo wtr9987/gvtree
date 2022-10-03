@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.2-0                */
+/*                  gvtree V1.3-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -27,6 +27,14 @@ void TagWidget::clear()
 {
     labelToIndex.clear();
     QTabWidget::clear();
+    foreach(const QString &info, mwin->getNodeInfo())
+    {
+        TagList* tmp = new TagList(this);
+
+        tmp->setObjectName(info);
+        connect(tmp, SIGNAL(itemPressed(QListWidgetItem*)), this, SLOT(lookupId(QListWidgetItem*)));
+        labelToIndex[info] = addTab(tmp, info);
+    }
 }
 
 void TagWidget::addData(const QMap<QString, QStringList>& _data)
@@ -35,22 +43,22 @@ void TagWidget::addData(const QMap<QString, QStringList>& _data)
          it != _data.end();
          it++)
     {
-        if (it.value().size() == 0)
+        if ((it.value().size() == 0)
+            || (it.key().at(0) == QChar('_'))
+            || (it.key() == QString("Comment"))
+           )
             continue;
-        if (it.key().at(0) == QChar('_'))
-            continue;
-        if (labelToIndex.find(it.key()) == labelToIndex.end())
+
+        // TODO improve "CommentRaw"/"Comment" processing.
+        // Without this replacement, only "Comment" fragments
+        // (separated lines) appear in the list view. 
+        // With "CommentRaw" the complete checkin comment is
+        // contained in the list.
+        QString key = (it.key() == QString("CommentRaw")) ? QString("Comment") : it.key();
+
+        if (labelToIndex.find(key) != labelToIndex.end())
         {
-            TagList* tmp = new TagList(this);
-            tmp->setObjectName(it.key());
-            connect(tmp, SIGNAL(itemPressed(QListWidgetItem*)),
-                    this, SLOT(lookupId(QListWidgetItem*)));
-            tmp->addData(it.value());
-            labelToIndex[it.key()] = addTab(tmp, it.key());
-        }
-        else
-        {
-            TagList* tmp = dynamic_cast<TagList*>(widget(labelToIndex[it.key()]));
+            TagList* tmp = dynamic_cast<TagList*>(widget(labelToIndex[key]));
             tmp->addData(it.value());
         }
     }

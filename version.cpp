@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.2-0                */
+/*                  gvtree V1.3-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -229,15 +229,18 @@ void Version::paint(QPainter* _painter, const QStyleOptionGraphicsItem* _option,
         _painter->setPen(QPen(graph->getTextColor(), 0));
 
         int height = 0;
-        for (QMap<QString, QStringList>::iterator kit = keyInformation.begin();
-             kit != keyInformation.end();
-             kit++)
+
+        foreach(const QString &info, graph->getMainWindow()->getNodeInfo())
         {
-            if (globalVersionInfo.contains(kit.key())
-                || localVersionInfo.contains(kit.key())
-               )
+            if (globalVersionInfo.contains(info)
+                || localVersionInfo.contains(info))
             {
-                drawTextBox(kit.key(), kit.value(), height, _painter);
+                QMap<QString, QStringList>::iterator kit = keyInformation.find(info);
+                if (kit != keyInformation.end())
+                {
+                    drawTextBox(info, kit.value(), height, _painter);
+                    height += 1;
+                }
             }
         }
     }
@@ -303,7 +306,72 @@ bool Version::processGitLogInfo(const QString& _input, const QStringList& _parts
     // tag information
     processGitLogTagInformation(_parts.at(4));
 
+    if (_parts.size() > 5)
+    {
+        processGitLogCommentInformation(_parts.at(5));
+    }
+
     return true;
+}
+
+void Version::updateCommentInformation(int _columns, int _maxlen)
+{
+    QStringList& commentRaw = keyInformation[QString("CommentRaw")];
+
+    if (commentRaw.size() == 0)
+        return;
+
+    int columns = _columns;
+    int maxlen = _maxlen;
+
+    keyInformation[QString("Comment")] = QStringList();
+
+    QString comment = commentRaw.front();
+    QString info = comment;
+
+    if (maxlen)
+    {
+        info = comment.mid(0, maxlen);
+        if (comment.size() > maxlen)
+            info = info + "...";
+    }
+
+    int len = 0;
+    QString part;
+    QStringList tmp = info.split(' ');
+    foreach (const QString &str, tmp)
+    {
+        if (len == 0)
+        {
+            part = str;
+            len += str.size();
+        }
+        else if (columns == 0 || len < columns)
+        {
+            part = part + " " + str;
+            len += 1 + str.size();
+        }
+        else
+        {
+            keyInformation[QString("Comment")].push_back(part);
+            part = QString();
+            len = 0;
+        }
+    }
+
+    if (len != 0)
+    {
+        keyInformation[QString("Comment")].push_back(part);
+    }
+}
+
+void Version::processGitLogCommentInformation(const QString& _comment)
+{
+    keyInformation[QString("CommentRaw")].push_back(_comment);
+
+    int columns, maxlen;
+    graph->getMainWindow()->getCommentProperties(columns, maxlen);
+    updateCommentInformation(columns, maxlen);
 }
 
 void Version::processGitLogTagInformation(const QString& _tagInfo)
@@ -421,7 +489,10 @@ bool Version::findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatc
     if (newmatched != oldmatched
         || localVersionInfo != oldLocalVersionInfo)
     {
-        if (_exactMatch == true && newmatched == true)
+        // Changed to unfold all matching versions...
+        // if (_exactMatch == true && newmatched == true)
+
+        if (newmatched == true)
         {
             ensureUnfolded();
         }
@@ -723,7 +794,7 @@ int Version::getPredecessorHashes(QStringList& _result)
 {
     _result.clear();
 
-    QList<Version*> predecessors;
+    QSet<Version*> predecessors;
     getPredecessors(predecessors);
     foreach(Version * it, predecessors)
     {
@@ -732,7 +803,7 @@ int Version::getPredecessorHashes(QStringList& _result)
     return _result.size();
 }
 
-int Version::getPredecessors(QList<Version*>& _result)
+int Version::getPredecessors(QSet<Version*>& _result)
 {
     _result.clear();
 
@@ -746,7 +817,7 @@ int Version::getPredecessors(QList<Version*>& _result)
         {
             Version* predecessor = dynamic_cast<Version*>(edge->sourceVersion());
             if (predecessor)
-                _result.push_back(predecessor);
+                _result.insert(predecessor);
         }
     }
 

@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.2-0                */
+/*                  gvtree V1.3-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -72,7 +72,6 @@ public:
     void addToCleanupFiles(const QString& _path);
 
     // get preferences
-    void getXYFactor(float& _xfactor, float& _yfactor) const;
     int getMaxLines() const;
     bool getShortHashes() const;
     bool getTopDownView() const;
@@ -85,6 +84,7 @@ public:
     QColor getPreferencesColor(QString _key);
     QString getTempPath() const;
     bool getPrintCmdToStdout() const;
+    void getCommentProperties(int& _columns, int& _limit) const;
 
     //
     Ui_Dialog& getPreferences();
@@ -112,6 +112,7 @@ public slots:
 
     // File menu
     void reloadCurrentRepository();
+    void resetCurrentRepository();
     void setGitLocalRepository();
     void quit();
 
@@ -139,6 +140,9 @@ public slots:
 
     //
     void updatePbFileConstraint(const QString& _fileConstraint);
+
+    //
+    const QStringList& getNodeInfo() const;
 
 protected:
 
@@ -231,6 +235,7 @@ private:
     QDockWidget* compareTreeDock;
     QDockWidget* searchDock;
     QDockWidget* branchDock;
+    QStringList nodeInfo;
 };
 
 #endif
