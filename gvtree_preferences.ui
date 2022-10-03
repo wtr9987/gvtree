@@ -589,6 +589,9 @@
             <property name="toolTip">
              <string>Commit comments are limited to this length.</string>
             </property>
+            <property name="maximum">
+             <number>1022</number>
+            </property>
            </widget>
           </item>
           <item row="0" column="2">
