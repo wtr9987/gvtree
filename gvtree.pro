@@ -93,6 +93,7 @@ DISTFILES += $$SOURCEFILES \
   doc/images/f23.png \
   doc/images/f24.png \
   doc/images/f25.png \
+  doc/images/f26.png \
   doc/images/f27.png \
   doc/images/f28.png \
   doc/images/f29.png \
