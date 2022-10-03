@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>871</width>
-    <height>645</height>
+    <height>768</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -316,7 +316,7 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
+          <item row="1" column="0">
            <widget class="QRadioButton" name="rbConnectorStyle1">
             <property name="focusPolicy">
              <enum>Qt::NoFocus</enum>
@@ -554,10 +554,20 @@
          </layout>
         </widget>
        </item>
-       <item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabWidgetPage3">
+      <attribute name="title">
+       <string>Tag Settings</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_5">
+       <item row="0" column="0" rowspan="98">
+        <layout class="QVBoxLayout" name="verticalLayout_3"/>
+       </item>
+       <item row="99" column="0" colspan="2">
         <widget class="QGroupBox" name="groupBox_5">
          <property name="title">
-          <string>Commit comment dimensions</string>
+          <string>Comment dimensions</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_7">
           <item row="0" column="1">
@@ -570,7 +580,7 @@
           <item row="0" column="0">
            <widget class="QLabel" name="label">
             <property name="text">
-             <string>Column width</string>
+             <string>Columns</string>
             </property>
            </widget>
           </item>
@@ -584,22 +594,12 @@
           <item row="0" column="2">
            <widget class="QLabel" name="label_2">
             <property name="text">
-             <string>Maximum length</string>
+             <string>Length</string>
             </property>
            </widget>
           </item>
          </layout>
         </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="tabWidgetPage3">
-      <attribute name="title">
-       <string>Tag Settings</string>
-      </attribute>
-      <layout class="QGridLayout" name="gridLayout_5">
-       <item row="0" column="0" rowspan="99">
-        <layout class="QVBoxLayout" name="verticalLayout_3"/>
        </item>
       </layout>
      </widget>

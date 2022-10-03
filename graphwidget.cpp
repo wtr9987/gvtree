@@ -270,9 +270,6 @@ void GraphWidget::keyPressEvent(QKeyEvent* _event)
 {
     switch (_event->key())
     {
-        case Qt::Key_W:
-            verticalScrollBar()->setSliderPosition(verticalScrollBar()->sliderPosition() - 2);
-            break;
         case Qt::Key_F:
             if (mwin && Qt::ControlModifier == QApplication::keyboardModifiers())
             {
@@ -280,14 +277,25 @@ void GraphWidget::keyPressEvent(QKeyEvent* _event)
                 mwin->getSearchWidget()->setFocus();
             }
             break;
+        case Qt::Key_W:
+            verticalScrollBar()->setSliderPosition(
+                verticalScrollBar()->sliderPosition() -
+                (Qt::ShiftModifier == QApplication::keyboardModifiers() ? getYFactor() / 2 : 2));
+            break;
         case Qt::Key_S:
-            verticalScrollBar()->setSliderPosition(verticalScrollBar()->sliderPosition() + 2);
+            verticalScrollBar()->setSliderPosition(
+                verticalScrollBar()->sliderPosition() +
+                (Qt::ShiftModifier == QApplication::keyboardModifiers() ? getYFactor() / 2 : 2));
             break;
         case Qt::Key_D:
-            horizontalScrollBar()->setSliderPosition(horizontalScrollBar()->sliderPosition() + 2);
+            horizontalScrollBar()->setSliderPosition(
+                horizontalScrollBar()->sliderPosition() +
+                (Qt::ShiftModifier == QApplication::keyboardModifiers() ? getXFactor() / 2 : 2));
             break;
         case Qt::Key_A:
-            horizontalScrollBar()->setSliderPosition(horizontalScrollBar()->sliderPosition() - 2);
+            horizontalScrollBar()->setSliderPosition(
+                horizontalScrollBar()->sliderPosition() -
+                (Qt::ShiftModifier == QApplication::keyboardModifiers() ? getXFactor() / 2 : 2));
             break;
         case Qt::Key_Plus:
             zoomIn();
@@ -691,7 +699,7 @@ void GraphWidget::process(QList<QString> _cache)
                 parent = previousBranchslots[i + 1];
 
             if (parent == NULL)
-              parent = rootVersion;
+                parent = rootVersion;
 
             // collect merge sources
             if (pl == '/' && parent != previousBranchslots[i - 1])
