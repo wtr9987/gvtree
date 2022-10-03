@@ -167,6 +167,7 @@ public slots:
     void diffLocalChanges();
     void resetDiff();
     void resetSelection();
+    void focusBranch();
     void focusCurrent();
     void fitInView();
     void foldAll();

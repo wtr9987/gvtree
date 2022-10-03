@@ -306,6 +306,9 @@ void GraphWidget::keyPressEvent(QKeyEvent* _event)
         case Qt::Key_1:
             QGraphicsView::fitInView(scene()->itemsBoundingRect(), Qt::KeepAspectRatio);
             break;
+        case Qt::Key_O:
+            focusElement("HEAD",true);
+            break;
         case Qt::Key_H:
             focusCurrent();
             break;
@@ -1000,6 +1003,16 @@ void GraphWidget::compareToPrevious(Version* _v)
 void GraphWidget::focusVersion(const Version* _v)
 {
     focusNeighbourBox(_v->getNeighbourBox());
+}
+
+void GraphWidget::focusBranch()
+{
+  QString branch = mwin->getSelectedBranch();
+  branch.replace("remotes/","");
+  if (branch.size() == 0)
+    focusCurrent();
+  else
+    focusElement(branch,true);
 }
 
 void GraphWidget::focusCurrent()

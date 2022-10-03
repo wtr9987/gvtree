@@ -191,7 +191,7 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
     dock->hide();
 
     connect(gvtree_branchlist.branchList, SIGNAL(itemSelectionChanged()), this, SLOT(reloadCurrentRepository()));
-    connect(gvtree_branchlist.branchList, SIGNAL(itemSelectionChanged()), graphwidget, SLOT(focusCurrent()));
+    connect(gvtree_branchlist.branchList, SIGNAL(itemSelectionChanged()), graphwidget, SLOT(focusBranch()));
     connect(gvtree_branchlist.cbSort, SIGNAL(currentIndexChanged(int)),
             gvtree_branchlist.branchList, SLOT(setSort(int)));
     connect(gvtree_branchlist.pbReset, SIGNAL(pressed()),
