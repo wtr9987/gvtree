@@ -191,7 +191,7 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
     dock->hide();
 
     connect(gvtree_branchlist.branchList, SIGNAL(itemSelectionChanged()), this, SLOT(reloadCurrentRepository()));
-    connect(gvtree_branchlist.branchList, SIGNAL(itemSelectionChanged()), graphwidget, SLOT(focusBranch()));
+    connect(gvtree_branchlist.branchList, SIGNAL(itemSelectionChanged()), graphwidget, SLOT(focusCurrent()));
     connect(gvtree_branchlist.cbSort, SIGNAL(currentIndexChanged(int)),
             gvtree_branchlist.branchList, SLOT(setSort(int)));
     connect(gvtree_branchlist.pbReset, SIGNAL(pressed()),
@@ -672,16 +672,15 @@ void MainWindow::createMenus()
     viewmenu = menuBar()->addMenu(tr("View"));
 
     gridLayout = new TagPrefGridLayout();
-
     gridLayout->addTagPreference("HEAD", "(HEAD.*)");
     gridLayout->addTagPreference("Commit Date", "([0-9]+)");
     gridLayout->addTagPreference("User Name", "\\[([0-9a-zA-Z ]*)\\]");
     gridLayout->addTagPreference("Hash", "([0-9a-f]+)");
     gridLayout->addTagPreference("Branch", "^((?!.*tag: )\\b([\\/0-9a-zA-Z_]*)\\b)$");
-    gridLayout->addTagPreference("Release Label", "tag: \\b(R[0-9.\\-]+)$");
+    gridLayout->addTagPreference("Release Label", "tag: \\b(R[0-9.\\-]+(_RC[0-9]+)?)$");
     gridLayout->addTagPreference("Baseline Label", "tag: \\b(BASELINE_[0-9.\\-]+)$");
-    gridLayout->addTagPreference("FIX/PQT Label", "tag: \\b((FIX_STR[0-9]+)|(PQT_STR[0-9]+))$");
-    gridLayout->addTagPreference("HO Label", "tag: \\b(STR[0-9]+_HO[0-9]*)$");
+    gridLayout->addTagPreference("FIX/PQT Label", "tag: \\b(((FIX|PQT)_STR[0-9]+(DEV|DOC)?(_RR[0-9]+)?))$");
+    gridLayout->addTagPreference("HO Label", "tag: \\b(STR[0-9]+(DEV|DOC)?_HO[0-9]*)$");
     gridLayout->addTagPreference("Other Tags", "");
     gridLayout->addTagPreference("Comment", "");
     gvtree_preferences.verticalLayout_3->addLayout(gridLayout);

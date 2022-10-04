@@ -167,7 +167,6 @@ public slots:
     void diffLocalChanges();
     void resetDiff();
     void resetSelection();
-    void focusBranch();
     void focusCurrent();
     void fitInView();
     void foldAll();
@@ -200,7 +199,14 @@ protected:
     void fillCompareWidgetFromToInfo();
     Version* findVersion(const QString& _hash);
 
+    // to debug the git log --graph parser...
     void debugGraphParser(const QString& _tree, const QVector<Version*>& _slots);
+    void debugExit(char _c,
+                   int _column,
+                   int _lineNumber,
+                   const QString& _tree,
+                   const QString& _previousTree,
+                   const QString& _line);
 
 private:
 
@@ -216,7 +222,7 @@ private:
     // root version node
     Version* rootVersion;
     Version* localHeadVersion; // local HEAD version
-    Version* branchVersion;    // top version element
+    Version* headVersion;      // top version element (without --remotes == localHeadVersion)
 
     QStringList globalVersionInfo;
 

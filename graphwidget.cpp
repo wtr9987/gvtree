@@ -66,7 +66,7 @@ GraphWidget::GraphWidget(MainWindow* _parent)
     fromToInfo(NULL),
     rootVersion(NULL),
     localHeadVersion(NULL),
-    branchVersion(NULL),
+    headVersion(NULL),
     mwin(_parent),
     compareTree(NULL),
     connectorStyle(0),
@@ -307,7 +307,7 @@ void GraphWidget::keyPressEvent(QKeyEvent* _event)
             QGraphicsView::fitInView(scene()->itemsBoundingRect(), Qt::KeepAspectRatio);
             break;
         case Qt::Key_O:
-            focusElement("HEAD",true);
+            focusElement("HEAD", true);
             break;
         case Qt::Key_H:
             focusCurrent();
@@ -406,10 +406,11 @@ void GraphWidget::setGitLogFileConstraint(const QString& _fileConstraint)
 
 Version* GraphWidget::gitlogSingle(QString _hash)
 {
+    if (_hash.size())
+        return getVersionByHash(_hash);
+
     if (localRepositoryPath.isEmpty())
-    {
         return NULL;
-    }
 
     QString cmd = "git -C "
         + localRepositoryPath
@@ -419,6 +420,8 @@ Version* GraphWidget::gitlogSingle(QString _hash)
 
     if (_hash.isEmpty() == false)
         cmd += " " + _hash;
+    else if (mwin->getSelectedBranch().size())
+        cmd += " " + mwin->getSelectedBranch();
 
     QList<QString> cache;
 
@@ -434,21 +437,29 @@ Version* GraphWidget::gitlogSingle(QString _hash)
         cerr << "Error: Input too short " << line.toUtf8().data() << endl;
         return NULL;
     }
+
     // check if the Version object already exists
     QString hash = parts.at(1);
-    Version* v = new Version(globalVersionInfo, this);
+    return getVersionByHash(hash);
 
-    // if the key information has already been parsed, use it
-    v->setKeyInformation(keyInformationCache.value(hash, QMap<QString, QStringList>()));
-
-    // init or update
-    if (v->processGitLogInfo(line, parts))
+    Version* v = getVersionByHash(hash);
+    if (v == NULL)
     {
-        keyInformationCache[hash] = v->getKeyInformation();
+
+        // create an object...
+        v = new Version(globalVersionInfo, this);
+
+        // if the key information has already been parsed, use it
+        v->setKeyInformation(keyInformationCache.value(hash, QMap<QString, QStringList>()));
+
+        // init or update
+        if (v->processGitLogInfo(line, parts))
+        {
+            keyInformationCache[hash] = v->getKeyInformation();
+        }
+
+        mwin->getTagWidget()->addData(v->getKeyInformation());
     }
-
-    mwin->getTagWidget()->addData(v->getKeyInformation());
-
     return v;
 }
 
@@ -526,6 +537,23 @@ void GraphWidget::load(const QString& _path)
     setUpdatesEnabled(true);
 }
 
+void GraphWidget::debugExit(char _c,
+                            int _column,
+                            int _lineNumber,
+                            const QString& _tree,
+                            const QString& _previousTree,
+                            const QString& _line)
+{
+    std::cerr << "Unknown sequence: current [" << _c
+              << "] line [" << _lineNumber << "] column [" << _column << "]" << std::endl;
+    std::cerr << _line.toUtf8().data() << std::endl;
+    std::cerr << std::endl;
+    std::cerr << _tree.toUtf8().data() << std::endl;
+    std::cerr << _previousTree.toUtf8().data() << std::endl;
+    std::cerr << std::endl;
+    exit(0);
+}
+
 void GraphWidget::debugGraphParser(
     const QString& _tree,
     const QVector<Version*>& _slots)
@@ -543,7 +571,7 @@ void GraphWidget::process(QList<QString> _cache)
     // cerr << "process start " << timestamp() << endl;
 
     // reset local head
-    branchVersion = NULL;
+    headVersion = NULL;
 
     connectorStyle = mwin->getConnectorStyle();
 
@@ -593,6 +621,8 @@ void GraphWidget::process(QList<QString> _cache)
             continue;
         }
 
+        linenumber++;
+
         // get --graph tree pattern
         int len = treePattern.matchedLength();
         QString tree = treePattern.cap(1);
@@ -634,39 +664,44 @@ void GraphWidget::process(QList<QString> _cache)
             switch (cm)
             {
                 case '|':
-                    if (pm == '|' || pm == '*')
+                    if (pm == '|' || pm == '*' || pm == '/' || pm == '\\')
                         branchslots[i] = previousBranchslots[i];
                     else if (pl == '/')
                         branchslots[i] = previousBranchslots[i - 1];
                     else if (pr == '\\')
                         branchslots[i] = previousBranchslots[i + 1];
+                    // else debugExit(cm,i,linenumber,tree,previousTree,line);
                     break;
                 case '/':
                     if (cll == '_')
                         branchslots[i] = branchslots[i - 2];
                     else if (pll == '/')
                         branchslots[i] = previousBranchslots[i - 2];
-                    else if (pl == '|' || pl == '*')
+                    else if (pl == '|' || pl == '*' || pl == '/')
                         branchslots[i] = previousBranchslots[i - 1];
-                    else if (pm == '\\')
+                    else if (pm == '\\' || pm == '|')
                         branchslots[i] = previousBranchslots[i];
+                    // else debugExit(cm,i,linenumber,tree,previousTree,line);
                     break;
                 case '_':
                     if (cll == '_')
                         branchslots[i] = branchslots[i - 2];
                     else if (pll == '/')
                         branchslots[i] = previousBranchslots[i - 2];
+                    // else debugExit(cm,i,linenumber,tree,previousTree,line);
                     break;
                 case '\\':
                     if (pm == '/')
                         branchslots[i] = previousBranchslots[i];
-                    else if (pr == '|' || pr == '*')
+                    else if (pr == '|' || pr == '*' || pr == '\\')
                         branchslots[i] = previousBranchslots[i + 1];
+                    // else debugExit(cm,i,linenumber,tree,previousTree,line);
                     break;
                 case '.':
                 case '-':
-                    if (pr == '\\')
+                    if (pr == '\\' || pr == ' ')
                         branchslots[i] = previousBranchslots[i + 1];
+                    // else debugExit(cm,i,linenumber,tree,previousTree,line);
                     break;
                 case '*':
                     newVersion = i;
@@ -675,6 +710,7 @@ void GraphWidget::process(QList<QString> _cache)
                     break;
                 default:
                     std::cerr << "Character " << cm << " not recognized." << std::endl;
+                    exit(0);
                     break;
             }
         }
@@ -769,11 +805,12 @@ void GraphWidget::process(QList<QString> _cache)
 
             // replace parent
             branchslots[i] = v;
-            // the last line contains the local HEAD version
-            branchVersion = v;
+            // The last line contains the first version
+            // of the git log output.
+            headVersion = v;
         }
 
-        // debugGraphParser(tree, branchslots);
+        //debugGraphParser(tree, branchslots);
         previousTree = tree;
         previousBranchslots = branchslots;
         for (int i = 0; i < branchslots.size(); i++)
@@ -782,23 +819,9 @@ void GraphWidget::process(QList<QString> _cache)
         }
     }
 
-    if (branchVersion)
-    {
-        if (branchVersion->getKeyInformation().contains("HEAD") == false)
-        {
-            localHeadVersion = gitlogSingle();
-            if (localHeadVersion)
-            {
-                localHeadVersion->hide();
-                scene()->addItem(localHeadVersion);
-            }
-        }
-        else
-        {
-            localHeadVersion = branchVersion;
-            localHeadVersion->setIsFoldable(foldHead);
-        }
-    }
+    localHeadVersion = gitlogSingle();
+    if (localHeadVersion)
+        localHeadVersion->setIsFoldable(foldHead);
 
     rootVersion->collectFolderVersions(rootVersion, NULL);
     normalizeGraph();
@@ -1005,25 +1028,9 @@ void GraphWidget::focusVersion(const Version* _v)
     focusNeighbourBox(_v->getNeighbourBox());
 }
 
-void GraphWidget::focusBranch()
-{
-  QString branch = mwin->getSelectedBranch();
-  branch.replace("remotes/","");
-  if (branch.size() == 0)
-    focusCurrent();
-  else
-    focusElement(branch,true);
-}
-
 void GraphWidget::focusCurrent()
 {
-    if (branchVersion)
-    {
-        resetMatches();
-        branchVersion->setMatched(true);
-        focusVersion(branchVersion);
-    }
-    else if (localHeadVersion)
+    if (localHeadVersion)
     {
         resetMatches();
         localHeadVersion->setMatched(true);
