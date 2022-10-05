@@ -1091,6 +1091,12 @@ void GraphWidget::forceUpdate()
 {
     foreach(QGraphicsItem * it, scene()->items())
     {
+        if (it->type() == QGraphicsItem::UserType + 1)
+        {
+            Version* n = dynamic_cast<Version*>(it);
+            if (n)
+                n->calculateLocalBoundingBox();
+        }
         it->update();
     }
     viewport()->repaint();

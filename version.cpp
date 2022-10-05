@@ -235,14 +235,18 @@ void Version::paint(QPainter* _painter, const QStyleOptionGraphicsItem* _option,
             if (globalVersionInfo.contains(info)
                 || localVersionInfo.contains(info))
             {
-                QMap<QString, QStringList>::iterator kit = keyInformation.find(info);
+                QMap<QString, QStringList>::const_iterator kit = keyInformation.find(info);
                 if (kit != keyInformation.end())
                 {
                     drawTextBox(info, kit.value(), height, _painter);
-                    height += 1;
                 }
             }
         }
+
+        // debug : draw bounding box
+        //_painter->setPen(QPen(QColor(255, 0, 0), 0));
+        //_painter->setBrush(QBrush());
+        //_painter->drawRect(localBoundingBox);
     }
 }
 
@@ -305,7 +309,7 @@ bool Version::processGitLogInfo(const QString& _input, const QStringList& _parts
 
     // tag information
     processGitLogTagInformation(_parts.at(4));
-    
+
     // commit comment
     processGitLogCommentInformation(_parts.at(5));
 
@@ -329,7 +333,7 @@ void Version::updateCommentInformation(int _columns, int _maxlen)
             info = info + "...";
     }
 
-    keyInformation[QString("Comment")]=QStringList();
+    keyInformation[QString("Comment")] = QStringList();
 
     int len = 0;
     QString part;
@@ -525,12 +529,10 @@ bool Version::getTextBoundingBox(const QString& _key, const QStringList& _values
 
     foreach(const QString it, _values)
     {
-        QRectF textbox = QFontMetricsF(tp->getFont()).boundingRect(it).translated(20, _height);
+        QRectF textbox = QFontMetricsF(tp->getFont()).boundingRect(it);
 
-        textbox.adjust(0, 0, 32, 0);
-
-        _height += textbox.height() + 2;
-        _updatedBox |= textbox;
+        _updatedBox |= textbox.translated(20, _height).adjusted(0, 0, 20, 0);
+        _height += textbox.height() + 1;
     }
     return true;
 }
@@ -544,13 +546,11 @@ bool Version::drawTextBox(const QString& _key, const QStringList& _values, int& 
 
     foreach(const QString &it, _values)
     {
-        QRectF textbox = QFontMetricsF(tp->getFont()).boundingRect(it).translated(20, _height);
+        QRectF textbox = QFontMetricsF(tp->getFont()).boundingRect(it);
 
-        textbox.adjust(0, 0, 32, 0);
-
-        _height += textbox.height() + 2;
         _painter->setFont(tp->getFont());
-        _painter->drawText(textbox, Qt::AlignLeft, it);
+        _painter->drawText(textbox.translated(20, _height).adjusted(0, 0, 20, 0), Qt::AlignLeft, it);
+        _height += textbox.height() + 1;
     }
     return true;
 }
@@ -579,11 +579,18 @@ void Version::calculateLocalBoundingBox()
     localBoundingBox = folderBox | QRectF(-30, -30, 60, 60);
 
     int height = 0;
-    for (QMap<QString, QStringList>::const_iterator kit = keyInformation.begin();
-         kit != keyInformation.end();
-         kit++)
+
+    foreach(const QString &info, graph->getMainWindow()->getNodeInfo())
     {
-        getTextBoundingBox(kit.key(), kit.value(), height, localBoundingBox);
+        if (globalVersionInfo.contains(info)
+            || localVersionInfo.contains(info))
+        {
+            QMap<QString, QStringList>::const_iterator kit = keyInformation.find(info);
+            if (kit != keyInformation.end())
+            {
+                getTextBoundingBox(kit.key(), kit.value(), height, localBoundingBox);
+            }
+        }
     }
 
     // done
