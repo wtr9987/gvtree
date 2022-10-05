@@ -428,60 +428,50 @@ bool Version::findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatc
     QSet<QString> oldLocalVersionInfo = localVersionInfo;
     localVersionInfo.clear();
 
-    bool checkDetail = false;
-    QString rawInput = keyInformation["_input"].join(" ");
-    rawInput += " " + keyInformation["Commit Date"].join(" ");
+    QString rawInput = keyInformation["_input"].join(" ")
+        + " " + keyInformation["Commit Date"].join(" ");
 
-    if (_pattern.isValid())
-    {
-        checkDetail = (_pattern.indexIn(rawInput, 0) != -1);
-    }
-    else
-    {
-        checkDetail = (rawInput.indexOf(_text, 0) != -1);
-    }
+    bool checkDetail = _pattern.isValid() ? (_pattern.indexIn(rawInput, 0) != -1) :
+        (rawInput.indexOf(_text, 0) != -1);
 
     if (checkDetail)
     {
-
         for (QMap<QString, QStringList>::iterator kit = keyInformation.begin();
              kit != keyInformation.end();
              kit++)
         {
-
-            if (kit.key() == QString("_input")
-                || kit.key() == QString("CommentRaw"))
+            if (kit.key() == QString("_input"))
                 continue;
 
-            if (_pattern.isValid() && _exactMatch == false)
+            if (_exactMatch == true)
             {
-                QString tmp = kit.value().join(QString(" "));
-                if (_pattern.indexIn(tmp, 0) != -1)
+                foreach (const QString &str, kit.value())
                 {
-                    newmatched = true;
-                    localVersionInfo.insert(kit.key());
+                    if (str == _text)
+                    {
+                        newmatched = true;
+                        if (kit.key() == "CommentRaw")
+                            localVersionInfo.insert("Comment");
+                        else
+                            localVersionInfo.insert(kit.key());
+                        break;
+                    }
                 }
+                if (newmatched)
+                    break;
             }
             else
             {
-                if (_exactMatch == true)
-                {
-                    foreach (const QString &str, kit.value())
-                    {
-                        if (str == _text)
-                        {
-                            newmatched = true;
-                            localVersionInfo.insert(kit.key());
-                            break;
-                        }
-                    }
-                    if (newmatched)
-                        break;
-                }
-                else if (kit.value().join(QString(" ")).indexOf(_text) != -1)
+                QString tmp = kit.value().join(QString(" "));
+
+                if ((_pattern.isValid() && _pattern.indexIn(tmp, 0) != -1)
+                    || (tmp.indexOf(_text) != -1))
                 {
                     newmatched = true;
-                    localVersionInfo.insert(kit.key());
+                    if (kit.key() == "CommentRaw")
+                        localVersionInfo.insert("Comment");
+                    else
+                        localVersionInfo.insert(kit.key());
                 }
             }
         }
