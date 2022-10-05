@@ -305,11 +305,9 @@ bool Version::processGitLogInfo(const QString& _input, const QStringList& _parts
 
     // tag information
     processGitLogTagInformation(_parts.at(4));
-
-    if (_parts.size() > 5)
-    {
-        processGitLogCommentInformation(_parts.at(5));
-    }
+    
+    // commit comment
+    processGitLogCommentInformation(_parts.at(5));
 
     return true;
 }
@@ -321,20 +319,17 @@ void Version::updateCommentInformation(int _columns, int _maxlen)
     if (commentRaw.size() == 0)
         return;
 
-    int columns = _columns;
-    int maxlen = _maxlen;
-
-    keyInformation[QString("Comment")] = QStringList();
-
-    QString comment = commentRaw.front();
+    QString comment = commentRaw.join(" ");
     QString info = comment;
 
-    if (maxlen)
+    if (_maxlen)
     {
-        info = comment.mid(0, maxlen);
-        if (comment.size() > maxlen)
+        info = comment.mid(0, _maxlen);
+        if (comment.size() > _maxlen)
             info = info + "...";
     }
+
+    keyInformation[QString("Comment")]=QStringList();
 
     int len = 0;
     QString part;
@@ -346,7 +341,7 @@ void Version::updateCommentInformation(int _columns, int _maxlen)
             part = str;
             len += str.size();
         }
-        else if (columns == 0 || len < columns)
+        else if (_columns == 0 || len < _columns)
         {
             part = part + " " + str;
             len += 1 + str.size();
@@ -450,7 +445,8 @@ bool Version::findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatc
              kit++)
         {
 
-            if (kit.key() == QString("_input"))
+            if (kit.key() == QString("_input")
+                || kit.key() == QString("CommentRaw"))
                 continue;
 
             if (_pattern.isValid() && _exactMatch == false)

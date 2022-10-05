@@ -49,7 +49,7 @@ public:
 
     // Get real git log information of a local repository
     void gitlog(bool _dirChanged = false);
-    Version* gitlogSingle(QString _hash = QString());
+    Version* gitlogSingle(QString _hash = QString(), bool _create=false);
 
     // Get hashes of one file and markup versions
     void setGitLogFileConstraint(const QString& _fileConstraint = QString());

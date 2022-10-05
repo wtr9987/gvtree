@@ -404,9 +404,9 @@ void GraphWidget::setGitLogFileConstraint(const QString& _fileConstraint)
     update();
 }
 
-Version* GraphWidget::gitlogSingle(QString _hash)
+Version* GraphWidget::gitlogSingle(QString _hash, bool _create)
 {
-    if (_hash.size())
+    if (_hash.size() && _create == false)
         return getVersionByHash(_hash);
 
     if (localRepositoryPath.isEmpty())
@@ -416,7 +416,7 @@ Version* GraphWidget::gitlogSingle(QString _hash)
         + localRepositoryPath
         + " log --graph -1 --pretty=\"#"
         + (shortHashes ? "%h" : "%H")
-        + "#%at#%an#%d#%s\"";
+        + "#%at#%an#%d#%s#\"";
 
     if (_hash.isEmpty() == false)
         cmd += " " + _hash;
@@ -432,7 +432,7 @@ Version* GraphWidget::gitlogSingle(QString _hash)
     QStringList parts = line.split(QChar('#'));
 
     // abort, if too short...
-    if (parts.size() < 5)
+    if (parts.size() < 6)
     {
         cerr << "Error: Input too short " << line.toUtf8().data() << endl;
         return NULL;
@@ -440,12 +440,11 @@ Version* GraphWidget::gitlogSingle(QString _hash)
 
     // check if the Version object already exists
     QString hash = parts.at(1);
-    return getVersionByHash(hash);
 
-    Version* v = getVersionByHash(hash);
-    if (v == NULL)
+    Version* v = (_create == false) ? getVersionByHash(hash) : NULL;
+
+    if (!v)
     {
-
         // create an object...
         v = new Version(globalVersionInfo, this);
 
@@ -460,6 +459,7 @@ Version* GraphWidget::gitlogSingle(QString _hash)
 
         mwin->getTagWidget()->addData(v->getKeyInformation());
     }
+
     return v;
 }
 
@@ -768,7 +768,7 @@ void GraphWidget::process(QList<QString> _cache)
             QStringList parts = info.split(QChar('#'));
 
             // abort, if too short...
-            if (parts.size() < 5)
+            if (parts.size() < 6)
             {
                 cerr << "Error: Input too short " << line.toUtf8().data() << endl;
                 break;
@@ -1710,7 +1710,7 @@ bool GraphWidget::restoreImportantVersions()
         selectedVersion = findVersion(selectedVersionHash);
         if (!selectedVersion)
         {
-            selectedVersion = gitlogSingle(selectedVersionHash);
+            selectedVersion = gitlogSingle(selectedVersionHash, true);
             selectedVersion->hide();
             scene()->addItem(selectedVersion);
             if (fromHashSave.contains(selectedVersionHash))

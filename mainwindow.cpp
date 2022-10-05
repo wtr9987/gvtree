@@ -306,7 +306,7 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
             cout << "-f [gitlog] " << endl;
             cout << "   Testing:" << endl;
             cout << "   Load a file created with " << endl;
-            cout << "     git log --graph --pretty=\"#%h#%an#%at#%d#\"" << endl;
+            cout << "     git log --graph --pretty=\"#%h#%at#%an#%d#%s#\"" << endl;
             cout << "   This has been helpful during development to import constraint and" << endl;
             cout << "   complex repository data." << endl;
             cout << endl;
@@ -698,11 +698,9 @@ void MainWindow::createMenus()
     windowmenu->addAction(preferencesAct);
     windowmenu->addSeparator();
 
-    QSettings settings;
-
-
     nodeInfo << "HEAD" << "Commit Date" << "User Name" << "Hash" << "Branch" << "Release Label" << "Baseline Label" << "FIX/PQT Label" << "HO Label" << "Other Tags" << "Comment";
 
+    QSettings settings;
     foreach (const QString it, nodeInfo)
     {
         QAction* item = new QAction(it, this);
