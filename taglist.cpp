@@ -25,7 +25,7 @@ TagList::TagList(QWidget* _parent) : QListWidget(_parent)
 
 void TagList::addData(const QStringList& _data)
 {
-#if QT_VERSION >= 0x050000
+#if QT_VERSION >= 0x51400
     QSet<QString> add(_data.begin(), _data.end());
 #else
     QSet<QString> add = _data.toSet();

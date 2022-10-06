@@ -259,7 +259,7 @@ void GraphWidget::mouseReleaseEvent(QMouseEvent* _event)
 void GraphWidget::wheelEvent(QWheelEvent* event)
 {
     pan = false;
-#if QT_VERSION < 0x050000
+#if QT_VERSION < 0x51400
     scaleView(pow((double) 1.3, event->delta() / 240.0));
 #else
     scaleView(pow((double) 1.3, event->angleDelta().y() / 240.0));
