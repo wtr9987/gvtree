@@ -150,8 +150,8 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
     gvtree_comparetree.compareTree->setGraphWidget(graphwidget);
     gvtree_comparetree.compareTree->resetCompareTree();
 
-    dock = new QDockWidget(tr("Compare Files"), this);
-    dock->setObjectName("Compare Files");
+    dock = new QDockWidget(tr("Compare Versions"), this);
+    dock->setObjectName("Compare Versions");
     dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     dock->setWidget(ctwin);
     addDockWidget(Qt::RightDockWidgetArea, dock);
@@ -681,7 +681,7 @@ void MainWindow::createMenus()
     gridLayout->addTagPreference("Baseline Label", "tag: \\b(BASELINE_[0-9.\\-]+)$");
     gridLayout->addTagPreference("FIX/PQT Label", "tag: \\b(((FIX|PQT)_STR[0-9]+(DEV|DOC)?(_RR[0-9]+)?))$");
     gridLayout->addTagPreference("HO Label", "tag: \\b(STR[0-9]+(DEV|DOC)?_HO[0-9]*)$");
-    gridLayout->addTagPreference("Other Tags", "");
+    gridLayout->addTagPreference("Other Tags", "tag: \\b(.*)$");
     gridLayout->addTagPreference("Comment", "");
     gvtree_preferences.verticalLayout_3->addLayout(gridLayout);
 

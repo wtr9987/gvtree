@@ -926,6 +926,7 @@ void GraphWidget::viewThisVersion(Version* _v)
     toVersion = NULL;
 
     fillCompareWidgetFromToInfo();
+    mwin->getToDateLabel()->setText(QString("root Version"));
 
     compareTree->viewThisVersion(_v->getHash());
 

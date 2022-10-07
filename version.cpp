@@ -343,14 +343,15 @@ void Version::updateCommentInformation(int _columns, int _maxlen)
         if (len == 0)
         {
             part = str;
-            len += str.size();
+            len = str.size();
         }
         else if (_columns == 0 || len < _columns)
         {
             part = part + " " + str;
             len += 1 + str.size();
         }
-        else
+
+        if (_columns && len >= _columns)
         {
             keyInformation[QString("Comment")].push_back(part);
             part = QString();
@@ -395,7 +396,8 @@ void Version::processGitLogTagInformation(const QString& _tagInfo)
             << QString("Baseline Label")
             << QString("FIX/PQT Label")
             << QString("HO Label")
-            << QString("Branch");
+            << QString("Branch")
+            << QString("Other Tags");
 
         foreach(const QString &it, scanItems)
         {
@@ -415,8 +417,6 @@ void Version::processGitLogTagInformation(const QString& _tagInfo)
                 }
             }
         }
-
-        keyInformation[QString("Other Tags")] = tags;
     }
 }
 
