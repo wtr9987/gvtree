@@ -121,12 +121,14 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
     // create dock widgets
     QDockWidget* dock = NULL;
 
-    // -- create browser for tags and branches
-    tagwidget = new TagWidget(this);
+    // -- create new 
+    tagtree = new TagTree(this);
+    tagtree->setMainWindow(this);
+    tagtree->setGraphWidget(graphwidget);
     dock = new QDockWidget(tr("Version Information"), this);
     dock->setObjectName("Version Information");
     dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    dock->setWidget(tagwidget);
+    dock->setWidget(tagtree);
     addDockWidget(Qt::RightDockWidgetArea, dock);
     windowmenu->addAction(dock->toggleViewAction());
     dock->hide();
@@ -1016,10 +1018,18 @@ void MainWindow::resizeEvent(QResizeEvent* event)
 
 void MainWindow::lookupId(const QString& _text, bool _exactMatch)
 {
+    QList<Version*> matches;
     if (_text.size() < 3)
+    {
+        graphwidget->resetMatches();
+        tagtree->updateSearchResult(matches);
         return;
+    }
 
-    if (graphwidget->focusElement(_text, _exactMatch))
+    graphwidget->matchVersions(_text, matches, _exactMatch);
+    tagtree->updateSearchResult(matches);
+
+    if (matches.size() && graphwidget->focusElements(matches))
         search->setFocus();
 }
 
@@ -1085,9 +1095,9 @@ void MainWindow::quit()
     QCoreApplication::exit(0);
 }
 
-TagWidget* MainWindow::getTagWidget() const
+TagTree* MainWindow::getTagTree() const
 {
-    return tagwidget;
+    return tagtree;
 }
 
 void MainWindow::getMimeTypeTools(const QString& _mimeType,

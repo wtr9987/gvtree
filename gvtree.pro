@@ -29,8 +29,7 @@ HEADERS += \
         execute_cmd.h \
         tagpreference.h \
         tagprefgridlayout.h \
-        taglist.h \
-        tagwidget.h \
+        tagtree.h \
         branchlist.h \
         mimetable.h \
         fromtoinfo.h 
@@ -55,8 +54,7 @@ SOURCES += \
         execute_cmd.cpp \
         tagpreference.cpp \
         tagprefgridlayout.cpp \
-        taglist.cpp \
-        tagwidget.cpp \
+        tagtree.cpp \
         branchlist.cpp \
         mimetable.cpp \
         fromtoinfo.cpp

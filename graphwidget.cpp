@@ -307,7 +307,7 @@ void GraphWidget::keyPressEvent(QKeyEvent* _event)
             QGraphicsView::fitInView(scene()->itemsBoundingRect(), Qt::KeepAspectRatio);
             break;
         case Qt::Key_O:
-            focusElement("HEAD", true);
+            focusElements("HEAD", true);
             break;
         case Qt::Key_H:
             focusCurrent();
@@ -457,7 +457,10 @@ Version* GraphWidget::gitlogSingle(QString _hash, bool _create)
             keyInformationCache[hash] = v->getKeyInformation();
         }
 
-        mwin->getTagWidget()->addData(v->getKeyInformation());
+        mwin->getTagTree()->blockSignals(true);
+        mwin->getTagTree()->addData(v);
+        mwin->getTagTree()->compress();
+        mwin->getTagTree()->blockSignals(false);
     }
 
     return v;
@@ -577,8 +580,8 @@ void GraphWidget::process(QList<QString> _cache)
 
     clear();
 
-    mwin->getTagWidget()->blockSignals(true);
-    mwin->getTagWidget()->clear();
+    mwin->getTagTree()->blockSignals(true);
+    mwin->getTagTree()->resetTagTree();
 
     int linecount = 0;
     int maxTreePatternLength = 0;
@@ -787,7 +790,7 @@ void GraphWidget::process(QList<QString> _cache)
                 keyInformationCache[hash] = v->getKeyInformation();
             }
 
-            mwin->getTagWidget()->addData(v->getKeyInformation());
+            mwin->getTagTree()->addData(v);
 
             // main?
             v->setIsMain(i == 0);
@@ -827,8 +830,8 @@ void GraphWidget::process(QList<QString> _cache)
     normalizeGraph();
     setMinSize();
 
-    mwin->getTagWidget()->blockSignals(false);
-    mwin->getTagWidget()->setDefault();
+    mwin->getTagTree()->compress();
+    mwin->getTagTree()->blockSignals(false);
 
     // cerr << "process end " << timestamp() << endl;
 }
@@ -1242,41 +1245,72 @@ void GraphWidget::resetMatches()
     }
 }
 
-bool GraphWidget::focusElement(const QString& _text, bool _exactMatch)
+int GraphWidget::matchVersions(const QString& _text, QList<Version*>& _matches, bool _exactMatch)
 {
-    pan = false;
-    resetMatches();
-    if (_text.isEmpty())
+    _matches.clear();
+
+    if (!_text.isEmpty())
     {
-        QGraphicsView::fitInView(scene()->itemsBoundingRect(), Qt::KeepAspectRatio);
-        return false;
-    }
+        QRegExp pattern(_text);
 
-    QList<QGraphicsItem*> hits;
-    QRegExp pattern(_text);
-
-    foreach(QGraphicsItem * it, scene()->items())
-    {
-        if (it->type() != QGraphicsItem::UserType + 1)
-            continue;
-
-        Version* n = dynamic_cast<Version*>(it);
-
-        if (n && n->findMatch(pattern, _text, _exactMatch))
+        foreach(QGraphicsItem * it, scene()->items())
         {
-            hits.push_back(it);
+            if (it->type() != QGraphicsItem::UserType + 1)
+                continue;
+
+            Version* n = dynamic_cast<Version*>(it);
+
+            if (n && n->findMatch(pattern, _text, _exactMatch))
+            {
+                _matches.push_back(n);
+            }
         }
     }
 
-    if (hits.size() > 0)
+    return _matches.size();
+}
+
+bool GraphWidget::focusElements(const QString& _text, bool _exactMatch)
+{
+    pan = false;
+    resetMatches();
+
+    QList<Version*> matches;
+    matchVersions(_text, matches, _exactMatch);
+
+    displayHits(matches);
+
+    return matches.size() > 0;
+}
+
+bool GraphWidget::focusElements(const QList<Version*>& _markup)
+{
+    resetMatches();
+
+    QList<Version*> hits;
+    foreach(Version * it, _markup)
+    {
+        it->setMatched(true);
+        it->ensureUnfolded();
+        hits.push_back(it);
+    }
+
+    displayHits(hits);
+
+    return _markup.size() > 0;
+}
+
+void GraphWidget::displayHits(const QList<Version*>& _hits)
+{
+    if (_hits.size() > 0)
     {
         // ensure visibility
         updateGraphFolding();
 
-        QGraphicsItem* it = hits.front();
+        QGraphicsItem* it = _hits.front();
         QRectF tmp = QRectF(-10, -10, 20, 20).translated(it->scenePos());
 
-        foreach(QGraphicsItem * it, hits)
+        foreach(QGraphicsItem * it, _hits)
         {
             tmp |= QRectF(-10, -10, 20, 20).translated(it->scenePos());
         }
@@ -1287,9 +1321,7 @@ bool GraphWidget::focusElement(const QString& _text, bool _exactMatch)
     else
     {
         QGraphicsView::fitInView(scene()->itemsBoundingRect(), Qt::KeepAspectRatio);
-        return false;
     }
-    return true;
 }
 
 void GraphWidget::flipY()

@@ -32,7 +32,7 @@
 
 #include "graphwidget.h"
 #include "tagprefgridlayout.h"
-#include "tagwidget.h"
+#include "tagtree.h"
 #include "branchlist.h"
 #include "ui_gvtree_comparetree.h"
 #include "ui_gvtree_difftool.h"
@@ -61,7 +61,7 @@ public:
     QLineEdit* getSearchWidget() const;
     QDockWidget* getSearchDock();
     QDockWidget* getBranchDock();
-    TagWidget* getTagWidget() const;
+    TagTree* getTagTree() const;
     QString getSelectedBranch();
 
     // dialog to store tools for a certain file type
@@ -188,7 +188,7 @@ protected:
     // update git status on reload
     void updateGitStatus(const QString& _repoPath);
 
-    TagWidget* tagwidget;
+    TagTree* tagtree;
 
     QTextBrowser* gitstatus;
 

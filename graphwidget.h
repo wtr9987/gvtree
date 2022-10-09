@@ -27,7 +27,6 @@
 #include <QRectF>
 #include <QTextEdit>
 
-#include "tagwidget.h"
 #include "fromtoinfo.h"
 #include "comparetree.h"
 
@@ -49,7 +48,7 @@ public:
 
     // Get real git log information of a local repository
     void gitlog(bool _dirChanged = false);
-    Version* gitlogSingle(QString _hash = QString(), bool _create=false);
+    Version* gitlogSingle(QString _hash = QString(), bool _create = false);
 
     // Get hashes of one file and markup versions
     void setGitLogFileConstraint(const QString& _fileConstraint = QString());
@@ -69,7 +68,10 @@ public:
 
     // focus
     void focusNeighbourBox(const QRectF& _rect);
-    bool focusElement(const QString& _text, bool _exactMatch = false);
+    int matchVersions(const QString& _text, QList<Version*>& _matches, bool _exactMatch);
+    bool focusElements(const QString& _text, bool _exactMatch = false);
+    bool focusElements(const QList<Version*>& _markup);
+    void displayHits(const QList<Version*>& _hits);
 
     void clear();
     void resetMatches();
@@ -111,6 +113,7 @@ public:
 
     Version* getLocalHeadVersion() const;
     void updateFromToInfo();
+    void focusVersion(const Version* _v);
 
     // style
     const QColor& getBackgroundColor() const
@@ -194,7 +197,6 @@ protected:
     virtual void mouseReleaseEvent(QMouseEvent* event);
     void drawBackground(QPainter* painter, const QRectF& rect);
     void scaleView(qreal scaleFactor);
-    void focusVersion(const Version* _v);
     void expandTree();
     void fillCompareWidgetFromToInfo();
     Version* findVersion(const QString& _hash);
