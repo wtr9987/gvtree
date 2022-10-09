@@ -49,18 +49,22 @@ TagTree::TagTree(QWidget* _parent) : QTreeView(_parent)
 
 void TagTree::updateSearchResult(QList<Version*>& _matches)
 {
+    // remove "Search Result" subttree
     treemodel->removeRow(0, root->index());
-    QStandardItem* search = new QStandardItem("Search");
+
+    // insert empty "Search Result" node.
+    QStandardItem* search = new QStandardItem("Search Result");
     QList<QStandardItem*> sl;
     sl.push_back(search);
     treemodel->insertRow(0, sl);
 
     QStandardItem* p = root->child(0);
 
-    foreach(Version* v, _matches)
+    // Insert matches from search dialog
+    foreach(Version * v, _matches)
     {
         QList<QStandardItem*> columns;
-      QString timestamp = v->getKeyInformation().find("Commit Date").value().join(" ");
+        QString timestamp = v->getKeyInformation().find("Commit Date").value().join(" ");
 
         QStandardItem* t = new QStandardItem(timestamp);
         t->setEditable(false);
@@ -71,6 +75,7 @@ void TagTree::updateSearchResult(QList<Version*>& _matches)
         columns << t;
         p->appendRow(columns);
     }
+
     // display search results
     expand(p->index());
 }
@@ -226,8 +231,8 @@ void TagTree::resetTagTree()
 
     root = treemodel->invisibleRootItem();
     root->setEditable(false);
-    // nodeInfo << "HEAD" << "Commit Date" << "User Name" << "Hash" << "Branch" << "Release Label" << "Baseline Label" << "FIX/PQT Label" << "HO Label" << "Other Tags" << "Comment";
-    nodeInfo << "Search"
+    QStringList nodeInfo;
+    nodeInfo << "Search Result"
              << "HEAD"
              << "Release Label"
              << "Baseline Label"

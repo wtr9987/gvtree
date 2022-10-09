@@ -65,7 +65,6 @@ protected:
     class MainWindow* mwin;
     class GraphWidget* graph;
     QStandardItem* root;
-    QStringList nodeInfo;
 };
 
 #endif
