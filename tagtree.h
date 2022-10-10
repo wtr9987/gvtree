@@ -28,42 +28,56 @@
 #include "version.h"
 
 /**
- * \brief CompareTree is a QTreeView widget
- *        to display the files of a git version or
- *        changed files between two or more git versions.
+ * \brief TagTree is a replacement for tagwidget/taglist.
+ *        The tabs are now the top level of the tree representation.
+ *        Search Result, HEAD, Release Label, Baseline Label, ...
+ *        If a search pattern is entered, all matching versions are listed
+ *        under the Search Result node.
+ *        Under HEAD, Release Label, Baseline Label, ...
+ *        the matching tag information is listed and one level below the
+ *        matching versions.
  */
 class TagTree : public QTreeView
 {
     Q_OBJECT
 public:
-    TagTree(QWidget* _parent = NULL);
+    TagTree(class GraphWidget* _graph, class MainWindow* _mwin);
 
-    void setMainWindow(class MainWindow* _mwin);
-    void setGraphWidget(class GraphWidget* _graph);
-
-    // remove all current data
+    // reset/init tree
     void resetTagTree();
 
+    // add information
     void addData(const Version* _v);
+
+    // compress last tree level
     void compress(QStandardItem* _p = NULL);
+
+    // import mathing versions from search dialog
     void updateSearchResult(QList<Version*>& _matches);
 
 protected:
+    // construct tree
+    QStandardItem* findOrInsert(QStandardItem* _p, const QString& _val);
+    void insertLeaf(QStandardItem* _p, const QString& _timestamp, const Version* _v);
+
+    // create a list of all selected version nodes
     void collectSubitems(const QModelIndex& _p, QList<Version*>& _collect);
-    QStandardItemModel* treemodel;
+
+    // block right button to allow context menu
     virtual void mousePressEvent (QMouseEvent* event);
 
 public slots:
-    // show context menu
+    // context menu to expand or collapse the whole tree
     void onCustomContextMenu(const QPoint& point);
 
 protected slots:
+    // focus selection in main view
     void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 
-
 protected:
-    class MainWindow* mwin;
     class GraphWidget* graph;
+    class MainWindow* mwin;
+    QStandardItemModel* treemodel;
     QStandardItem* root;
 };
 

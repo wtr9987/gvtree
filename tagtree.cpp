@@ -26,7 +26,7 @@
 
 using namespace std;
 
-TagTree::TagTree(QWidget* _parent) : QTreeView(_parent)
+TagTree::TagTree(GraphWidget* _graph, MainWindow* _mwin) : QTreeView(_mwin), graph(_graph), mwin(_mwin), treemodel(NULL), root(NULL)
 {
     setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -39,9 +39,9 @@ TagTree::TagTree(QWidget* _parent) : QTreeView(_parent)
     resetTagTree();
 
 #if QT_VERSION >= 0x51400
-    header()->setSectionResizeMode(QHeaderView::Interactive);
+    header()->setSectionResizeMode(QHeaderView::Stretch);
 #else
-    header()->setResizeMode(QHeaderView::Interactive);
+    header()->setResizeMode(QHeaderView::Stretch);
 #endif
 
     show();
@@ -82,29 +82,21 @@ void TagTree::updateSearchResult(QList<Version*>& _matches)
 
 void TagTree::compress(QStandardItem* _p)
 {
-    if (_p == NULL)
-        _p = root;
+    _p = (_p == NULL) ? root : _p;
 
-    int rows = _p->rowCount();
-    if (rows == 1)
+    if (_p->rowCount() == 1 && !_p->child(0, 0)->hasChildren())
     {
-        if (_p->child(0, 0)->hasChildren() == false)
+        QStandardItem* c = _p->takeChild(0, 1);
+        if (c && c->data(Qt::UserRole + 1).value<VersionPointer>())
         {
-            QStandardItem* c1 = _p->takeChild(0, 1);
-            Version* v = c1 ? c1->data(Qt::UserRole + 1).value<VersionPointer>() : NULL;
-            if (c1 && v)
-            {
-                _p->parent()->setChild(_p->row(), 1, c1);
-                treemodel->removeRow(0, _p->index());
-                return;
-            }
+            _p->parent()->setChild(_p->row(), 1, c);
+            treemodel->removeRow(0, _p->index());
+            return;
         }
     }
-    for (int i = 0; i < rows; i++)
-    {
-        if (_p->child(i))
-            compress(_p->child(i));
-    }
+
+    for (int i = 0; i < _p->rowCount(); i++)
+        compress(_p->child(i));
 }
 
 void TagTree::addData(const Version* _v)
@@ -125,25 +117,8 @@ void TagTree::addData(const Version* _v)
         else if (key == "CommentRaw")
             key = "Comment";
 
-        QStandardItem* p = root;
-
         // level 1 : taginfo key
-        bool skip = false;
-        for (int i = 0; i < p->rowCount(); i++)
-        {
-            QStandardItem* t = p->child(i);
-            if (t->text() == key)
-            {
-                p = t;
-                skip = true;
-                break;
-            }
-        }
-        if (!skip)
-        {
-            // std::cerr << "TODO new key information? " << key.toUtf8().data() << std::endl;
-            continue;
-        }
+        QStandardItem* p = findOrInsert(root, key);
 
         if (key == "Commit Date")
         {
@@ -157,65 +132,42 @@ void TagTree::addData(const Version* _v)
 
             foreach(const QString &tmp, ts)
             {
-                bool skip = false;
-
-                for (int i = 0; i < p->rowCount(); i++)
-                {
-                    QStandardItem* t = p->child(i);
-                    if (t->text() == tmp)
-                    {
-                        p = t;
-                        skip = true;
-                        break;
-                    }
-                }
-                if (skip == false)
-                {
-                    QStandardItem* t = new QStandardItem(tmp);
-                    t->setEditable(false);
-                    p->appendRow(t);
-                    p = t;
-                }
+                p = findOrInsert(p, tmp);
             }
+
+            insertLeaf(p, timestamp, _v);
         }
         else
         {
-            // level 2 different values
             foreach(const QString &val, it.value())
             {
-                bool skip = false;
-
-                for (int i = 0; i < p->rowCount(); i++)
-                {
-                    QStandardItem* t = p->child(i);
-                    if (t->text() == val)
-                    {
-                        p = t;
-                        skip = true;
-                        break;
-                    }
-                }
-                if (skip == false)
-                {
-                    QStandardItem* t = new QStandardItem(val);
-                    t->setEditable(false);
-                    p->appendRow(t);
-                    p = t;
-                }
+                insertLeaf(findOrInsert(p, val), timestamp, _v);
             }
         }
-
-        // add leaf info...
-        QList<QStandardItem*> columns;
-        QStandardItem* t = new QStandardItem("");
-        t->setEditable(false);
-        columns << t;
-        t = new QStandardItem(timestamp);
-        t->setData(QVariant::fromValue(VersionPointer(_v)), Qt::UserRole + 1);
-        t->setEditable(false);
-        columns << t;
-        p->appendRow(columns);
     }
+}
+
+QStandardItem* TagTree::findOrInsert(QStandardItem* _p, const QString& _val)
+{
+    for (int i = 0; i < _p->rowCount(); i++)
+    {
+        if (_p->child(i)->text() == _val)
+            return _p->child(i);
+    }
+
+    QStandardItem* t = new QStandardItem(_val);
+    t->setEditable(false);
+    _p->appendRow(t);
+    return t;
+}
+
+void TagTree::insertLeaf(QStandardItem* _p, const QString& _timestamp, const Version* _v)
+{
+    QList<QStandardItem*> columns;
+    columns << new QStandardItem("") << new QStandardItem(_timestamp);
+    columns.back()->setData(QVariant::fromValue(VersionPointer(_v)), Qt::UserRole + 1);
+    columns.back()->setEditable(false);
+    _p->appendRow(columns);
 }
 
 void TagTree::resetTagTree()
@@ -227,10 +179,10 @@ void TagTree::resetTagTree()
 
     treemodel->setHorizontalHeaderItem(0, new QStandardItem(QString("Tag Information")));
     treemodel->setHorizontalHeaderItem(1, new QStandardItem(QString("Commit Date")));
-    // treemodel->setHorizontalHeaderItem(2, new QStandardItem(QString("Hash")));
 
     root = treemodel->invisibleRootItem();
     root->setEditable(false);
+
     QStringList nodeInfo;
     nodeInfo << "Search Result"
              << "HEAD"
@@ -269,16 +221,6 @@ void TagTree::onCustomContextMenu(const QPoint& point)
     menu->exec(viewport()->mapToGlobal(point));
 }
 
-void TagTree::setMainWindow(class MainWindow* _mwin)
-{
-    mwin = _mwin;
-}
-
-void TagTree::setGraphWidget(class GraphWidget* _graph)
-{
-    graph = _graph;
-}
-
 void TagTree::mousePressEvent (QMouseEvent* event)
 {
     if (event->button() == Qt::RightButton)
@@ -307,6 +249,7 @@ void TagTree::selectionChanged(const QItemSelection& selected, const QItemSelect
                 QList<Version*> collect;
                 collectSubitems(idx, collect);
                 graph->focusElements(collect);
+                break;
             }
         }
     }

@@ -122,9 +122,7 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
     QDockWidget* dock = NULL;
 
     // -- create new 
-    tagtree = new TagTree(this);
-    tagtree->setMainWindow(this);
-    tagtree->setGraphWidget(graphwidget);
+    tagtree = new TagTree(graphwidget, this);
     dock = new QDockWidget(tr("Version Information"), this);
     dock->setObjectName("Version Information");
     dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
