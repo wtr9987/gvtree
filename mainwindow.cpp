@@ -17,7 +17,7 @@
 
 #include <QApplication>
 
-#if QT_VERSION >= 0x51400
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
 #include <QScreen>
 #else
 #include <QTextCodec>
@@ -596,7 +596,7 @@ void MainWindow::restoreWindowSettings()
         // results in an effective negative x and/or y offset for the window.
         move(0, 0);
 
-#if QT_VERSION >= 0x51400
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
         QRect rootRect;
         QList<QScreen*> screens = QGuiApplication::screens();
         if (screens.size() > 0)
@@ -1224,7 +1224,7 @@ void MainWindow::saveChangedSettings()
 
     bool forceUpdate = false;
 
-#if QT_VERSION < 0x51400
+#if QT_VERSION < QT_VERSION_CHECK(5,0,0)
     QString codec = gvtree_preferences.cbCodecForCStrings->currentText();
     if (settings.value("codecForCStrings").toString() != codec)
     {
@@ -1488,7 +1488,7 @@ void MainWindow::updateGitStatus(const QString& _repoPath)
 bool MainWindow::initCbCodecForCStrings(QString _default)
 {
     gvtree_preferences.cbCodecForCStrings->clear();
-#if QT_VERSION >= 0x51400
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
     Q_UNUSED(_default);
     gvtree_preferences.cbCodecForCStrings->addItem(QString("UTF-8"));
     gvtree_preferences.cbCodecForCStrings->setCurrentIndex(0);

@@ -84,7 +84,8 @@ DISTFILES += $$SOURCEFILES \
   doc/images/f15.png \
   doc/images/f16.png \
   doc/images/f17.png \
-  doc/images/f18.png \
+  doc/images/f18a.png \
+  doc/images/f18b.png \
   doc/images/f20.png \
   doc/images/f21.png \
   doc/images/f22.png \
@@ -107,7 +108,8 @@ DISTFILES += $$SOURCEFILES \
   doc/images/f39.png \
   doc/images/f40.png \
   doc/images/f41.png \
-  doc/images/f42.png \
+  doc/images/f42a.png \
+  doc/images/f42b.png \
   doc/images/f43.png \
   doc/images/f44.png \
   doc/images/f45.png \

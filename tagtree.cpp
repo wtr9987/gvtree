@@ -38,7 +38,7 @@ TagTree::TagTree(GraphWidget* _graph, MainWindow* _mwin) : QTreeView(_mwin), gra
 
     resetTagTree();
 
-#if QT_VERSION >= 0x51400
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
     header()->setSectionResizeMode(QHeaderView::Stretch);
 #else
     header()->setResizeMode(QHeaderView::Stretch);
@@ -87,7 +87,7 @@ void TagTree::compress(QStandardItem* _p)
     if (_p->rowCount() == 1 && !_p->child(0, 0)->hasChildren())
     {
         QStandardItem* c = _p->takeChild(0, 1);
-        if (c && c->data(Qt::UserRole + 1).value<VersionPointer>())
+        if (c && c->data(Qt::UserRole + 1).value<VersionPointer>() && _p->parent())
         {
             _p->parent()->setChild(_p->row(), 1, c);
             treemodel->removeRow(0, _p->index());
