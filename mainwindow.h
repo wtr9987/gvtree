@@ -29,6 +29,7 @@
 #include <QStringList>
 #include <QTextBrowser>
 #include <QTreeView>
+#include <QRegExp>
 
 #include "graphwidget.h"
 #include "tagprefgridlayout.h"
@@ -76,7 +77,6 @@ public:
     bool getShortHashes() const;
     bool getTopDownView() const;
     bool getRemotes() const;
-    bool getFoldHead() const;
     bool getOpenGLRendering() const;
     bool getDiffLocalFiles() const;
     int getConnectorStyle() const;
@@ -85,6 +85,7 @@ public:
     QString getTempPath() const;
     bool getPrintCmdToStdout() const;
     void getCommentProperties(int& _columns, int& _limit) const;
+    bool getVersionIsFoldable(const QMap<QString, QStringList>& _keyinformation) const;
 
     //
     Ui_Dialog& getPreferences();
@@ -236,6 +237,7 @@ private:
     QDockWidget* searchDock;
     QDockWidget* branchDock;
     QStringList nodeInfo;
+    QRegExp foldNotRegExp;
 };
 
 #endif

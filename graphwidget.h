@@ -260,7 +260,6 @@ private:
     bool shortHashes;
     bool topDownView;
     bool remotes;
-    bool foldHead;
     int xfactor;
     int yfactor;
     int commentColumns;

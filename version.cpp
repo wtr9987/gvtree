@@ -389,15 +389,14 @@ void Version::processGitLogTagInformation(const QString& _tagInfo)
             tags << str.trimmed();
         }
 
-        QStringList scanItems;
-        scanItems
-            << QString("HEAD")
-            << QString("Release Label")
-            << QString("Baseline Label")
-            << QString("FIX/PQT Label")
-            << QString("HO Label")
-            << QString("Branch")
-            << QString("Other Tags");
+        QStringList scanItems (QStringList()
+                               << QString("HEAD")
+                               << QString("Release Label")
+                               << QString("Baseline Label")
+                               << QString("FIX/PQT Label")
+                               << QString("HO Label")
+                               << QString("Branch")
+                               << QString("Other Tags"));
 
         foreach(const QString &it, scanItems)
         {
@@ -658,9 +657,9 @@ void Version::collectFolderVersions(Version* _rootNode, Version* _parent)
     if (_parent
         && _parent != _rootNode
         && _parent->getNumOutEdges() == 1
-        && getNumOutEdges() <= 1
+        //&& getNumOutEdges() <= 1
         && (numEdges() - getNumOutEdges() <= 1)
-        && isFoldable()
+        && _parent->isFoldable()
        )
     {
         addToFolder(_parent);
@@ -963,6 +962,7 @@ bool Version::isFoldable() const
 {
     return foldable;
 }
+
 void Version::setIsFoldable(bool _val)
 {
     foldable = _val;

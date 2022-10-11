@@ -75,7 +75,6 @@ GraphWidget::GraphWidget(MainWindow* _parent)
     shortHashes(false),
     topDownView(false),
     remotes(false),
-    foldHead(false),
     xfactor(1),
     yfactor(1),
     commentColumns(-1),
@@ -90,7 +89,6 @@ GraphWidget::GraphWidget(MainWindow* _parent)
         shortHashes = mwin->getShortHashes();
         topDownView = mwin->getTopDownView();
         remotes = mwin->getRemotes();
-        foldHead = mwin->getFoldHead();
     }
 
     // scene
@@ -133,10 +131,9 @@ void GraphWidget::test()
 {
     QMap<QString, Version*> nodes;
 
-    QStringList nodeNames;
-
-    nodeNames << "A" << "B" << "C" << "D" << "E" << "F" << "G" << "H"
-              << "I" << "J" << "K" << "L" << "M" << "N" << "O";
+    QStringList nodeNames = (QStringList()
+                             << "A" << "B" << "C" << "D" << "E" << "F" << "G" << "H"
+                             << "I" << "J" << "K" << "L" << "M" << "N" << "O");
 
     foreach (const QString &n, nodeNames)
     {
@@ -149,10 +146,9 @@ void GraphWidget::test()
         scene()->addItem(nodes[n]);
     }
 
-    QStringList edgeData;
-
-    edgeData << "OE" << "OF" << "ON" << "EA" << "ED" << "DB" << "DC" << "NG"
-             << "NM" << "MH" << "MI" << "MJ" << "MK" << "ML";
+    QStringList edgeData = (QStringList()
+                            << "OE" << "OF" << "ON" << "EA" << "ED" << "DB" << "DC" << "NG"
+                            << "NM" << "MH" << "MI" << "MJ" << "MK" << "ML");
 
     foreach (const QString &e, edgeData)
     {
@@ -790,6 +786,9 @@ void GraphWidget::process(QList<QString> _cache)
                 keyInformationCache[hash] = v->getKeyInformation();
             }
 
+            //
+            v->setIsFoldable(mwin->getVersionIsFoldable(v->getKeyInformation()));
+
             mwin->getTagTree()->addData(v);
 
             // main?
@@ -823,8 +822,6 @@ void GraphWidget::process(QList<QString> _cache)
     }
 
     localHeadVersion = gitlogSingle();
-    if (localHeadVersion)
-        localHeadVersion->setIsFoldable(foldHead);
 
     rootVersion->collectFolderVersions(rootVersion, NULL);
     normalizeGraph();
@@ -972,9 +969,7 @@ void GraphWidget::compareVersions(Version* _v1, Version* _v2)
 
     fillCompareWidgetFromToInfo();
 
-    QStringList fromVersionHashes;
-
-    fromVersionHashes.push_back(_v1->getHash());
+    QStringList fromVersionHashes(_v1->getHash());
     compareTree->compareHashes(fromVersionHashes, _v2->getHash());
 
     // ensure visibility of Compare Versions dock
@@ -1399,12 +1394,6 @@ void GraphWidget::preferencesUpdated(bool _forceUpdate)
     if (remotes != mwin->getRemotes())
     {
         remotes = mwin->getRemotes();
-        updateAll = true;
-    }
-
-    if (foldHead != mwin->getFoldHead())
-    {
-        foldHead = mwin->getFoldHead();
         updateAll = true;
     }
 

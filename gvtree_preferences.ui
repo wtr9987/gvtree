@@ -37,7 +37,7 @@
    <item row="1" column="1" colspan="2">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="tabWidgetPage1">
       <property name="statusTip">
@@ -79,7 +79,7 @@
          </layout>
         </widget>
        </item>
-       <item row="22" column="1">
+       <item row="21" column="1">
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -119,7 +119,7 @@
          </property>
         </widget>
        </item>
-       <item row="13" column="1">
+       <item row="12" column="1">
         <widget class="QCheckBox" name="top_down_view">
          <property name="toolTip">
           <string>In git log the latest version is printed on the top. To print the earliest node (root node) at the top, choose the top down view here.</string>
@@ -201,7 +201,7 @@
          </property>
         </spacer>
        </item>
-       <item row="15" column="1">
+       <item row="14" column="1">
         <widget class="QCheckBox" name="print_cmd_to_stdout">
          <property name="toolTip">
           <string>If an external program is called from gvtree the used commandline is echoed to stdout.</string>
@@ -260,7 +260,7 @@
          </property>
         </widget>
        </item>
-       <item row="14" column="1">
+       <item row="13" column="1">
         <widget class="QCheckBox" name="diff_local_files">
          <property name="focusPolicy">
           <enum>Qt::NoFocus</enum>
@@ -275,13 +275,6 @@
        </item>
        <item row="5" column="2">
         <widget class="QComboBox" name="cbCodecForCStrings"/>
-       </item>
-       <item row="12" column="1">
-        <widget class="QCheckBox" name="fold_head">
-         <property name="text">
-          <string>fold HEAD version</string>
-         </property>
-        </widget>
        </item>
       </layout>
      </widget>
@@ -561,10 +554,7 @@
        <string>Tag Settings</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_5">
-       <item row="0" column="0" rowspan="98">
-        <layout class="QVBoxLayout" name="verticalLayout_3"/>
-       </item>
-       <item row="99" column="0" colspan="2">
+       <item row="100" column="0" colspan="2">
         <widget class="QGroupBox" name="groupBox_5">
          <property name="title">
           <string>Comment dimensions</string>
@@ -598,6 +588,77 @@
            <widget class="QLabel" name="label_2">
             <property name="text">
              <string>Length</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="0" column="0" rowspan="98" colspan="2">
+        <layout class="QVBoxLayout" name="verticalLayout_3"/>
+       </item>
+       <item row="99" column="0" colspan="2">
+        <widget class="QGroupBox" name="groupBox_6">
+         <property name="title">
+          <string>Do not hide in folder</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_9">
+          <item row="4" column="1">
+           <widget class="QCheckBox" name="fold_no_branch">
+            <property name="text">
+             <string>Branch tag</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1" colspan="3">
+           <widget class="QLineEdit" name="fold_not_regexp"/>
+          </item>
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="fold_no_tag">
+            <property name="text">
+             <string>any tag</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QCheckBox" name="fold_no_head">
+            <property name="text">
+             <string>HEAD</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QCheckBox" name="fold_not_pattern">
+            <property name="text">
+             <string>tag with pattern</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QCheckBox" name="fold_no_release">
+            <property name="text">
+             <string>Release Label</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QCheckBox" name="fold_no_baseline">
+            <property name="text">
+             <string>Baseline Label</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="2">
+           <widget class="QCheckBox" name="fold_no_FIXPQT">
+            <property name="text">
+             <string>FIX/PQT Label</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="3">
+           <widget class="QCheckBox" name="fold_no_HO">
+            <property name="text">
+             <string>HO Label</string>
             </property>
            </widget>
           </item>

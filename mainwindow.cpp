@@ -121,7 +121,7 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
     // create dock widgets
     QDockWidget* dock = NULL;
 
-    // -- create new 
+    // -- create new
     tagtree = new TagTree(graphwidget, this);
     dock = new QDockWidget(tr("Version Information"), this);
     dock->setObjectName("Version Information");
@@ -459,11 +459,11 @@ void MainWindow::restorePreferencesSettings()
     initCbCodecForCStrings(settings.value("codecForCStrings").toString());
 
     if (!settings.contains("comment_columns"))
-      settings.setValue("comment_columns", 0); // unlimited
+        settings.setValue("comment_columns", 0); // unlimited
     gvtree_preferences.comment_columns->setValue(settings.value("comment_columns").toInt());
 
     if (!settings.contains("comment_maxlen"))
-      settings.setValue("comment_maxlen", 0); // unlimited
+        settings.setValue("comment_maxlen", 0); // unlimited
     gvtree_preferences.comment_maxlen->setValue(settings.value("comment_maxlen").toInt());
 
     if (!settings.contains("xfactor"))
@@ -507,10 +507,52 @@ void MainWindow::restorePreferencesSettings()
     else
         gvtree_preferences.remotes->setChecked(false);
 
-    if (settings.contains("foldHead") && settings.value("foldHead").toBool())
-        gvtree_preferences.fold_head->setChecked(true);
+    // switches for version folding
+    if (settings.contains("fold_no_head") && settings.value("fold_no_head").toBool())
+        gvtree_preferences.fold_no_head->setChecked(true);
     else
-        gvtree_preferences.fold_head->setChecked(false);
+        gvtree_preferences.fold_no_head->setChecked(false);
+
+    if (settings.contains("fold_no_branch") && settings.value("fold_no_branch").toBool())
+        gvtree_preferences.fold_no_branch->setChecked(true);
+    else
+        gvtree_preferences.fold_no_branch->setChecked(false);
+
+    if (settings.contains("fold_no_release") && settings.value("fold_no_release").toBool())
+        gvtree_preferences.fold_no_release->setChecked(true);
+    else
+        gvtree_preferences.fold_no_release->setChecked(false);
+
+    if (settings.contains("fold_no_baseline") && settings.value("fold_no_baseline").toBool())
+        gvtree_preferences.fold_no_baseline->setChecked(true);
+    else
+        gvtree_preferences.fold_no_baseline->setChecked(false);
+
+    if (settings.contains("fold_no_HO") && settings.value("fold_no_HO").toBool())
+        gvtree_preferences.fold_no_HO->setChecked(true);
+    else
+        gvtree_preferences.fold_no_HO->setChecked(false);
+
+    if (settings.contains("fold_no_FIXPQT") && settings.value("fold_no_FIXPQT").toBool())
+        gvtree_preferences.fold_no_FIXPQT->setChecked(true);
+    else
+        gvtree_preferences.fold_no_FIXPQT->setChecked(false);
+
+    if (settings.contains("fold_no_tag") && settings.value("fold_no_tag").toBool())
+        gvtree_preferences.fold_no_tag->setChecked(true);
+    else
+        gvtree_preferences.fold_no_tag->setChecked(false);
+
+    if (settings.contains("fold_not_pattern") && settings.value("fold_not_pattern").toBool())
+        gvtree_preferences.fold_not_pattern->setChecked(true);
+    else
+        gvtree_preferences.fold_not_pattern->setChecked(false);
+
+    if (settings.contains("fold_not_regexp"))
+    {
+        gvtree_preferences.fold_not_regexp->setText(settings.value("fold_not_regexp").toString());
+        foldNotRegExp = QRegExp(gvtree_preferences.fold_not_regexp->text());
+    }
 
     if (settings.contains("defaultLastRepo")
         && settings.value("defaultLastRepo").toInt())
@@ -582,8 +624,8 @@ void MainWindow::restoreWindowSettings()
 
 void MainWindow::resetCurrentRepository()
 {
-  graphwidget->gitlog(true);
-  refreshRepo->setEnabled(true);
+    graphwidget->gitlog(true);
+    refreshRepo->setEnabled(true);
 }
 
 void MainWindow::restoreLocalRepository()
@@ -1164,11 +1206,6 @@ bool MainWindow::getRemotes() const
     return gvtree_preferences.remotes->isChecked();
 }
 
-bool MainWindow::getFoldHead() const
-{
-    return gvtree_preferences.fold_head->isChecked();
-}
-
 bool MainWindow::getOpenGLRendering() const
 {
     return gvtree_preferences.open_gl_rendering->isChecked();
@@ -1201,7 +1238,39 @@ void MainWindow::saveChangedSettings()
     settings.setValue("openGLRendering", gvtree_preferences.open_gl_rendering->isChecked());
     settings.setValue("diffLocalFile", gvtree_preferences.diff_local_files->isChecked());
     settings.setValue("remotes", gvtree_preferences.remotes->isChecked());
-    settings.setValue("foldHead", gvtree_preferences.fold_head->isChecked());
+
+    forceUpdate = forceUpdate || !settings.contains("fold_no_tag")
+        || settings.value("fold_no_tag").toBool() != gvtree_preferences.fold_no_tag->isChecked()
+        || !settings.contains("fold_no_head")
+        || settings.value("fold_no_head").toBool() != gvtree_preferences.fold_no_head->isChecked()
+        || !settings.contains("fold_no_branch")
+        || settings.value("fold_no_branch").toBool() != gvtree_preferences.fold_no_branch->isChecked()
+        || !settings.contains("fold_no_baseline")
+        || settings.value("fold_no_baseline").toBool() != gvtree_preferences.fold_no_baseline->isChecked()
+        || !settings.contains("fold_no_release")
+        || settings.value("fold_no_release").toBool() != gvtree_preferences.fold_no_release->isChecked()
+        || !settings.contains("fold_no_FIXPQT")
+        || settings.value("fold_no_FIXPQT").toBool() != gvtree_preferences.fold_no_FIXPQT->isChecked()
+        || !settings.contains("fold_no_HO")
+        || settings.value("fold_no_HO").toBool() != gvtree_preferences.fold_no_HO->isChecked()
+        || !settings.contains("fold_not_pattern")
+        || settings.value("fold_not_pattern").toBool() != gvtree_preferences.fold_not_pattern->isChecked()
+        || !settings.contains("fold_not_regexp")
+        || settings.value("fold_not_regexp").toString() != gvtree_preferences.fold_not_pattern->text();
+
+    gvtree_preferences.fold_not_regexp->setText(settings.value("fold_not_regexp").toString());
+    settings.setValue("fold_no_tag", gvtree_preferences.fold_no_tag->isChecked());
+    settings.setValue("fold_no_head", gvtree_preferences.fold_no_head->isChecked());
+    settings.setValue("fold_no_branch", gvtree_preferences.fold_no_branch->isChecked());
+    settings.setValue("fold_no_baseline", gvtree_preferences.fold_no_baseline->isChecked());
+    settings.setValue("fold_no_release", gvtree_preferences.fold_no_release->isChecked());
+    settings.setValue("fold_no_FIXPQT", gvtree_preferences.fold_no_FIXPQT->isChecked());
+    settings.setValue("fold_no_HO", gvtree_preferences.fold_no_HO->isChecked());
+    settings.setValue("fold_not_pattern", gvtree_preferences.fold_not_pattern->isChecked());
+    settings.setValue("fold_not_regexp", gvtree_preferences.fold_not_regexp->text());
+    gvtree_preferences.fold_not_regexp->setText(settings.value("fold_not_regexp").toString());
+    foldNotRegExp = QRegExp(gvtree_preferences.fold_not_regexp->text());
+
     settings.setValue("connectorStyle", getConnectorStyle());
     settings.setValue("defaultLastRepo", gvtree_preferences.rbLastRepo->isChecked() ? 1 : 0);
     settings.setValue("printCmdToStdout", gvtree_preferences.print_cmd_to_stdout->isChecked());
@@ -1221,7 +1290,7 @@ void MainWindow::saveChangedSettings()
     {
         settings.setValue("comment_columns", gvtree_preferences.comment_columns->value());
     }
-    
+
     int comment_maxlen = settings.value("comment_maxlen").toInt();
     if (comment_maxlen != gvtree_preferences.comment_maxlen->value())
     {
@@ -1236,6 +1305,7 @@ void MainWindow::saveChangedSettings()
 void MainWindow::getCommentProperties(int& _columns, int& _limit) const
 {
     QSettings settings;
+
     _columns = settings.value("comment_columns").toInt();
     _limit = settings.value("comment_maxlen").toInt();
 }
@@ -1449,4 +1519,56 @@ QString MainWindow::getSelectedBranch()
 const QStringList& MainWindow::getNodeInfo() const
 {
     return nodeInfo;
+}
+
+bool MainWindow::getVersionIsFoldable(const QMap<QString, QStringList>& _keyinformation) const
+{
+    bool fold_no_head = gvtree_preferences.fold_no_head->isChecked();
+    bool fold_no_branch = gvtree_preferences.fold_no_branch->isChecked();
+    bool fold_no_release = gvtree_preferences.fold_no_release->isChecked();
+    bool fold_no_baseline = gvtree_preferences.fold_no_baseline->isChecked();
+    bool fold_no_HO = gvtree_preferences.fold_no_HO->isChecked();
+    bool fold_no_FIXPQT = gvtree_preferences.fold_no_FIXPQT->isChecked();
+    bool fold_no_tag = gvtree_preferences.fold_no_tag->isChecked();
+    bool fold_not_pattern = gvtree_preferences.fold_not_pattern->isChecked();
+
+    for (QMap<QString, QStringList>::const_iterator it = _keyinformation.begin();
+         it != _keyinformation.end();
+         it++)
+    {
+        if (it.value().size() > 0)
+        {
+            if (it.key() == "HEAD" && (fold_no_tag || fold_no_head))
+                return false;
+
+            if (it.key() == "Release Label" && (fold_no_tag || fold_no_release))
+                return false;
+
+            if (it.key() == "Baseline Label" && (fold_no_tag || fold_no_baseline))
+                return false;
+
+            if (it.key() == "Branch" && (fold_no_tag || fold_no_branch))
+                return false;
+
+            if (it.key() == "FIX/PQT Label" && (fold_no_tag || fold_no_FIXPQT))
+                return false;
+
+            if (it.key() == "HO Label" && (fold_no_tag || fold_no_HO))
+                return false;
+
+            if (it.key() == "Other Tags" && fold_no_tag)
+            {
+                return false;
+            }
+            if (fold_not_pattern && foldNotRegExp.isValid())
+            {
+                foreach(const QString &str, it.value())
+                {
+                    if (foldNotRegExp.indexIn(str, 0) != -1)
+                        return false;
+                }
+            }
+        }
+    }
+    return true;
 }
