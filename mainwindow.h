@@ -59,10 +59,9 @@ public:
     QPushButton* getCompareTreeToPushButton();
     QComboBox* getFromComboBox();
     QLabel* getToDateLabel();
-    QLineEdit* getSearchWidget() const;
-    QDockWidget* getSearchDock();
     QDockWidget* getBranchDock();
     TagTree* getTagTree() const;
+    QDockWidget* getTagTreeDock();
     QString getSelectedBranch();
 
     // dialog to store tools for a certain file type
@@ -124,9 +123,6 @@ public slots:
     void helpDialog();
     void licenseDialog();
     void aboutDialog();
-
-    // search line edit
-    void lookupId(const QString& _text, bool _exactMatch = false);
 
     // select path and apply CSS style sheet file
     void changeCssFilePath();
@@ -209,7 +205,6 @@ protected:
     QWidget* ctwin;
     QWidget* blwin;
     QTreeView* compareTree;
-    QLineEdit* search;
     TagPrefGridLayout* gridLayout;
     BranchList* branchList;
 
@@ -234,7 +229,7 @@ private:
     QFileSystemWatcher* watcher;
     QPushButton* pbRepositoryRefresh;
     QDockWidget* compareTreeDock;
-    QDockWidget* searchDock;
+    QDockWidget* tagTreeDock;
     QDockWidget* branchDock;
     QStringList nodeInfo;
     QRegExp foldNotRegExp;

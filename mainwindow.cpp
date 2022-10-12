@@ -130,6 +130,7 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
     addDockWidget(Qt::RightDockWidgetArea, dock);
     windowmenu->addAction(dock->toggleViewAction());
     dock->hide();
+    tagTreeDock=dock;
 
     // -- create text browser for current git status
     gitstatus = new QTextBrowser(this);
@@ -163,19 +164,6 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
             gvtree_comparetree.compareTree, SLOT(currentIndexChanged(int)));
     connect(gvtree_comparetree.toButton, SIGNAL(pressed()), graphwidget, SLOT(focusToVersion()));
     connect(gvtree_comparetree.fromButton, SIGNAL(pressed()), graphwidget, SLOT(focusFromVersion()));
-
-    // -- line dialog to search nodes by hash, date, tag or branch information
-    search = new QLineEdit(this);
-    connect(search, SIGNAL(textEdited(const QString&)), this, SLOT(lookupId(const QString&)));
-
-    dock = new QDockWidget(tr("Search Version"), this);
-    dock->setObjectName("Search Version");
-    dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    dock->setWidget(search);
-    addDockWidget(Qt::RightDockWidgetArea, dock);
-    windowmenu->addAction(dock->toggleViewAction());
-    searchDock = dock;
-    dock->hide();
 
     // -- list of all branches
     blwin = new QWidget;
@@ -397,9 +385,9 @@ QDockWidget* MainWindow::getCompareTreeDock()
     return compareTreeDock;
 }
 
-QDockWidget* MainWindow::getSearchDock()
+QDockWidget* MainWindow::getTagTreeDock()
 {
-    return searchDock;
+    return tagTreeDock;
 }
 
 QDockWidget* MainWindow::getBranchDock()
@@ -1054,29 +1042,6 @@ void MainWindow::aboutDialog()
 void MainWindow::resizeEvent(QResizeEvent* event)
 {
     QMainWindow::resizeEvent(event);
-}
-
-void MainWindow::lookupId(const QString& _text, bool _exactMatch)
-{
-    QList<Version*> matches;
-    if (_text.size() < 3)
-    {
-        graphwidget->resetMatches();
-        QString emptyPattern("");
-        tagtree->updateSearchResult(emptyPattern, matches);
-        return;
-    }
-
-    graphwidget->matchVersions(_text, matches, _exactMatch);
-    tagtree->updateSearchResult(_text, matches);
-
-    if (matches.size() && graphwidget->focusElements(matches))
-        search->setFocus();
-}
-
-QLineEdit* MainWindow::getSearchWidget() const
-{
-    return search;
 }
 
 CompareTree* MainWindow::getCompareTree()

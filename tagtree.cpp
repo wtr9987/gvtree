@@ -26,7 +26,7 @@
 
 using namespace std;
 
-TagTree::TagTree(GraphWidget* _graph, MainWindow* _mwin) : QTreeView(_mwin), graph(_graph), mwin(_mwin), treemodel(NULL), root(NULL)
+TagTree::TagTree(GraphWidget* _graph, MainWindow* _mwin) : QTreeView(_mwin), graph(_graph), mwin(_mwin), treemodel(NULL), root(NULL), search(NULL)
 {
     setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -47,35 +47,27 @@ TagTree::TagTree(GraphWidget* _graph, MainWindow* _mwin) : QTreeView(_mwin), gra
     show();
 }
 
-void TagTree::updateSearchResult(const QString& _pattern, QList<Version*>& _matches)
+void TagTree::updateSearchResult(QList<Version*>& _matches)
 {
-    // remove "Search Result" subttree
-    treemodel->removeRow(0, root->index());
-
-    // insert empty "Search Result" node.
-    QStandardItem* search = new QStandardItem("Search Result");
-    // repeat matching if selected
-    search->setData(_pattern, Qt::UserRole + 1);
-    QList<QStandardItem*> sl;
-    sl.push_back(search);
-    treemodel->insertRow(0, sl);
-
+    // Remove nodes under "Search Result" node
     QStandardItem* p = root->child(0);
+    while (p->rowCount() > 0)
+    {
+        treemodel->removeRow(p->rowCount() - 1, p->index());
+    }
 
     // Insert matches from search dialog
     foreach(Version * v, _matches)
     {
-        QList<QStandardItem*> columns;
-        QString timestamp = v->getKeyInformation().find("Commit Date").value().join(" ");
+        QStandardItem* c1 = new QStandardItem("+");
+        c1->setEditable(false);
 
-        QStandardItem* t = new QStandardItem(timestamp);
-        t->setEditable(false);
-        columns << t;
-        t = new QStandardItem(timestamp);
-        t->setData(QVariant::fromValue(VersionPointer(v)), Qt::UserRole + 1);
-        t->setEditable(false);
-        columns << t;
-        p->appendRow(columns);
+        QStandardItem* c2 = new QStandardItem( v->getKeyInformation().find("Commit Date").value().join(" "));
+        c2->setData(QVariant::fromValue(VersionPointer(v)), Qt::UserRole + 1);
+        c2->setEditable(false);
+
+        QList<QStandardItem*> row = QList<QStandardItem*>() << c1 << c2;
+        p->appendRow(row);
     }
 
     // display search results
@@ -180,7 +172,7 @@ void TagTree::resetTagTree()
     treemodel->clear();
 
     treemodel->setHorizontalHeaderItem(0, new QStandardItem(QString("Tag Information")));
-    treemodel->setHorizontalHeaderItem(1, new QStandardItem(QString("Commit Date")));
+    treemodel->setHorizontalHeaderItem(1, new QStandardItem(QString("")));
 
     root = treemodel->invisibleRootItem();
     root->setEditable(false);
@@ -206,6 +198,10 @@ void TagTree::resetTagTree()
         t->setEditable(false);
         root->appendRow(t);
     }
+
+    search = new QLineEdit(this);
+    connect(search, SIGNAL(textEdited(const QString&)), this, SLOT(lookupId(const QString&)));
+    setIndexWidget(treemodel->index(0, 1), search);
 }
 
 void TagTree::onCustomContextMenu(const QPoint& point)
@@ -266,14 +262,8 @@ void TagTree::collectSubitems(const QModelIndex& _p, QList<Version*>& _collect)
             QString arg = _p.parent().data(Qt::DisplayRole).toString();
             if (arg == "Search Result")
             {
-                // TODO find better way to set localVersionInfo from
-                // search text edit.
-                // Perhaps remove search dock and insert the line edit
-                // into the tagtree widget as a delegate.
-                QString search = _p.parent().data(Qt::UserRole + 1).toString();
-                QRegExp pattern(search);
-
-                v->findMatch(pattern, search, false);
+                QRegExp pattern(search->text());
+                v->findMatch(pattern, search->text(), false);
             }
             else
             {
@@ -291,4 +281,32 @@ void TagTree::collectSubitems(const QModelIndex& _p, QList<Version*>& _collect)
     {
         collectSubitems(treemodel->index(i, 0, _p), _collect);
     }
+}
+
+void TagTree::lookupId(const QString& _text, bool _exactMatch)
+{
+    QString pattern = _text;
+
+    QList<Version*> matches;
+    if (pattern.size() < 3)
+    {
+        graph->resetMatches();
+        pattern = QString("");
+    }
+    else
+    {
+        graph->matchVersions(pattern, matches, _exactMatch);
+
+        if (matches.size())
+            graph->focusElements(matches);
+    }
+    updateSearchResult(matches);
+
+    // keep focus
+    search->setFocus();
+}
+
+QLineEdit* TagTree::getSearch()
+{
+    return search;
 }

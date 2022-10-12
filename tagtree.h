@@ -24,6 +24,7 @@
 #include <QWidget>
 #include <QAction>
 #include <QString>
+#include <QLineEdit>
 
 #include "version.h"
 
@@ -53,7 +54,9 @@ public:
     void compress(QStandardItem* _p = NULL);
 
     // import mathing versions from search dialog
-    void updateSearchResult(const QString& _pattern, QList<Version*>& _matches);
+    void updateSearchResult(QList<Version*>& _matches);
+
+    QLineEdit* getSearch();
 
 protected:
     // construct tree
@@ -73,12 +76,15 @@ public slots:
 protected slots:
     // focus selection in main view
     void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
+    // perform search
+    void lookupId(const QString& _text, bool _exactMatch = false);
 
 protected:
     class GraphWidget* graph;
     class MainWindow* mwin;
     QStandardItemModel* treemodel;
     QStandardItem* root;
+    QLineEdit* search;
 };
 
 #endif

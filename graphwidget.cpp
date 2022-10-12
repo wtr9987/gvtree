@@ -269,8 +269,8 @@ void GraphWidget::keyPressEvent(QKeyEvent* _event)
         case Qt::Key_F:
             if (mwin && Qt::ControlModifier == QApplication::keyboardModifiers())
             {
-                mwin->getSearchDock()->show();
-                mwin->getSearchWidget()->setFocus();
+                mwin->getTagTreeDock()->show();
+                mwin->getTagTree()->getSearch()->setFocus();
             }
             break;
         case Qt::Key_W:
