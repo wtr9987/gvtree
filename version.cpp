@@ -478,14 +478,10 @@ bool Version::findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatc
     if (newmatched != oldmatched
         || localVersionInfo != oldLocalVersionInfo)
     {
-        // Changed to unfold all matching versions...
-        // if (_exactMatch == true && newmatched == true)
-
         if (newmatched == true)
         {
             ensureUnfolded();
         }
-
         setMatched(newmatched);
     }
     return matched;
@@ -556,6 +552,11 @@ void Version::setMatched(bool _val)
         calculateLocalBoundingBox();
         QGraphicsItem::update();
     }
+}
+
+void Version::addLocalVersionInfo(const QString& _val)
+{
+  localVersionInfo.insert(_val);
 }
 
 bool Version::getMatched() const

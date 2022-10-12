@@ -38,7 +38,7 @@ TagTree::TagTree(GraphWidget* _graph, MainWindow* _mwin) : QTreeView(_mwin), gra
 
     resetTagTree();
 
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     header()->setSectionResizeMode(QHeaderView::Stretch);
 #else
     header()->setResizeMode(QHeaderView::Stretch);
@@ -47,13 +47,15 @@ TagTree::TagTree(GraphWidget* _graph, MainWindow* _mwin) : QTreeView(_mwin), gra
     show();
 }
 
-void TagTree::updateSearchResult(QList<Version*>& _matches)
+void TagTree::updateSearchResult(const QString& _pattern, QList<Version*>& _matches)
 {
     // remove "Search Result" subttree
     treemodel->removeRow(0, root->index());
 
     // insert empty "Search Result" node.
     QStandardItem* search = new QStandardItem("Search Result");
+    // repeat matching if selected
+    search->setData(_pattern, Qt::UserRole + 1);
     QList<QStandardItem*> sl;
     sl.push_back(search);
     treemodel->insertRow(0, sl);
@@ -234,23 +236,19 @@ void TagTree::mousePressEvent (QMouseEvent* event)
 void TagTree::selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
 {
     QTreeView::selectionChanged(selected, deselected);
-    const QModelIndexList& sel = selected.indexes();
 
-    if (sel.size() == 0)
+    graph->resetMatches();
+
+    const QModelIndexList& sel = selected.indexes();
+    foreach (const QModelIndex &idx, sel)
     {
-        graph->resetMatches();
-    }
-    else
-    {
-        foreach (const QModelIndex &idx, sel)
+        if (idx.column() == 0)
         {
-            if (idx.column() == 0)
-            {
-                QList<Version*> collect;
-                collectSubitems(idx, collect);
-                graph->focusElements(collect);
-                break;
-            }
+            QList<Version*> collect;
+            collectSubitems(idx, collect);
+
+            graph->focusElements(collect);
+            break;
         }
     }
 }
@@ -265,6 +263,22 @@ void TagTree::collectSubitems(const QModelIndex& _p, QList<Version*>& _collect)
         Version* v = sib.data(Qt::UserRole + 1).value<VersionPointer>();
         if (v)
         {
+            QString arg = _p.parent().data(Qt::DisplayRole).toString();
+            if (arg == "Search Result")
+            {
+                // TODO find better way to set localVersionInfo from
+                // search text edit.
+                // Perhaps remove search dock and insert the line edit
+                // into the tagtree widget as a delegate.
+                QString search = _p.parent().data(Qt::UserRole + 1).toString();
+                QRegExp pattern(search);
+
+                v->findMatch(pattern, search, false);
+            }
+            else
+            {
+                v->addLocalVersionInfo(arg);
+            }
             _collect.push_back(v);
             return;
         }

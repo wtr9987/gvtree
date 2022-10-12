@@ -743,7 +743,7 @@ void MainWindow::createMenus()
     nodeInfo << "HEAD" << "Commit Date" << "User Name" << "Hash" << "Branch" << "Release Label" << "Baseline Label" << "FIX/PQT Label" << "HO Label" << "Other Tags" << "Comment";
 
     QSettings settings;
-    foreach (const QString it, nodeInfo)
+    foreach (const QString& it, nodeInfo)
     {
         QAction* item = new QAction(it, this);
 
@@ -1062,12 +1062,13 @@ void MainWindow::lookupId(const QString& _text, bool _exactMatch)
     if (_text.size() < 3)
     {
         graphwidget->resetMatches();
-        tagtree->updateSearchResult(matches);
+        QString emptyPattern("");
+        tagtree->updateSearchResult(emptyPattern, matches);
         return;
     }
 
     graphwidget->matchVersions(_text, matches, _exactMatch);
-    tagtree->updateSearchResult(matches);
+    tagtree->updateSearchResult(_text, matches);
 
     if (matches.size() && graphwidget->focusElements(matches))
         search->setFocus();

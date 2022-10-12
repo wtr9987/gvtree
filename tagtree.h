@@ -53,7 +53,7 @@ public:
     void compress(QStandardItem* _p = NULL);
 
     // import mathing versions from search dialog
-    void updateSearchResult(QList<Version*>& _matches);
+    void updateSearchResult(const QString& _pattern, QList<Version*>& _matches);
 
 protected:
     // construct tree

@@ -255,7 +255,7 @@ void GraphWidget::mouseReleaseEvent(QMouseEvent* _event)
 void GraphWidget::wheelEvent(QWheelEvent* event)
 {
     pan = false;
-#if QT_VERSION < QT_VERSION_CHECK(5,0,0)
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
     scaleView(pow((double) 1.3, event->delta() / 240.0));
 #else
     scaleView(pow((double) 1.3, event->angleDelta().y() / 240.0));
@@ -1280,14 +1280,24 @@ bool GraphWidget::focusElements(const QString& _text, bool _exactMatch)
 
 bool GraphWidget::focusElements(const QList<Version*>& _markup)
 {
-    resetMatches();
-
     QList<Version*> hits;
-    foreach(Version * it, _markup)
+    foreach(QGraphicsItem * it, scene()->items())
     {
-        it->setMatched(true);
-        it->ensureUnfolded();
-        hits.push_back(it);
+        if (it->type() != QGraphicsItem::UserType + 1)
+            continue;
+
+        Version* v = dynamic_cast<Version*>(it);
+
+        if (!_markup.contains(v))
+        {
+            v->setMatched(false);
+        }
+        else
+        {
+            v->setMatched(true);
+            v->ensureUnfolded();
+            hits.push_back(v);
+        }
     }
 
     displayHits(hits);
