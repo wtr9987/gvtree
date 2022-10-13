@@ -1222,9 +1222,8 @@ void MainWindow::saveChangedSettings()
         || !settings.contains("fold_not_pattern")
         || settings.value("fold_not_pattern").toBool() != gvtree_preferences.fold_not_pattern->isChecked()
         || !settings.contains("fold_not_regexp")
-        || settings.value("fold_not_regexp").toString() != gvtree_preferences.fold_not_pattern->text();
+        || settings.value("fold_not_regexp").toString() != gvtree_preferences.fold_not_regexp->text();
 
-    gvtree_preferences.fold_not_regexp->setText(settings.value("fold_not_regexp").toString());
     settings.setValue("fold_no_tag", gvtree_preferences.fold_no_tag->isChecked());
     settings.setValue("fold_no_head", gvtree_preferences.fold_no_head->isChecked());
     settings.setValue("fold_no_branch", gvtree_preferences.fold_no_branch->isChecked());
