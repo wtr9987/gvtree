@@ -22,7 +22,6 @@
 #include <QMouseEvent>
 #include <QStandardItemModel>
 #include <QWidget>
-#include <QAction>
 #include <QString>
 #include <QLineEdit>
 
@@ -74,10 +73,12 @@ public slots:
     void onCustomContextMenu(const QPoint& point);
 
 protected slots:
-    // focus selection in main view
+    // focus selected items in main view
     void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
     // perform search
     void lookupId(const QString& _text, bool _exactMatch = false);
+    // change focus to main view
+    void focusGraph();
 
 protected:
     class GraphWidget* graph;

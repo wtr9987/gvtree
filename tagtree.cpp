@@ -18,11 +18,10 @@
 #include <iostream>
 
 #include <QMenu>
-#include <QFileInfo>
+#include <QAction>
 #include "tagtree.h"
 #include "mainwindow.h"
 #include "graphwidget.h"
-#include <unistd.h>
 
 using namespace std;
 
@@ -51,6 +50,7 @@ void TagTree::updateSearchResult(QList<Version*>& _matches)
 {
     // Remove nodes under "Search Result" node
     QStandardItem* p = root->child(0);
+
     while (p->rowCount() > 0)
     {
         treemodel->removeRow(p->rowCount() - 1, p->index());
@@ -60,13 +60,16 @@ void TagTree::updateSearchResult(QList<Version*>& _matches)
     foreach(Version * v, _matches)
     {
         QStandardItem* c1 = new QStandardItem("+");
+
         c1->setEditable(false);
 
-        QStandardItem* c2 = new QStandardItem( v->getKeyInformation().find("Commit Date").value().join(" "));
+        QStandardItem* c2 = new QStandardItem(v->getKeyInformation().find("Commit Date").value().join(" "));
+
         c2->setData(QVariant::fromValue(VersionPointer(v)), Qt::UserRole + 1);
         c2->setEditable(false);
 
         QList<QStandardItem*> row = QList<QStandardItem*>() << c1 << c2;
+
         p->appendRow(row);
     }
 
@@ -98,6 +101,7 @@ void TagTree::addData(const Version* _v)
     QString timestamp;
 
     QMap<QString, QStringList>::const_iterator dt = _v->getKeyInformation().find("Commit Date");
+
     if (dt != _v->getKeyInformation().end())
         timestamp = dt.value().join(" ");
 
@@ -124,7 +128,7 @@ void TagTree::addData(const Version* _v)
             QStringList ts;
             ts << year << month << day << daytime;
 
-            foreach(const QString &tmp, ts)
+            foreach(const QString& tmp, ts)
             {
                 p = findOrInsert(p, tmp);
             }
@@ -133,7 +137,7 @@ void TagTree::addData(const Version* _v)
         }
         else
         {
-            foreach(const QString &val, it.value())
+            foreach(const QString& val, it.value())
             {
                 insertLeaf(findOrInsert(p, val), timestamp, _v);
             }
@@ -150,6 +154,7 @@ QStandardItem* TagTree::findOrInsert(QStandardItem* _p, const QString& _val)
     }
 
     QStandardItem* t = new QStandardItem(_val);
+
     t->setEditable(false);
     _p->appendRow(t);
     return t;
@@ -158,6 +163,7 @@ QStandardItem* TagTree::findOrInsert(QStandardItem* _p, const QString& _val)
 void TagTree::insertLeaf(QStandardItem* _p, const QString& _timestamp, const Version* _v)
 {
     QList<QStandardItem*> columns;
+
     columns << new QStandardItem("") << new QStandardItem(_timestamp);
     columns.back()->setData(QVariant::fromValue(VersionPointer(_v)), Qt::UserRole + 1);
     columns.back()->setEditable(false);
@@ -178,6 +184,7 @@ void TagTree::resetTagTree()
     root->setEditable(false);
 
     QStringList nodeInfo;
+
     nodeInfo << "Search Result"
              << "HEAD"
              << "Release Label"
@@ -191,7 +198,7 @@ void TagTree::resetTagTree()
              << "Comment"  // ... don't know if useful, maby not
              << "Hash"; // ... not useful, use search instead
 
-    foreach(const QString &key, nodeInfo)
+    foreach(const QString& key, nodeInfo)
     {
         QStandardItem* t = new QStandardItem(key);
 
@@ -201,6 +208,7 @@ void TagTree::resetTagTree()
 
     search = new QLineEdit(this);
     connect(search, SIGNAL(textEdited(const QString&)), this, SLOT(lookupId(const QString&)));
+    connect(search, SIGNAL(returnPressed()), this, SLOT(focusGraph()));
     setIndexWidget(treemodel->index(0, 1), search);
 }
 
@@ -236,7 +244,8 @@ void TagTree::selectionChanged(const QItemSelection& selected, const QItemSelect
     graph->resetMatches();
 
     const QModelIndexList& sel = selected.indexes();
-    foreach (const QModelIndex &idx, sel)
+
+    foreach (const QModelIndex& idx, sel)
     {
         if (idx.column() == 0)
         {
@@ -288,6 +297,7 @@ void TagTree::lookupId(const QString& _text, bool _exactMatch)
     QString pattern = _text;
 
     QList<Version*> matches;
+
     if (pattern.size() < 3)
     {
         graph->resetMatches();
@@ -304,6 +314,11 @@ void TagTree::lookupId(const QString& _text, bool _exactMatch)
 
     // keep focus
     search->setFocus();
+}
+
+void TagTree::focusGraph()
+{
+    graph->setFocus();
 }
 
 QLineEdit* TagTree::getSearch()

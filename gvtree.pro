@@ -108,8 +108,7 @@ DISTFILES += $$SOURCEFILES \
   doc/images/f39.png \
   doc/images/f40.png \
   doc/images/f41.png \
-  doc/images/f42a.png \
-  doc/images/f42b.png \
+  doc/images/f42.png \
   doc/images/f43.png \
   doc/images/f44.png \
   doc/images/f45.png \
