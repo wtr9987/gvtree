@@ -128,6 +128,8 @@ public:
     void setMatched(bool _val);
     bool getMatched() const;
 
+    void addLocalVersionInfo(const QString& _val);
+
     void setUpdateBoundingRect(bool _val);
     bool findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatch = false);
     void collectFolderVersions(Version* _rootNode, Version* _parent);

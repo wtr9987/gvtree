@@ -29,10 +29,11 @@
 #include <QStringList>
 #include <QTextBrowser>
 #include <QTreeView>
+#include <QRegExp>
 
 #include "graphwidget.h"
 #include "tagprefgridlayout.h"
-#include "tagwidget.h"
+#include "tagtree.h"
 #include "branchlist.h"
 #include "ui_gvtree_comparetree.h"
 #include "ui_gvtree_difftool.h"
@@ -58,10 +59,9 @@ public:
     QPushButton* getCompareTreeToPushButton();
     QComboBox* getFromComboBox();
     QLabel* getToDateLabel();
-    QLineEdit* getSearchWidget() const;
-    QDockWidget* getSearchDock();
     QDockWidget* getBranchDock();
-    TagWidget* getTagWidget() const;
+    TagTree* getTagTree() const;
+    QDockWidget* getTagTreeDock();
     QString getSelectedBranch();
 
     // dialog to store tools for a certain file type
@@ -76,7 +76,6 @@ public:
     bool getShortHashes() const;
     bool getTopDownView() const;
     bool getRemotes() const;
-    bool getFoldHead() const;
     bool getOpenGLRendering() const;
     bool getDiffLocalFiles() const;
     int getConnectorStyle() const;
@@ -85,6 +84,7 @@ public:
     QString getTempPath() const;
     bool getPrintCmdToStdout() const;
     void getCommentProperties(int& _columns, int& _limit) const;
+    bool getVersionIsFoldable(const QMap<QString, QStringList>& _keyinformation) const;
 
     //
     Ui_Dialog& getPreferences();
@@ -123,9 +123,6 @@ public slots:
     void helpDialog();
     void licenseDialog();
     void aboutDialog();
-
-    // search line edit
-    void lookupId(const QString& _text, bool _exactMatch = false);
 
     // select path and apply CSS style sheet file
     void changeCssFilePath();
@@ -188,7 +185,7 @@ protected:
     // update git status on reload
     void updateGitStatus(const QString& _repoPath);
 
-    TagWidget* tagwidget;
+    TagTree* tagtree;
 
     QTextBrowser* gitstatus;
 
@@ -208,7 +205,6 @@ protected:
     QWidget* ctwin;
     QWidget* blwin;
     QTreeView* compareTree;
-    QLineEdit* search;
     TagPrefGridLayout* gridLayout;
     BranchList* branchList;
 
@@ -233,9 +229,10 @@ private:
     QFileSystemWatcher* watcher;
     QPushButton* pbRepositoryRefresh;
     QDockWidget* compareTreeDock;
-    QDockWidget* searchDock;
+    QDockWidget* tagTreeDock;
     QDockWidget* branchDock;
     QStringList nodeInfo;
+    QRegExp foldNotRegExp;
 };
 
 #endif

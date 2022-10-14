@@ -42,7 +42,7 @@ void CompareTree::compareHashes(const QStringList& _hash1, const QString& _hash2
     treemodel->setHorizontalHeaderItem(0, new QStandardItem(QString("Path")));
     treemodel->setHorizontalHeaderItem(1, new QStandardItem(QString("File")));
 
-#if QT_VERSION >= 0x050000
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
     header()->setSectionResizeMode(QHeaderView::Stretch);
 #else
     header()->setResizeMode(QHeaderView::Stretch);
@@ -386,7 +386,7 @@ void CompareTree::viewLocalChanges(bool _staged)
     treemodel->setHorizontalHeaderItem(0, new QStandardItem(QString("Path")));
     treemodel->setHorizontalHeaderItem(1, new QStandardItem(QString("File")));
 
-#if QT_VERSION >= 0x050000
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
     header()->setSectionResizeMode(QHeaderView::Stretch);
 #else
     header()->setResizeMode(QHeaderView::Stretch);
@@ -472,7 +472,7 @@ void CompareTree::viewThisVersion(const QString& _hash)
     treemodel->setHorizontalHeaderItem(0, new QStandardItem(QString("Path")));
     treemodel->setHorizontalHeaderItem(1, new QStandardItem(QString("File")));
 
-#if QT_VERSION >= 0x050000
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
     header()->setSectionResizeMode(QHeaderView::Stretch);
 #else
     header()->setResizeMode(QHeaderView::Stretch);

@@ -4,7 +4,7 @@ DEPENDPATH += .
 INCLUDEPATH += . 
 VERSION = -1.3-0
 RC_ICONS = gvtree.ico
-CPPFLAGS += -g
+CPPFLAGS += -O3
 QT += opengl widgets
 INSTALLS += target documentation
 
@@ -29,8 +29,7 @@ HEADERS += \
         execute_cmd.h \
         tagpreference.h \
         tagprefgridlayout.h \
-        taglist.h \
-        tagwidget.h \
+        tagtree.h \
         branchlist.h \
         mimetable.h \
         fromtoinfo.h 
@@ -55,8 +54,7 @@ SOURCES += \
         execute_cmd.cpp \
         tagpreference.cpp \
         tagprefgridlayout.cpp \
-        taglist.cpp \
-        tagwidget.cpp \
+        tagtree.cpp \
         branchlist.cpp \
         mimetable.cpp \
         fromtoinfo.cpp
@@ -86,7 +84,8 @@ DISTFILES += $$SOURCEFILES \
   doc/images/f15.png \
   doc/images/f16.png \
   doc/images/f17.png \
-  doc/images/f18.png \
+  doc/images/f18a.png \
+  doc/images/f18b.png \
   doc/images/f20.png \
   doc/images/f21.png \
   doc/images/f22.png \

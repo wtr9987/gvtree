@@ -28,7 +28,7 @@ MimeTable::MimeTable(QWidget* _parent) : QTableWidget(_parent)
 
     horizontalHeader()->setStretchLastSection(true);
     horizontalHeader()->setHighlightSections(false);
-#if QT_VERSION >= 0x050000
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
     horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     horizontalHeader()->setSectionsClickable(false);
 #else

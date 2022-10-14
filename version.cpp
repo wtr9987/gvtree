@@ -235,14 +235,18 @@ void Version::paint(QPainter* _painter, const QStyleOptionGraphicsItem* _option,
             if (globalVersionInfo.contains(info)
                 || localVersionInfo.contains(info))
             {
-                QMap<QString, QStringList>::iterator kit = keyInformation.find(info);
+                QMap<QString, QStringList>::const_iterator kit = keyInformation.find(info);
                 if (kit != keyInformation.end())
                 {
                     drawTextBox(info, kit.value(), height, _painter);
-                    height += 1;
                 }
             }
         }
+
+        // debug : draw bounding box
+        //_painter->setPen(QPen(QColor(255, 0, 0), 0));
+        //_painter->setBrush(QBrush());
+        //_painter->drawRect(localBoundingBox);
     }
 }
 
@@ -306,10 +310,8 @@ bool Version::processGitLogInfo(const QString& _input, const QStringList& _parts
     // tag information
     processGitLogTagInformation(_parts.at(4));
 
-    if (_parts.size() > 5)
-    {
-        processGitLogCommentInformation(_parts.at(5));
-    }
+    // commit comment
+    processGitLogCommentInformation(_parts.at(5));
 
     return true;
 }
@@ -321,20 +323,17 @@ void Version::updateCommentInformation(int _columns, int _maxlen)
     if (commentRaw.size() == 0)
         return;
 
-    int columns = _columns;
-    int maxlen = _maxlen;
-
-    keyInformation[QString("Comment")] = QStringList();
-
-    QString comment = commentRaw.front();
+    QString comment = commentRaw.join(" ");
     QString info = comment;
 
-    if (maxlen)
+    if (_maxlen)
     {
-        info = comment.mid(0, maxlen);
-        if (comment.size() > maxlen)
+        info = comment.mid(0, _maxlen);
+        if (comment.size() > _maxlen)
             info = info + "...";
     }
+
+    keyInformation[QString("Comment")] = QStringList();
 
     int len = 0;
     QString part;
@@ -344,14 +343,15 @@ void Version::updateCommentInformation(int _columns, int _maxlen)
         if (len == 0)
         {
             part = str;
-            len += str.size();
+            len = str.size();
         }
-        else if (columns == 0 || len < columns)
+        else if (_columns == 0 || len < _columns)
         {
             part = part + " " + str;
             len += 1 + str.size();
         }
-        else
+
+        if (_columns && len >= _columns)
         {
             keyInformation[QString("Comment")].push_back(part);
             part = QString();
@@ -389,14 +389,14 @@ void Version::processGitLogTagInformation(const QString& _tagInfo)
             tags << str.trimmed();
         }
 
-        QStringList scanItems;
-        scanItems
-            << QString("HEAD")
-            << QString("Release Label")
-            << QString("Baseline Label")
-            << QString("FIX/PQT Label")
-            << QString("HO Label")
-            << QString("Branch");
+        QStringList scanItems (QStringList()
+                               << QString("HEAD")
+                               << QString("Release Label")
+                               << QString("Baseline Label")
+                               << QString("FIX/PQT Label")
+                               << QString("HO Label")
+                               << QString("Branch")
+                               << QString("Other Tags"));
 
         foreach(const QString &it, scanItems)
         {
@@ -416,8 +416,6 @@ void Version::processGitLogTagInformation(const QString& _tagInfo)
                 }
             }
         }
-
-        keyInformation[QString("Other Tags")] = tags;
     }
 }
 
@@ -429,59 +427,50 @@ bool Version::findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatc
     QSet<QString> oldLocalVersionInfo = localVersionInfo;
     localVersionInfo.clear();
 
-    bool checkDetail = false;
-    QString rawInput = keyInformation["_input"].join(" ");
-    rawInput += " " + keyInformation["Commit Date"].join(" ");
+    QString rawInput = keyInformation["_input"].join(" ")
+        + " " + keyInformation["Commit Date"].join(" ");
 
-    if (_pattern.isValid())
-    {
-        checkDetail = (_pattern.indexIn(rawInput, 0) != -1);
-    }
-    else
-    {
-        checkDetail = (rawInput.indexOf(_text, 0) != -1);
-    }
+    bool checkDetail = _pattern.isValid() ? (_pattern.indexIn(rawInput, 0) != -1) :
+        (rawInput.indexOf(_text, 0) != -1);
 
     if (checkDetail)
     {
-
         for (QMap<QString, QStringList>::iterator kit = keyInformation.begin();
              kit != keyInformation.end();
              kit++)
         {
-
             if (kit.key() == QString("_input"))
                 continue;
 
-            if (_pattern.isValid() && _exactMatch == false)
+            if (_exactMatch == true)
             {
-                QString tmp = kit.value().join(QString(" "));
-                if (_pattern.indexIn(tmp, 0) != -1)
+                foreach (const QString &str, kit.value())
                 {
-                    newmatched = true;
-                    localVersionInfo.insert(kit.key());
+                    if (str == _text)
+                    {
+                        newmatched = true;
+                        if (kit.key() == "CommentRaw")
+                            localVersionInfo.insert("Comment");
+                        else
+                            localVersionInfo.insert(kit.key());
+                        break;
+                    }
                 }
+                if (newmatched)
+                    break;
             }
             else
             {
-                if (_exactMatch == true)
-                {
-                    foreach (const QString &str, kit.value())
-                    {
-                        if (str == _text)
-                        {
-                            newmatched = true;
-                            localVersionInfo.insert(kit.key());
-                            break;
-                        }
-                    }
-                    if (newmatched)
-                        break;
-                }
-                else if (kit.value().join(QString(" ")).indexOf(_text) != -1)
+                QString tmp = kit.value().join(QString(" "));
+
+                if ((_pattern.isValid() && _pattern.indexIn(tmp, 0) != -1)
+                    || (tmp.indexOf(_text) != -1))
                 {
                     newmatched = true;
-                    localVersionInfo.insert(kit.key());
+                    if (kit.key() == "CommentRaw")
+                        localVersionInfo.insert("Comment");
+                    else
+                        localVersionInfo.insert(kit.key());
                 }
             }
         }
@@ -489,14 +478,10 @@ bool Version::findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatc
     if (newmatched != oldmatched
         || localVersionInfo != oldLocalVersionInfo)
     {
-        // Changed to unfold all matching versions...
-        // if (_exactMatch == true && newmatched == true)
-
         if (newmatched == true)
         {
             ensureUnfolded();
         }
-
         setMatched(newmatched);
     }
     return matched;
@@ -529,12 +514,10 @@ bool Version::getTextBoundingBox(const QString& _key, const QStringList& _values
 
     foreach(const QString it, _values)
     {
-        QRectF textbox = QFontMetricsF(tp->getFont()).boundingRect(it).translated(20, _height);
+        QRectF textbox = QFontMetricsF(tp->getFont()).boundingRect(it);
 
-        textbox.adjust(0, 0, 32, 0);
-
-        _height += textbox.height() + 2;
-        _updatedBox |= textbox;
+        _updatedBox |= textbox.translated(20, _height).adjusted(0, 0, 20, 0);
+        _height += textbox.height() + 1;
     }
     return true;
 }
@@ -548,13 +531,11 @@ bool Version::drawTextBox(const QString& _key, const QStringList& _values, int& 
 
     foreach(const QString &it, _values)
     {
-        QRectF textbox = QFontMetricsF(tp->getFont()).boundingRect(it).translated(20, _height);
+        QRectF textbox = QFontMetricsF(tp->getFont()).boundingRect(it);
 
-        textbox.adjust(0, 0, 32, 0);
-
-        _height += textbox.height() + 2;
         _painter->setFont(tp->getFont());
-        _painter->drawText(textbox, Qt::AlignLeft, it);
+        _painter->drawText(textbox.translated(20, _height).adjusted(0, 0, 20, 0), Qt::AlignLeft, it);
+        _height += textbox.height() + 1;
     }
     return true;
 }
@@ -573,6 +554,11 @@ void Version::setMatched(bool _val)
     }
 }
 
+void Version::addLocalVersionInfo(const QString& _val)
+{
+  localVersionInfo.insert(_val);
+}
+
 bool Version::getMatched() const
 {
     return matched;
@@ -583,11 +569,18 @@ void Version::calculateLocalBoundingBox()
     localBoundingBox = folderBox | QRectF(-30, -30, 60, 60);
 
     int height = 0;
-    for (QMap<QString, QStringList>::const_iterator kit = keyInformation.begin();
-         kit != keyInformation.end();
-         kit++)
+
+    foreach(const QString &info, graph->getMainWindow()->getNodeInfo())
     {
-        getTextBoundingBox(kit.key(), kit.value(), height, localBoundingBox);
+        if (globalVersionInfo.contains(info)
+            || localVersionInfo.contains(info))
+        {
+            QMap<QString, QStringList>::const_iterator kit = keyInformation.find(info);
+            if (kit != keyInformation.end())
+            {
+                getTextBoundingBox(kit.key(), kit.value(), height, localBoundingBox);
+            }
+        }
     }
 
     // done
@@ -665,9 +658,9 @@ void Version::collectFolderVersions(Version* _rootNode, Version* _parent)
     if (_parent
         && _parent != _rootNode
         && _parent->getNumOutEdges() == 1
-        && getNumOutEdges() <= 1
+        //&& getNumOutEdges() <= 1
         && (numEdges() - getNumOutEdges() <= 1)
-        && isFoldable()
+        && _parent->isFoldable()
        )
     {
         addToFolder(_parent);
@@ -970,6 +963,7 @@ bool Version::isFoldable() const
 {
     return foldable;
 }
+
 void Version::setIsFoldable(bool _val)
 {
     foldable = _val;
