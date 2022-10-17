@@ -96,7 +96,6 @@ public slots:
 
     // color preference changed
     void colorDialogBackground();
-    void colorDialogText();
     void colorDialogVersion();
     void colorDialogEdge();
     void colorDialogMerge();

@@ -27,28 +27,34 @@
 #include <QString>
 #include <QGridLayout>
 #include <QObject>
+#include <QColor>
 
 class TagPreference : public QObject
 {
     Q_OBJECT
 public:
     TagPreference(int _row,
-                    const QString& _name, 
-                    const QString& _regexDefault,
-                    QGridLayout* _parent=NULL);
+                  const QString& _name,
+                  const QString& _regexDefault,
+                  QGridLayout* _parent = NULL);
 
     const QFont& getFont() const;
+    const QColor& getColor() const;
     const QRegExp& getRegExp() const;
+protected:
+    void updateColorButton();
 
 protected:
-    QLabel* tagType;       // "Release Label"
+    QPushButton* tagType;
     QLineEdit* regularExpression;
     QRegExp regExp;
     QPushButton* fontButton;
     QFont font;
+    QColor color;
 
 private slots:
     void setFont();
+    void setColor();
     void setRegularExpression(const QString& _regex);
 
 signals:

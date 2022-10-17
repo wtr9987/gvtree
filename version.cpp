@@ -225,9 +225,6 @@ void Version::paint(QPainter* _painter, const QStyleOptionGraphicsItem* _option,
 
     if (lod > 0.3)
     {
-        // text color is black
-        _painter->setPen(QPen(graph->getTextColor(), 0));
-
         int height = 0;
 
         foreach(const QString &info, graph->getMainWindow()->getNodeInfo())
@@ -534,6 +531,7 @@ bool Version::drawTextBox(const QString& _key, const QStringList& _values, int& 
         QRectF textbox = QFontMetricsF(tp->getFont()).boundingRect(it);
 
         _painter->setFont(tp->getFont());
+        _painter->setPen(QPen(tp->getColor(), 0));
         _painter->drawText(textbox.translated(20, _height).adjusted(0, 0, 20, 0), Qt::AlignLeft, it);
         _height += textbox.height() + 1;
     }
@@ -556,7 +554,7 @@ void Version::setMatched(bool _val)
 
 void Version::addLocalVersionInfo(const QString& _val)
 {
-  localVersionInfo.insert(_val);
+    localVersionInfo.insert(_val);
 }
 
 bool Version::getMatched() const

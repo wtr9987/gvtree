@@ -17,7 +17,7 @@
 
 #include <QApplication>
 
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include <QScreen>
 #else
 #include <QTextCodec>
@@ -130,7 +130,7 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
     addDockWidget(Qt::RightDockWidgetArea, dock);
     windowmenu->addAction(dock->toggleViewAction());
     dock->hide();
-    tagTreeDock=dock;
+    tagTreeDock = dock;
 
     // -- create text browser for current git status
     gitstatus = new QTextBrowser(this);
@@ -731,7 +731,7 @@ void MainWindow::createMenus()
     nodeInfo << "HEAD" << "Commit Date" << "User Name" << "Hash" << "Branch" << "Release Label" << "Baseline Label" << "FIX/PQT Label" << "HO Label" << "Other Tags" << "Comment";
 
     QSettings settings;
-    foreach (const QString& it, nodeInfo)
+    foreach (const QString &it, nodeInfo)
     {
         QAction* item = new QAction(it, this);
 
@@ -769,7 +769,6 @@ void MainWindow::createMenus()
 
     // color preferences...
     connect(gvtree_preferences.pbColorBackground, SIGNAL(pressed()), this, SLOT(colorDialogBackground()));
-    connect(gvtree_preferences.pbColorText, SIGNAL(pressed()), this, SLOT(colorDialogText()));
     connect(gvtree_preferences.pbColorSelected, SIGNAL(pressed()), this, SLOT(colorDialogSelected()));
     connect(gvtree_preferences.pbColorSearch, SIGNAL(pressed()), this, SLOT(colorDialogSearch()));
     connect(gvtree_preferences.pbColorVersion, SIGNAL(pressed()), this, SLOT(colorDialogVersion()));
@@ -1190,7 +1189,7 @@ void MainWindow::saveChangedSettings()
 
     bool forceUpdate = false;
 
-#if QT_VERSION < QT_VERSION_CHECK(5,0,0)
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
     QString codec = gvtree_preferences.cbCodecForCStrings->currentText();
     if (settings.value("codecForCStrings").toString() != codec)
     {
@@ -1295,7 +1294,6 @@ int MainWindow::getConnectorStyle() const
 void MainWindow::restoreColorSettings()
 {
     restoreColorSettingsHelper(gvtree_preferences.pbColorBackground, QString("colorBackground"), QColor(255, 240, 192));
-    restoreColorSettingsHelper(gvtree_preferences.pbColorText, QString("colorText"), QColor(0, 0, 0));
     restoreColorSettingsHelper(gvtree_preferences.pbColorVersion, QString("colorVersion"), QColor(255, 192, 0));
     restoreColorSettingsHelper(gvtree_preferences.pbColorEdge, QString("colorEdge"), QColor(64, 64, 64));
     restoreColorSettingsHelper(gvtree_preferences.pbColorMerge, QString("colorMerge"), QColor(64, 64, 192));
@@ -1345,11 +1343,6 @@ void MainWindow::colorDialogCommon(QString _key, QPushButton* _pb)
 void MainWindow::colorDialogBackground()
 {
     colorDialogCommon("colorBackground", gvtree_preferences.pbColorBackground);
-}
-
-void MainWindow::colorDialogText()
-{
-    colorDialogCommon("colorText", gvtree_preferences.pbColorText);
 }
 
 void MainWindow::colorDialogFolded()
@@ -1453,7 +1446,7 @@ void MainWindow::updateGitStatus(const QString& _repoPath)
 bool MainWindow::initCbCodecForCStrings(QString _default)
 {
     gvtree_preferences.cbCodecForCStrings->clear();
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     Q_UNUSED(_default);
     gvtree_preferences.cbCodecForCStrings->addItem(QString("UTF-8"));
     gvtree_preferences.cbCodecForCStrings->setCurrentIndex(0);
