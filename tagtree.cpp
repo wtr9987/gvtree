@@ -50,7 +50,22 @@ TagTree::TagTree(GraphWidget* _graph, MainWindow* _mwin) : QTreeView(_mwin), gra
 void TagTree::updateSearchResult(QList<Version*>& _matches)
 {
     // Remove nodes under "Search Result" node
-    QStandardItem* p = root->child(0);
+    QStandardItem* p = NULL;
+
+    for (int i = 0; i < root->rowCount(); i++)
+    {
+        if (root->child(i)->text() == "Search Result")
+        {
+            p = root->child(i);
+            break;
+        }
+    }
+
+    if (!p)
+    {
+        // error
+        return;
+    }
 
     while (p->rowCount() > 0)
     {
