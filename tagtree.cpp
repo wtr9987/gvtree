@@ -34,6 +34,7 @@ TagTree::TagTree(GraphWidget* _graph, MainWindow* _mwin) : QTreeView(_mwin), gra
 
     treemodel = new QStandardItemModel(NULL);
     setModel(treemodel);
+    setSortingEnabled(true);
 
     resetTagTree();
 
@@ -116,7 +117,7 @@ void TagTree::addData(const Version* _v)
             key = "Comment";
 
         // level 1 : taginfo key
-        QStandardItem* p = findOrInsert(root, key);
+        QStandardItem* p = findOrInsert(root, key, false);
 
         if (key == "Commit Date")
         {
@@ -128,7 +129,7 @@ void TagTree::addData(const Version* _v)
             QStringList ts;
             ts << year << month << day << daytime;
 
-            foreach(const QString& tmp, ts)
+            foreach(const QString &tmp, ts)
             {
                 p = findOrInsert(p, tmp);
             }
@@ -137,7 +138,7 @@ void TagTree::addData(const Version* _v)
         }
         else
         {
-            foreach(const QString& val, it.value())
+            foreach(const QString &val, it.value())
             {
                 insertLeaf(findOrInsert(p, val), timestamp, _v);
             }
@@ -145,18 +146,26 @@ void TagTree::addData(const Version* _v)
     }
 }
 
-QStandardItem* TagTree::findOrInsert(QStandardItem* _p, const QString& _val)
+QStandardItem* TagTree::findOrInsert(QStandardItem* _p, const QString& _val, bool _sort)
 {
-    for (int i = 0; i < _p->rowCount(); i++)
+    int i = 0;
+
+    for (; i < _p->rowCount(); i++)
     {
         if (_p->child(i)->text() == _val)
             return _p->child(i);
+
+        if (_sort && _p->child(i)->text() > _val)
+            break;
     }
 
     QStandardItem* t = new QStandardItem(_val);
 
     t->setEditable(false);
-    _p->appendRow(t);
+    if (_sort)
+        _p->insertRow(i, t);
+    else
+        _p->appendRow(t);
     return t;
 }
 
@@ -198,7 +207,7 @@ void TagTree::resetTagTree()
              << "Comment"  // ... don't know if useful, maby not
              << "Hash"; // ... not useful, use search instead
 
-    foreach(const QString& key, nodeInfo)
+    foreach(const QString &key, nodeInfo)
     {
         QStandardItem* t = new QStandardItem(key);
 
@@ -245,7 +254,7 @@ void TagTree::selectionChanged(const QItemSelection& selected, const QItemSelect
 
     const QModelIndexList& sel = selected.indexes();
 
-    foreach (const QModelIndex& idx, sel)
+    foreach (const QModelIndex &idx, sel)
     {
         if (idx.column() == 0)
         {
