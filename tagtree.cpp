@@ -25,12 +25,17 @@
 
 using namespace std;
 
-TagTree::TagTree(GraphWidget* _graph, MainWindow* _mwin) : QTreeView(_mwin), graph(_graph), mwin(_mwin), treemodel(NULL), root(NULL), search(NULL)
+TagTree::TagTree(GraphWidget* _graph, MainWindow* _mwin) : QTreeView(_mwin),
+                                                           graph(_graph),
+                                                           mwin(_mwin),
+                                                           treemodel(NULL),
+                                                           root(NULL),
+                                                           search(NULL)
 {
     setContextMenuPolicy(Qt::CustomContextMenu);
 
-    connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
-            this, SLOT(onCustomContextMenu(const QPoint&)));
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
+            this, SLOT(onCustomContextMenu(const QPoint &)));
 
     treemodel = new QStandardItemModel(NULL);
     setModel(treemodel);
@@ -75,8 +80,9 @@ void TagTree::updateSearchResult(QList<Version*>& _matches)
     // Insert matches from search dialog
     foreach(Version * v, _matches)
     {
-        QStandardItem* c1 = new QStandardItem("+");
+        QStandardItem* c1 = new QStandardItem("");
 
+        c1->setIcon(QIcon(":/images/gvt_dot.png"));
         c1->setEditable(false);
 
         QStandardItem* c2 = new QStandardItem(v->getKeyInformation().find("Commit Date").value().join(" "));
@@ -88,6 +94,9 @@ void TagTree::updateSearchResult(QList<Version*>& _matches)
 
         p->appendRow(row);
     }
+
+    // Set folder symbol if needed
+    p->setIcon(_matches.size()?QIcon().fromTheme("folder"):QIcon());
 
     // display search results
     expand(p->index());
@@ -102,10 +111,20 @@ void TagTree::compress(QStandardItem* _p)
         QStandardItem* c = _p->takeChild(0, 1);
         if (c && c->data(Qt::UserRole + 1).value<VersionPointer>() && _p->parent())
         {
+            _p->setIcon(QIcon(":/images/gvt_dot.png"));
             _p->parent()->setChild(_p->row(), 1, c);
             treemodel->removeRow(0, _p->index());
             return;
         }
+        else
+        {
+            _p->setIcon(QIcon().fromTheme("folder"));
+        }
+    }
+
+    if (_p->rowCount() > 1)
+    {
+        _p->setIcon(QIcon().fromTheme("folder"));
     }
 
     for (int i = 0; i < _p->rowCount(); i++)
@@ -175,6 +194,7 @@ QStandardItem* TagTree::findOrInsert(QStandardItem* _p, const QString& _val, boo
     }
 
     QStandardItem* t = new QStandardItem(_val);
+    //t->setIcon(QIcon().fromTheme("folder")); // folder-open
 
     t->setEditable(false);
     if (_sort)
@@ -231,7 +251,7 @@ void TagTree::resetTagTree()
     }
 
     search = new QLineEdit(this);
-    connect(search, SIGNAL(textEdited(const QString&)), this, SLOT(lookupId(const QString&)));
+    connect(search, SIGNAL(textEdited(const QString &)), this, SLOT(lookupId(const QString &)));
     connect(search, SIGNAL(returnPressed()), this, SLOT(focusGraph()));
     setIndexWidget(treemodel->index(0, 1), search);
 }

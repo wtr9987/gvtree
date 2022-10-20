@@ -119,6 +119,7 @@ DISTFILES += $$SOURCEFILES \
   images/connectorStyle1.png \
   images/gvt_add.png \
   images/gvt_del.png \
+  images/gvt_dot.png \
   images/gvt_mod.png \
   images/gvt_pointer.png \
   images/gvtree_logo_128.png \
