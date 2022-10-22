@@ -41,6 +41,8 @@ public:
     const QFont& getFont() const;
     const QColor& getColor() const;
     const QRegExp& getRegExp() const;
+    void disableRegExp();
+
 protected:
     void updateColorButton();
 

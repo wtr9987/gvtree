@@ -41,6 +41,7 @@ TagPreference::TagPreference(int _row,
 
     QString lookupRegexp = _name + "/regExp";
     QSettings settings;
+
     if (settings.contains(lookupRegexp))
     {
         regularExpression->setText(settings.value(lookupRegexp).toString());
@@ -55,6 +56,7 @@ TagPreference::TagPreference(int _row,
     connect(regularExpression, SIGNAL(textChanged(const QString&)), this, SLOT(setRegularExpression(const QString&)));
 
     QString lookupFont = _name + "/font";
+
     if (settings.contains(lookupFont))
     {
         fontButton->setText(settings.value(lookupFont).toString());
@@ -66,6 +68,7 @@ TagPreference::TagPreference(int _row,
     }
 
     QString lookupColor = _name + "/color";
+
     if (settings.contains(lookupColor))
     {
         color = settings.value(lookupColor).value<QColor>();
@@ -144,4 +147,9 @@ void TagPreference::setRegularExpression(const QString& _regex)
     {
         regularExpression->setStyleSheet("color: black;  background-color: red");
     }
+}
+
+void TagPreference::disableRegExp()
+{
+    regularExpression->setEnabled(false);
 }

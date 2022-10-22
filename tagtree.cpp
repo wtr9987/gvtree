@@ -26,16 +26,16 @@
 using namespace std;
 
 TagTree::TagTree(GraphWidget* _graph, MainWindow* _mwin) : QTreeView(_mwin),
-                                                           graph(_graph),
-                                                           mwin(_mwin),
-                                                           treemodel(NULL),
-                                                           root(NULL),
-                                                           search(NULL)
+    graph(_graph),
+    mwin(_mwin),
+    treemodel(NULL),
+    root(NULL),
+    search(NULL)
 {
     setContextMenuPolicy(Qt::CustomContextMenu);
 
-    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
-            this, SLOT(onCustomContextMenu(const QPoint &)));
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
+            this, SLOT(onCustomContextMenu(const QPoint&)));
 
     treemodel = new QStandardItemModel(NULL);
     setModel(treemodel);
@@ -96,7 +96,7 @@ void TagTree::updateSearchResult(QList<Version*>& _matches)
     }
 
     // Set folder symbol if needed
-    p->setIcon(_matches.size()?QIcon().fromTheme("folder"):QIcon());
+    p->setIcon(_matches.size() ? QIcon().fromTheme("folder") : QIcon());
 
     // display search results
     expand(p->index());
@@ -125,6 +125,16 @@ void TagTree::compress(QStandardItem* _p)
     if (_p->rowCount() > 1)
     {
         _p->setIcon(QIcon().fromTheme("folder"));
+        for (int i = 0; i < _p->rowCount(); i++)
+        {
+            QStandardItem* c0 = _p->child(i, 0);
+            QStandardItem* c1 = _p->child(i, 1);
+            if (c1 && c1->data(Qt::UserRole + 1).value<VersionPointer>()
+                && (c0->text() == c1->text()))
+            {
+                c1->setText("");
+            }
+        }
     }
 
     for (int i = 0; i < _p->rowCount(); i++)
@@ -160,10 +170,9 @@ void TagTree::addData(const Version* _v)
             QString day = timestamp.mid(8, 2);
             QString daytime = timestamp.mid(11, 8);
 
-            QStringList ts;
-            ts << year << month << day << daytime;
+            QStringList ts = QStringList() << year << month << day << daytime;
 
-            foreach(const QString &tmp, ts)
+            foreach(const QString& tmp, ts)
             {
                 p = findOrInsert(p, tmp);
             }
@@ -172,7 +181,7 @@ void TagTree::addData(const Version* _v)
         }
         else
         {
-            foreach(const QString &val, it.value())
+            foreach(const QString& val, it.value())
             {
                 insertLeaf(findOrInsert(p, val), timestamp, _v);
             }
@@ -194,7 +203,6 @@ QStandardItem* TagTree::findOrInsert(QStandardItem* _p, const QString& _val, boo
     }
 
     QStandardItem* t = new QStandardItem(_val);
-    //t->setIcon(QIcon().fromTheme("folder")); // folder-open
 
     t->setEditable(false);
     if (_sort)
@@ -208,7 +216,9 @@ void TagTree::insertLeaf(QStandardItem* _p, const QString& _timestamp, const Ver
 {
     QList<QStandardItem*> columns;
 
-    columns << new QStandardItem("") << new QStandardItem(_timestamp);
+    columns << new QStandardItem(_timestamp) << new QStandardItem(_timestamp);
+    columns.front()->setEditable(false);
+    columns.front()->setIcon(QIcon(":/images/gvt_dot.png"));
     columns.back()->setData(QVariant::fromValue(VersionPointer(_v)), Qt::UserRole + 1);
     columns.back()->setEditable(false);
     _p->appendRow(columns);
@@ -242,7 +252,7 @@ void TagTree::resetTagTree()
              << "Comment"  // ... don't know if useful, maby not
              << "Hash"; // ... not useful, use search instead
 
-    foreach(const QString &key, nodeInfo)
+    foreach(const QString& key, nodeInfo)
     {
         QStandardItem* t = new QStandardItem(key);
 
@@ -251,7 +261,7 @@ void TagTree::resetTagTree()
     }
 
     search = new QLineEdit(this);
-    connect(search, SIGNAL(textEdited(const QString &)), this, SLOT(lookupId(const QString &)));
+    connect(search, SIGNAL(textEdited(const QString&)), this, SLOT(lookupId(const QString&)));
     connect(search, SIGNAL(returnPressed()), this, SLOT(focusGraph()));
     setIndexWidget(treemodel->index(0, 1), search);
 }
@@ -289,7 +299,7 @@ void TagTree::selectionChanged(const QItemSelection& selected, const QItemSelect
 
     const QModelIndexList& sel = selected.indexes();
 
-    foreach (const QModelIndex &idx, sel)
+    foreach (const QModelIndex& idx, sel)
     {
         if (idx.column() == 0)
         {
