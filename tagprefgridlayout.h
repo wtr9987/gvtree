@@ -29,7 +29,7 @@ class TagPrefGridLayout : public QGridLayout
 public:
     TagPrefGridLayout(QWidget* _parent = NULL);
 
-    void addTagPreference(const QString& _name, const QString& _regexpDefault);
+    void addTagPreference(const QString& _name, const QString& _regexp, bool _regexpChangable);
 
     const TagPreference* getTagPreference(const QString& _item) const;
 
@@ -37,7 +37,7 @@ protected:
     int line;
     QVBoxLayout* cl;
     QMap<QString, TagPreference*> tp;
-    
+
 public slots:
     void regexpChangedProxy();
 

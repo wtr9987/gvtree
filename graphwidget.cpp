@@ -1439,7 +1439,6 @@ void GraphWidget::updateColors()
     searchColor = mwin->getPreferencesColor("colorSearch");
     edgeColor = mwin->getPreferencesColor("colorEdge");
     mergeColor = mwin->getPreferencesColor("colorMerge");
-    textColor = mwin->getPreferencesColor("colorText");
     foldedColor = mwin->getPreferencesColor("colorFolded");
     unfoldedColor = mwin->getPreferencesColor("colorUnfolded");
     fileConstraintColor = mwin->getPreferencesColor("colorFileConstraint");

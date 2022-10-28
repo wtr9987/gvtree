@@ -16,6 +16,7 @@
 /* --------------------------------------------- */
 
 #include <QFontDialog>
+#include <QColorDialog>
 #include <QApplication>
 #include "tagpreference.h"
 
@@ -27,7 +28,8 @@ TagPreference::TagPreference(int _row,
                              const QString& _regexDefault,
                              QGridLayout* _layout) : QObject(NULL)
 {
-    tagType = new QLabel(_name);
+    tagType = new QPushButton(_name);
+    connect(tagType, SIGNAL(clicked()), this, SLOT(setColor()));
     _layout->addWidget(tagType, _row, 0, 1, 1);
 
     fontButton = new QPushButton(QApplication::font().toString());
@@ -35,10 +37,11 @@ TagPreference::TagPreference(int _row,
     _layout->addWidget(fontButton, _row, 1, 1, 1);
 
     regularExpression = new QLineEdit();
-    _layout->addWidget(regularExpression, _row, 2, 1, 1);
+    _layout->addWidget(regularExpression, _row, 2, 1, 2);
 
     QString lookupRegexp = _name + "/regExp";
     QSettings settings;
+
     if (settings.contains(lookupRegexp))
     {
         regularExpression->setText(settings.value(lookupRegexp).toString());
@@ -53,6 +56,7 @@ TagPreference::TagPreference(int _row,
     connect(regularExpression, SIGNAL(textChanged(const QString&)), this, SLOT(setRegularExpression(const QString&)));
 
     QString lookupFont = _name + "/font";
+
     if (settings.contains(lookupFont))
     {
         fontButton->setText(settings.value(lookupFont).toString());
@@ -62,11 +66,24 @@ TagPreference::TagPreference(int _row,
     {
         font.fromString(fontButton->text());
     }
+
+    QString lookupColor = _name + "/color";
+
+    if (settings.contains(lookupColor))
+    {
+        color = settings.value(lookupColor).value<QColor>();
+    }
+    updateColorButton();
 }
 
 const QFont& TagPreference::getFont() const
 {
     return font;
+}
+
+const QColor& TagPreference::getColor() const
+{
+    return color;
 }
 
 const QRegExp& TagPreference::getRegExp() const
@@ -88,6 +105,32 @@ void TagPreference::setFont()
     }
 }
 
+void TagPreference::setColor()
+{
+    QColor tmpColor = QColorDialog::getColor(color);
+
+    if (tmpColor.isValid())
+    {
+        color = tmpColor;
+
+        QString settingsKey = tagType->text() + "/color";
+        QSettings settings;
+        settings.setValue(settingsKey, color.name());
+        updateColorButton();
+    }
+}
+
+void TagPreference::updateColorButton()
+{
+    QColor fgColor = QColor(0, 0, 0);
+
+    if (color.lightness() < 128)
+        fgColor = QColor(255, 255, 255);
+    QString css = "background-color: " + color.name() + "; color: " + fgColor.name() + ";";
+
+    tagType->setStyleSheet(css);
+}
+
 void TagPreference::setRegularExpression(const QString& _regex)
 {
     regExp = QRegExp(_regex);
@@ -104,4 +147,9 @@ void TagPreference::setRegularExpression(const QString& _regex)
     {
         regularExpression->setStyleSheet("color: black;  background-color: red");
     }
+}
+
+void TagPreference::disableRegExp()
+{
+    regularExpression->setEnabled(false);
 }

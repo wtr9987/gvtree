@@ -29,9 +29,12 @@ const TagPreference* TagPrefGridLayout::getTagPreference(const QString& _item) c
     return NULL;
 }
 
-void TagPrefGridLayout::addTagPreference(const QString& _name, const QString& _regexpDefault)
+void TagPrefGridLayout::addTagPreference(const QString& _name, const QString& _regexp, bool _regexpChangable)
 {
-    TagPreference* tpw = new TagPreference(line, _name, _regexpDefault, this);
+    TagPreference* tpw = new TagPreference(line, _name, _regexp, this);
+
+    if (!_regexpChangable)
+        tpw->disableRegExp();
 
     connect(tpw, SIGNAL(regexpChanged()), this, SLOT(regexpChangedProxy()));
     tp[_name] = tpw;

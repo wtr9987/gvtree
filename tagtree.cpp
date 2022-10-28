@@ -25,7 +25,12 @@
 
 using namespace std;
 
-TagTree::TagTree(GraphWidget* _graph, MainWindow* _mwin) : QTreeView(_mwin), graph(_graph), mwin(_mwin), treemodel(NULL), root(NULL), search(NULL)
+TagTree::TagTree(GraphWidget* _graph, MainWindow* _mwin) : QTreeView(_mwin),
+    graph(_graph),
+    mwin(_mwin),
+    treemodel(NULL),
+    root(NULL),
+    search(NULL)
 {
     setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -34,6 +39,7 @@ TagTree::TagTree(GraphWidget* _graph, MainWindow* _mwin) : QTreeView(_mwin), gra
 
     treemodel = new QStandardItemModel(NULL);
     setModel(treemodel);
+    setSortingEnabled(true);
 
     resetTagTree();
 
@@ -49,7 +55,22 @@ TagTree::TagTree(GraphWidget* _graph, MainWindow* _mwin) : QTreeView(_mwin), gra
 void TagTree::updateSearchResult(QList<Version*>& _matches)
 {
     // Remove nodes under "Search Result" node
-    QStandardItem* p = root->child(0);
+    QStandardItem* p = NULL;
+
+    for (int i = 0; i < root->rowCount(); i++)
+    {
+        if (root->child(i)->text() == "Search Result")
+        {
+            p = root->child(i);
+            break;
+        }
+    }
+
+    if (!p)
+    {
+        // error
+        return;
+    }
 
     while (p->rowCount() > 0)
     {
@@ -59,8 +80,9 @@ void TagTree::updateSearchResult(QList<Version*>& _matches)
     // Insert matches from search dialog
     foreach(Version * v, _matches)
     {
-        QStandardItem* c1 = new QStandardItem("+");
+        QStandardItem* c1 = new QStandardItem("");
 
+        c1->setIcon(QIcon(":/images/gvt_dot.png"));
         c1->setEditable(false);
 
         QStandardItem* c2 = new QStandardItem(v->getKeyInformation().find("Commit Date").value().join(" "));
@@ -72,6 +94,9 @@ void TagTree::updateSearchResult(QList<Version*>& _matches)
 
         p->appendRow(row);
     }
+
+    // Set folder symbol if needed
+    p->setIcon(_matches.size() ? QIcon().fromTheme("folder") : QIcon());
 
     // display search results
     expand(p->index());
@@ -86,9 +111,29 @@ void TagTree::compress(QStandardItem* _p)
         QStandardItem* c = _p->takeChild(0, 1);
         if (c && c->data(Qt::UserRole + 1).value<VersionPointer>() && _p->parent())
         {
+            _p->setIcon(QIcon(":/images/gvt_dot.png"));
             _p->parent()->setChild(_p->row(), 1, c);
             treemodel->removeRow(0, _p->index());
             return;
+        }
+        else
+        {
+            _p->setIcon(QIcon().fromTheme("folder"));
+        }
+    }
+
+    if (_p->rowCount() > 1)
+    {
+        _p->setIcon(QIcon().fromTheme("folder"));
+        for (int i = 0; i < _p->rowCount(); i++)
+        {
+            QStandardItem* c0 = _p->child(i, 0);
+            QStandardItem* c1 = _p->child(i, 1);
+            if (c1 && c1->data(Qt::UserRole + 1).value<VersionPointer>()
+                && (c0->text() == c1->text()))
+            {
+                c1->setText("");
+            }
         }
     }
 
@@ -116,7 +161,7 @@ void TagTree::addData(const Version* _v)
             key = "Comment";
 
         // level 1 : taginfo key
-        QStandardItem* p = findOrInsert(root, key);
+        QStandardItem* p = findOrInsert(root, key, false);
 
         if (key == "Commit Date")
         {
@@ -125,8 +170,7 @@ void TagTree::addData(const Version* _v)
             QString day = timestamp.mid(8, 2);
             QString daytime = timestamp.mid(11, 8);
 
-            QStringList ts;
-            ts << year << month << day << daytime;
+            QStringList ts = QStringList() << year << month << day << daytime;
 
             foreach(const QString& tmp, ts)
             {
@@ -145,18 +189,26 @@ void TagTree::addData(const Version* _v)
     }
 }
 
-QStandardItem* TagTree::findOrInsert(QStandardItem* _p, const QString& _val)
+QStandardItem* TagTree::findOrInsert(QStandardItem* _p, const QString& _val, bool _sort)
 {
-    for (int i = 0; i < _p->rowCount(); i++)
+    int i = 0;
+
+    for (; i < _p->rowCount(); i++)
     {
         if (_p->child(i)->text() == _val)
             return _p->child(i);
+
+        if (_sort && _p->child(i)->text() > _val)
+            break;
     }
 
     QStandardItem* t = new QStandardItem(_val);
 
     t->setEditable(false);
-    _p->appendRow(t);
+    if (_sort)
+        _p->insertRow(i, t);
+    else
+        _p->appendRow(t);
     return t;
 }
 
@@ -164,7 +216,9 @@ void TagTree::insertLeaf(QStandardItem* _p, const QString& _timestamp, const Ver
 {
     QList<QStandardItem*> columns;
 
-    columns << new QStandardItem("") << new QStandardItem(_timestamp);
+    columns << new QStandardItem(_timestamp) << new QStandardItem(_timestamp);
+    columns.front()->setEditable(false);
+    columns.front()->setIcon(QIcon(":/images/gvt_dot.png"));
     columns.back()->setData(QVariant::fromValue(VersionPointer(_v)), Qt::UserRole + 1);
     columns.back()->setEditable(false);
     _p->appendRow(columns);

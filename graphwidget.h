@@ -144,10 +144,6 @@ public:
     {
         return mergeColor;
     }
-    const QColor& getTextColor() const
-    {
-        return textColor;
-    }
     const QColor& getFoldedColor() const
     {
         return foldedColor;
@@ -249,7 +245,6 @@ private:
     QColor searchColor;
     QColor edgeColor;
     QColor mergeColor;
-    QColor textColor;
     QColor foldedColor;
     QColor unfoldedColor;
     QColor fileConstraintColor;

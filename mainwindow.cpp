@@ -17,7 +17,7 @@
 
 #include <QApplication>
 
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include <QScreen>
 #else
 #include <QTextCodec>
@@ -130,7 +130,7 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
     addDockWidget(Qt::RightDockWidgetArea, dock);
     windowmenu->addAction(dock->toggleViewAction());
     dock->hide();
-    tagTreeDock=dock;
+    tagTreeDock = dock;
 
     // -- create text browser for current git status
     gitstatus = new QTextBrowser(this);
@@ -702,17 +702,17 @@ void MainWindow::createMenus()
     viewmenu = menuBar()->addMenu(tr("View"));
 
     gridLayout = new TagPrefGridLayout();
-    gridLayout->addTagPreference("HEAD", "(HEAD.*)");
-    gridLayout->addTagPreference("Commit Date", "([0-9]+)");
-    gridLayout->addTagPreference("User Name", "\\[([0-9a-zA-Z ]*)\\]");
-    gridLayout->addTagPreference("Hash", "([0-9a-f]+)");
-    gridLayout->addTagPreference("Branch", "^((?!.*tag: )\\b([\\/0-9a-zA-Z_]*)\\b)$");
-    gridLayout->addTagPreference("Release Label", "tag: \\b(R[0-9.\\-]+(_RC[0-9]+)?)$");
-    gridLayout->addTagPreference("Baseline Label", "tag: \\b(BASELINE_[0-9.\\-]+)$");
-    gridLayout->addTagPreference("FIX/PQT Label", "tag: \\b(((FIX|PQT)_STR[0-9]+(DEV|DOC)?(_RR[0-9]+)?))$");
-    gridLayout->addTagPreference("HO Label", "tag: \\b(STR[0-9]+(DEV|DOC)?_HO[0-9]*)$");
-    gridLayout->addTagPreference("Other Tags", "tag: \\b(.*)$");
-    gridLayout->addTagPreference("Comment", "");
+    gridLayout->addTagPreference("HEAD", "(HEAD.*)", false);
+    gridLayout->addTagPreference("Commit Date", "", false);
+    gridLayout->addTagPreference("User Name", "", false);
+    gridLayout->addTagPreference("Hash", "", false);
+    gridLayout->addTagPreference("Branch", "^((?!.*tag: )\\b([\\/0-9a-zA-Z_]*)\\b)$", true);
+    gridLayout->addTagPreference("Release Label", "tag: \\b(R[0-9.\\-]+(_RC[0-9]+)?)$", true);
+    gridLayout->addTagPreference("Baseline Label", "tag: \\b(BASELINE_[0-9.\\-]+)$", true);
+    gridLayout->addTagPreference("FIX/PQT Label", "tag: \\b(((FIX|PQT)_STR[0-9]+(DEV|DOC)?(_RR[0-9]+)?))$", true);
+    gridLayout->addTagPreference("HO Label", "tag: \\b(STR[0-9]+(DEV|DOC)?_HO[0-9]*)$", true);
+    gridLayout->addTagPreference("Other Tags", "tag: \\b(.*)$", false);
+    gridLayout->addTagPreference("Comment", "", false);
     gvtree_preferences.verticalLayout_3->addLayout(gridLayout);
 
     connect(gridLayout, SIGNAL(regexpChanged()), this, SLOT(resetCurrentRepository()));
@@ -731,6 +731,7 @@ void MainWindow::createMenus()
     nodeInfo << "HEAD" << "Commit Date" << "User Name" << "Hash" << "Branch" << "Release Label" << "Baseline Label" << "FIX/PQT Label" << "HO Label" << "Other Tags" << "Comment";
 
     QSettings settings;
+
     foreach (const QString& it, nodeInfo)
     {
         QAction* item = new QAction(it, this);
@@ -769,7 +770,6 @@ void MainWindow::createMenus()
 
     // color preferences...
     connect(gvtree_preferences.pbColorBackground, SIGNAL(pressed()), this, SLOT(colorDialogBackground()));
-    connect(gvtree_preferences.pbColorText, SIGNAL(pressed()), this, SLOT(colorDialogText()));
     connect(gvtree_preferences.pbColorSelected, SIGNAL(pressed()), this, SLOT(colorDialogSelected()));
     connect(gvtree_preferences.pbColorSearch, SIGNAL(pressed()), this, SLOT(colorDialogSearch()));
     connect(gvtree_preferences.pbColorVersion, SIGNAL(pressed()), this, SLOT(colorDialogVersion()));
@@ -938,7 +938,7 @@ bool MainWindow::checkGitLocalRepository(const QString& _path,
 
     QString lookup_path;
 
-    foreach(const QString &str, path_elements)
+    foreach(const QString& str, path_elements)
     {
         lookup_path = lookup_path + str + QString("/");
         QString lookup_git = lookup_path + QString(".git");
@@ -946,7 +946,7 @@ bool MainWindow::checkGitLocalRepository(const QString& _path,
         check_for_repo.push_front(lookup_git);
     }
 
-    foreach(const QString &str, check_for_repo)
+    foreach(const QString& str, check_for_repo)
     {
         QFileInfo fi(str);
 
@@ -1144,7 +1144,7 @@ void MainWindow::addToCleanupFiles(const QString& _path)
 
 void MainWindow::doCleanupFiles()
 {
-    foreach(const QString &str, cleanupFiles)
+    foreach(const QString& str, cleanupFiles)
     {
         // tempPath must contain an absolute path
         if (str[0].toLatin1() == '/')
@@ -1190,7 +1190,7 @@ void MainWindow::saveChangedSettings()
 
     bool forceUpdate = false;
 
-#if QT_VERSION < QT_VERSION_CHECK(5,0,0)
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
     QString codec = gvtree_preferences.cbCodecForCStrings->currentText();
     if (settings.value("codecForCStrings").toString() != codec)
     {
@@ -1295,7 +1295,6 @@ int MainWindow::getConnectorStyle() const
 void MainWindow::restoreColorSettings()
 {
     restoreColorSettingsHelper(gvtree_preferences.pbColorBackground, QString("colorBackground"), QColor(255, 240, 192));
-    restoreColorSettingsHelper(gvtree_preferences.pbColorText, QString("colorText"), QColor(0, 0, 0));
     restoreColorSettingsHelper(gvtree_preferences.pbColorVersion, QString("colorVersion"), QColor(255, 192, 0));
     restoreColorSettingsHelper(gvtree_preferences.pbColorEdge, QString("colorEdge"), QColor(64, 64, 64));
     restoreColorSettingsHelper(gvtree_preferences.pbColorMerge, QString("colorMerge"), QColor(64, 64, 192));
@@ -1345,11 +1344,6 @@ void MainWindow::colorDialogCommon(QString _key, QPushButton* _pb)
 void MainWindow::colorDialogBackground()
 {
     colorDialogCommon("colorBackground", gvtree_preferences.pbColorBackground);
-}
-
-void MainWindow::colorDialogText()
-{
-    colorDialogCommon("colorText", gvtree_preferences.pbColorText);
 }
 
 void MainWindow::colorDialogFolded()
@@ -1443,7 +1437,7 @@ void MainWindow::updateGitStatus(const QString& _repoPath)
     QList<QString> cache;
 
     execute_cmd(cmd.toUtf8().data(), cache, getPrintCmdToStdout());
-    foreach(const QString &str, cache)
+    foreach(const QString& str, cache)
     {
         gitstatus->insertPlainText(str);
     }
@@ -1453,7 +1447,7 @@ void MainWindow::updateGitStatus(const QString& _repoPath)
 bool MainWindow::initCbCodecForCStrings(QString _default)
 {
     gvtree_preferences.cbCodecForCStrings->clear();
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     Q_UNUSED(_default);
     gvtree_preferences.cbCodecForCStrings->addItem(QString("UTF-8"));
     gvtree_preferences.cbCodecForCStrings->setCurrentIndex(0);
@@ -1527,7 +1521,7 @@ bool MainWindow::getVersionIsFoldable(const QMap<QString, QStringList>& _keyinfo
             }
             if (fold_not_pattern && foldNotRegExp.isValid())
             {
-                foreach(const QString &str, it.value())
+                foreach(const QString& str, it.value())
                 {
                     if (foldNotRegExp.indexIn(str, 0) != -1)
                         return false;

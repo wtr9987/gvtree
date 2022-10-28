@@ -59,7 +59,7 @@ public:
 
 protected:
     // construct tree
-    QStandardItem* findOrInsert(QStandardItem* _p, const QString& _val);
+    QStandardItem* findOrInsert(QStandardItem* _p, const QString& _val, bool _sort=true);
     void insertLeaf(QStandardItem* _p, const QString& _timestamp, const Version* _v);
 
     // create a list of all selected version nodes
