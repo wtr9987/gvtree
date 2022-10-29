@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.3-0                */
+/*                  gvtree V1.4-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -122,17 +122,52 @@ QRectF Edge::boundingRect() const
 
 QPainterPath Edge::shape() const
 {
-    QPainterPath result;
+    QVector<QPointF> border;
+    float dx = destPoint.x() - sourcePoint.x();
+    float dy = destPoint.y() - sourcePoint.y();
+    float sx = dx > 0.0 ? 1.0 : -1.0;
+    float sy = dy > 0.0 ? 1.0 : -1.0;
 
-    QPointF v = destPoint - sourcePoint;
+    if (merge || graph->getConnectorStyle() == 0)
+    {
+        QPointF cur = sourcePoint - QPointF(sx * 10.0, sy * 10.0);
+        border.push_back(cur);
+        cur += QPointF(sx * 20.0, 0.0);
+        border.push_back(cur);
+        cur += QPointF(dx, dy);
+        border.push_back(cur);
+        cur += QPointF(0.0, sy * 10.0);
+        border.push_back(cur);
+        cur -= QPointF(sx * 10.0, 0.0);
+        border.push_back(cur);
+        cur -= QPointF(dx, dy);
+        border.push_back(cur);
+    }
+    else
+    {
+        QPointF cur = sourcePoint - QPointF(sx * 10.0, sy * 10.0);
+        border.push_back(cur);
+        cur += QPointF(sx * 20.0, 0.0);
+        border.push_back(cur);
+        cur += QPointF(0.0, 0.5 * dy);
+        border.push_back(cur);
+        cur += QPointF(dx, 0.0);
+        border.push_back(cur);
+        cur += QPointF(0.0, 0.5 * dy) + QPointF(0.0, sy * 20.0);
+        border.push_back(cur);
+        cur -= QPointF(sx * 20.0, 0.0);
+        border.push_back(cur);
+        cur -= QPointF(0.0, 0.5 * dy);
+        border.push_back(cur);
+        cur -= QPointF(dx, 0.0);
+        border.push_back(cur);
+    }
 
-    v = 10.0 * v / sqrt(v.x() * v.x() + v.y() * v.y());
-    QPointF v_(v.y(), -v.x());
-
-    result = QPainterPath(sourcePoint + v + v_);
-    result.lineTo(sourcePoint + v - v_);
-    result.lineTo(destPoint - v - v_);
-    result.lineTo(destPoint - v + v_);
+    QPainterPath result(border[0]);
+    for (int i = 1; i < border.size(); i++)
+    {
+        result.lineTo(border[i]);
+    }
     result.closeSubpath();
 
     return result;
@@ -192,9 +227,7 @@ void Edge::paint(QPainter* _painter,
     path.moveTo(sourcePoint);
     if (!fileConstraint && !merge && graph->getConnectorStyle() == 1)
     {
-        //
-        QPointF p1(sourcePoint.x(), sourcePoint.y() +
-                   (graph->getTopDownView() ? -0.5 : 0.5) * graph->getYFactor());
+        QPointF p1(sourcePoint.x(), sourcePoint.y() + 0.5*(destPoint.y()-sourcePoint.y()));
         QPointF p2(destPoint.x(), p1.y());
 
         path.lineTo(p1);
