@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.3-0                */
+/*                  gvtree V1.4-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -1474,12 +1474,19 @@ void GraphWidget::contextMenuEvent(QContextMenuEvent* _event)
                 it = uit;
                 break;
             }
+            else if (v && !v->isFolder())
+            {
+                it = uit;
+                break;
+            }
+            else if (!it || it->type() != QGraphicsItem::UserType +1)
+            {
+              it = uit;
+            }
         }
-
-        if (uit->type() == QGraphicsItem::UserType + 2)
+        else if (uit->type() == QGraphicsItem::UserType + 2 && uit == NULL)
         {
             it = uit;
-            break;
         }
         else if ((uit != rootVersion)
                  && (uit->type() != QGraphicsItem::UserType + 4)
