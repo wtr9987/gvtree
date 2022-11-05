@@ -37,7 +37,7 @@
    <item row="1" column="1" colspan="2">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tabWidgetPage1">
       <property name="statusTip">
@@ -79,7 +79,7 @@
          </layout>
         </widget>
        </item>
-       <item row="21" column="1">
+       <item row="22" column="1">
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -276,6 +276,13 @@
        <item row="5" column="2">
         <widget class="QComboBox" name="cbCodecForCStrings"/>
        </item>
+       <item row="15" column="1">
+        <widget class="QCheckBox" name="include_selected">
+         <property name="text">
+          <string>focus includes selected version</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="tabWidgetPage2">
@@ -411,7 +418,7 @@
        <item>
         <widget class="QGroupBox" name="groupBox_3">
          <property name="title">
-          <string>Rendering Engine</string>
+          <string>Rendering</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_5">
           <item>
@@ -421,6 +428,13 @@
             </property>
             <property name="text">
              <string>Hardware Acceleration</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="animated">
+            <property name="text">
+             <string>Animation</string>
             </property>
            </widget>
           </item>

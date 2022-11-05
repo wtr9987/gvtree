@@ -57,6 +57,7 @@ public:
     QTextEdit* getCompareTreeToTextEdit();
     QPushButton* getCompareTreeFromPushButton();
     QPushButton* getCompareTreeToPushButton();
+    QTextEdit* getCompareTreeSelectedLog() const;
     QComboBox* getFromComboBox();
     QLabel* getToDateLabel();
     QDockWidget* getBranchDock();
@@ -76,6 +77,8 @@ public:
     bool getShortHashes() const;
     bool getTopDownView() const;
     bool getRemotes() const;
+    bool getIncludeSelected() const;
+    bool getAnimated() const;
     bool getOpenGLRendering() const;
     bool getDiffLocalFiles() const;
     int getConnectorStyle() const;

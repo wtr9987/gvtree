@@ -71,9 +71,11 @@ public:
     int matchVersions(const QString& _text, QList<Version*>& _matches, bool _exactMatch);
     bool focusElements(const QString& _text, bool _exactMatch = false);
     bool focusElements(const QList<Version*>& _markup);
+    void displayHits(Version* _v);
     void displayHits(const QList<Version*>& _hits);
 
     void clear();
+    void getMarkedupVersions(QList<Version*>& _markup, bool _selected = true);
     void resetMatches();
     void setMinSize(bool _resize = true);
 
@@ -184,6 +186,9 @@ public slots:
     void setBlockItemChanged(bool _val);
 
 protected:
+    void animatedFocus(QRectF& _from, QRectF& _to);
+    QRectF animatedFocus(QRectF& _from, QRectF& _to, double _morph, bool _aspect = true);
+
     virtual void contextMenuEvent(QContextMenuEvent* _event);
 
     virtual void keyPressEvent(QKeyEvent* event);

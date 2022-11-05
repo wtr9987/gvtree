@@ -73,8 +73,8 @@ public slots:
     void onCustomContextMenu(const QPoint& point);
 
 protected slots:
-    // focus selected items in main view
-    void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
+    // (re-)focus selected items in main view
+    void focusSelection(const QModelIndex& _index);
     // perform search
     void lookupId(const QString& _text, bool _exactMatch = false);
     // change focus to main view

@@ -217,9 +217,12 @@ void Edge::paint(QPainter* _painter,
         col = graph->getFileConstraintColor();
     }
 
+    if (lod < 0.4)
+      col.setAlpha(128);
+
     _painter->setPen(
         QPen(col, pw,
-             info ? Qt::DotLine : merge ? Qt::DashLine : Qt::SolidLine,
+                (lod>0.2) ? info ? Qt::DotLine : merge ? Qt::DashLine : Qt::SolidLine : Qt::SolidLine,
              Qt::RoundCap,
              Qt::RoundJoin));
 

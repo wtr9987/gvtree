@@ -1033,7 +1033,7 @@ void GraphWidget::focusCurrent()
     {
         resetMatches();
         localHeadVersion->setMatched(true);
-        focusVersion(localHeadVersion);
+        displayHits(localHeadVersion);
     }
 }
 
@@ -1278,6 +1278,20 @@ bool GraphWidget::focusElements(const QString& _text, bool _exactMatch)
     return matches.size() > 0;
 }
 
+void GraphWidget::getMarkedupVersions(QList<Version*>& _markup, bool _selected)
+{
+    foreach(QGraphicsItem * it, scene()->items())
+    {
+        if (it->type() != QGraphicsItem::UserType + 1)
+            continue;
+
+        Version* v = dynamic_cast<Version*>(it);
+
+        if (v && (v->getMatched() || (_selected && v->isSelected())))
+            _markup.push_back(v);
+    }
+}
+
 bool GraphWidget::focusElements(const QList<Version*>& _markup)
 {
     QList<Version*> hits;
@@ -1305,8 +1319,18 @@ bool GraphWidget::focusElements(const QList<Version*>& _markup)
     return _markup.size() > 0;
 }
 
+void GraphWidget::displayHits(Version* _v)
+{
+    QList<Version*> tmp;
+    tmp.push_back(_v);
+    displayHits(tmp);
+}
+
 void GraphWidget::displayHits(const QList<Version*>& _hits)
 {
+    QRectF from = mapToScene(viewport()->geometry()).boundingRect();
+    QRectF to;
+
     if (_hits.size() > 0)
     {
         // ensure visibility
@@ -1320,12 +1344,56 @@ void GraphWidget::displayHits(const QList<Version*>& _hits)
             tmp |= QRectF(-10, -10, 20, 20).translated(it->scenePos());
         }
 
+        if (mwin->getIncludeSelected() && selectedVersion)
+        {
+            tmp |= QRectF(-10, -10, 20, 20).translated(selectedVersion->scenePos());
+        }
+
         tmp.adjust(-getXFactor(), -getYFactor(), getXFactor(), getYFactor());
-        QGraphicsView::fitInView(tmp, Qt::KeepAspectRatio);
+        to = tmp;
     }
     else
     {
-        QGraphicsView::fitInView(scene()->itemsBoundingRect(), Qt::KeepAspectRatio);
+        if (mwin->getIncludeSelected() && selectedVersion)
+        {
+            to = QRectF(-10, -10, 20, 20).translated(selectedVersion->scenePos());
+            to.adjust(-getXFactor(), -getYFactor(), getXFactor(), getYFactor());
+        }
+        else
+        {
+            to = scene()->itemsBoundingRect();
+        }
+    }
+
+    if (mwin->getAnimated())
+        animatedFocus(from, to);
+
+    QGraphicsView::fitInView(to, Qt::KeepAspectRatio);
+    viewport()->repaint();
+}
+
+void GraphWidget::animatedFocus(QRectF& _from, QRectF& _to)
+{
+    qint64 elapsed = 0;
+    QElapsedTimer timer;
+
+    timer.start();
+    QGraphicsView::fitInView(animatedFocus(_from, _to, 0.0, true), Qt::KeepAspectRatio);
+    viewport()->repaint();
+    elapsed = timer.nsecsElapsed();
+    timer.invalidate();
+
+    qint64 frames = 24;
+    if (elapsed > 0)
+    {
+        frames = 1000000000 / elapsed;
+    }
+    double add = 1.0 / (frames + 1);
+
+    for (double morph = add; morph < 1.0; morph += add)
+    {
+        QGraphicsView::fitInView(animatedFocus(_from, _to, morph, true), Qt::KeepAspectRatio);
+        viewport()->repaint();
     }
 }
 
@@ -1479,9 +1547,9 @@ void GraphWidget::contextMenuEvent(QContextMenuEvent* _event)
                 it = uit;
                 break;
             }
-            else if (!it || it->type() != QGraphicsItem::UserType +1)
+            else if (!it || it->type() != QGraphicsItem::UserType + 1)
             {
-              it = uit;
+                it = uit;
             }
         }
         else if (uit->type() == QGraphicsItem::UserType + 2 && uit == NULL)
@@ -1784,4 +1852,50 @@ bool GraphWidget::restoreImportantVersions()
     }
 
     return success;
+}
+
+QRectF GraphWidget::animatedFocus(
+    QRectF& _from,
+    QRectF& _to,
+    double _morph,
+    bool _aspect)
+{
+
+    QRectF from = _from.normalized();
+    QRectF to = _to.normalized();
+
+    double dl = to.left() - from.left();
+    double dt = to.top() - from.top();
+    double dw = to.width() - from.width();
+    double dh = to.height() - from.height();
+
+    QRectF result(from.left() + _morph* dl,
+                  from.top() + _morph* dt,
+                  from.width() + _morph* dw,
+                  from.height() + _morph* dh);
+
+    double rf = from.width() / from.height();
+    double rt = to.width() / to.height();
+
+    if (_aspect || rf != rt)
+    {
+        if (rf > rt)
+        {
+            // width gets smaller and aspect
+            double w = result.height() * from.width() / from.height();
+            result = QRectF(result.left() - 0.5 * (w - result.width()),
+                            result.top(),
+                            w,
+                            result.height());
+        }
+        else
+        {
+            double h = result.width() * from.height() / from.width();
+            result = QRectF(result.left(),
+                            result.top() - 0.5 * (h - result.height()),
+                            result.width(),
+                            h);
+        }
+    }
+    return result;
 }

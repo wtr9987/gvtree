@@ -146,7 +146,6 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
     ctwin = new QWidget;
     gvtree_comparetree.setupUi(ctwin);
     graphwidget->setCompareTree(gvtree_comparetree.compareTree);
-
     gvtree_comparetree.compareTree->setMainWindow(this);
     gvtree_comparetree.compareTree->setGraphWidget(graphwidget);
     gvtree_comparetree.compareTree->resetCompareTree();
@@ -469,6 +468,14 @@ void MainWindow::restorePreferencesSettings()
     if (!settings.contains("topDownView"))
         settings.setValue("topDownView", false);
     gvtree_preferences.top_down_view->setChecked(settings.value("topDownView").toBool());
+
+    if (!settings.contains("includeSelected"))
+        settings.setValue("includeSelected", false);
+    gvtree_preferences.include_selected->setChecked(settings.value("includeSelected").toBool());
+
+    if (!settings.contains("animated"))
+        settings.setValue("animated", false);
+    gvtree_preferences.animated->setChecked(settings.value("animated").toBool());
 
     if (!settings.contains("openGLRendering"))
         settings.setValue("openGLRendering", false);
@@ -1049,6 +1056,11 @@ CompareTree* MainWindow::getCompareTree()
     return gvtree_comparetree.compareTree;
 }
 
+QTextEdit* MainWindow::getCompareTreeSelectedLog() const
+{
+    return gvtree_comparetree.selectedLog;
+}
+
 QTextEdit* MainWindow::getCompareTreeFromTextEdit()
 {
     return gvtree_comparetree.fromEdit;
@@ -1172,6 +1184,16 @@ bool MainWindow::getRemotes() const
     return gvtree_preferences.remotes->isChecked();
 }
 
+bool MainWindow::getIncludeSelected() const
+{
+    return gvtree_preferences.include_selected->isChecked();
+}
+
+bool MainWindow::getAnimated() const
+{
+    return gvtree_preferences.animated->isChecked();
+}
+
 bool MainWindow::getOpenGLRendering() const
 {
     return gvtree_preferences.open_gl_rendering->isChecked();
@@ -1202,6 +1224,8 @@ void MainWindow::saveChangedSettings()
     settings.setValue("topDownView", gvtree_preferences.top_down_view->isChecked());
     settings.setValue("gitShortHashes", gvtree_preferences.git_short_hashes->isChecked());
     settings.setValue("openGLRendering", gvtree_preferences.open_gl_rendering->isChecked());
+    settings.setValue("includeSelected", gvtree_preferences.include_selected->isChecked());
+    settings.setValue("animated", gvtree_preferences.animated->isChecked());
     settings.setValue("diffLocalFile", gvtree_preferences.diff_local_files->isChecked());
     settings.setValue("remotes", gvtree_preferences.remotes->isChecked());
 

@@ -35,7 +35,7 @@
       <enum>QTabWidget::North</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="tab1">
       <property name="maximumSize">
@@ -99,7 +99,7 @@
            <number>2</number>
           </property>
           <item row="2" column="1" colspan="5">
-           <widget class="QTextEdit" name="fromEdit">
+           <widget class="QTextBrowser" name="fromEdit">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
               <horstretch>0</horstretch>
@@ -107,24 +107,18 @@
              </sizepolicy>
             </property>
             <property name="focusPolicy">
-             <enum>Qt::NoFocus</enum>
+             <enum>Qt::ClickFocus</enum>
             </property>
             <property name="acceptDrops">
              <bool>false</bool>
             </property>
             <property name="frameShadow">
              <enum>QFrame::Plain</enum>
-            </property>
-            <property name="undoRedoEnabled">
-             <bool>false</bool>
-            </property>
-            <property name="textInteractionFlags">
-             <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
             </property>
            </widget>
           </item>
           <item row="4" column="1" colspan="5">
-           <widget class="QTextEdit" name="toEdit">
+           <widget class="QTextBrowser" name="toEdit">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
               <horstretch>0</horstretch>
@@ -132,16 +126,10 @@
              </sizepolicy>
             </property>
             <property name="focusPolicy">
-             <enum>Qt::NoFocus</enum>
-            </property>
-            <property name="acceptDrops">
-             <bool>false</bool>
+             <enum>Qt::ClickFocus</enum>
             </property>
             <property name="frameShadow">
              <enum>QFrame::Plain</enum>
-            </property>
-            <property name="textInteractionFlags">
-             <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
             </property>
            </widget>
           </item>
@@ -227,6 +215,50 @@
            </widget>
           </item>
          </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab3">
+      <property name="toolTip">
+       <string>Show git log of selected version.</string>
+      </property>
+      <attribute name="title">
+       <string>Selected</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="margin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QTextBrowser" name="selectedLog">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::ClickFocus</enum>
+         </property>
+         <property name="acceptDrops">
+          <bool>false</bool>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
+         <property name="undoRedoEnabled">
+          <bool>true</bool>
+         </property>
+         <property name="textInteractionFlags">
+          <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+         </property>
+         <property name="openLinks">
+          <bool>false</bool>
+         </property>
         </widget>
        </item>
       </layout>

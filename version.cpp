@@ -154,6 +154,16 @@ void Version::setSelected(bool _val)
 {
     QApplication::clipboard()->setText(_val ? hash : QString(), QClipboard::Selection);
     selected = _val;
+
+    QTextEdit* t = graph->getMainWindow()->getCompareTreeSelectedLog();
+    if (_val == false)
+    {
+      t->clear();
+    }
+    else
+    {
+      graph->commitInfo(this, t);
+    }
 }
 
 void Version::addInEdge(Edge* _edge)
@@ -225,7 +235,7 @@ void Version::paint(QPainter* _painter, const QStyleOptionGraphicsItem* _option,
 
     if (lod > 0.3)
     {
-        int height = 0;
+        int height = -10;
 
         foreach(const QString &info, graph->getMainWindow()->getNodeInfo())
         {
@@ -235,7 +245,7 @@ void Version::paint(QPainter* _painter, const QStyleOptionGraphicsItem* _option,
                 QMap<QString, QStringList>::const_iterator kit = keyInformation.find(info);
                 if (kit != keyInformation.end())
                 {
-                    drawTextBox(info, kit.value(), height, _painter);
+                    drawTextBox(info, kit.value(), height, lod, _painter);
                 }
             }
         }
@@ -509,31 +519,37 @@ bool Version::getTextBoundingBox(const QString& _key, const QStringList& _values
     if (!tp)
         return false;
 
+    QRectF textbox = QFontMetricsF(tp->getFont()).boundingRect("X");
+    int hadd = textbox.height() + 1;
     foreach(const QString it, _values)
     {
-        QRectF textbox = QFontMetricsF(tp->getFont()).boundingRect(it);
+        textbox = QFontMetricsF(tp->getFont()).boundingRect(it);
 
         _updatedBox |= textbox.translated(20, _height).adjusted(0, 0, 20, 0);
-        _height += textbox.height() + 1;
+        _height += hadd;
     }
     return true;
 }
 
-bool Version::drawTextBox(const QString& _key, const QStringList& _values, int& _height, QPainter* _painter)
+bool Version::drawTextBox(const QString& _key, const QStringList& _values, int& _height, const qreal& _lod, QPainter* _painter)
 {
     const TagPreference* tp = graph->getMainWindow()->getTagPreference(_key);
 
     if (!tp)
         return false;
 
-    foreach(const QString &it, _values)
+    QRectF textbox = QFontMetricsF(tp->getFont()).boundingRect("X");
+    if (textbox.height() * _lod > 7)
     {
-        QRectF textbox = QFontMetricsF(tp->getFont()).boundingRect(it);
-
-        _painter->setFont(tp->getFont());
-        _painter->setPen(QPen(tp->getColor(), 0));
-        _painter->drawText(textbox.translated(20, _height).adjusted(0, 0, 20, 0), Qt::AlignLeft, it);
-        _height += textbox.height() + 1;
+        int hadd = textbox.height() + 1;
+        foreach(const QString &it, _values)
+        {
+            textbox = QFontMetricsF(tp->getFont()).boundingRect(it);
+            _painter->setFont(tp->getFont());
+            _painter->setPen(QPen(tp->getColor(), 0));
+            _height += hadd;
+            _painter->drawText(textbox.translated(20, _height).adjusted(0, 0, 20, 0), Qt::AlignLeft, it);
+        }
     }
     return true;
 }
@@ -580,6 +596,7 @@ void Version::calculateLocalBoundingBox()
             }
         }
     }
+    localBoundingBox.adjust(0,0,0,10);
 
     // done
     updateBoundingRect = false;
