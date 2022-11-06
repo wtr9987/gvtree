@@ -65,3 +65,6 @@ ChangeLog gvtree V1.2-0 dev_1.2
 	- lineEdit/TextEdit with Copy function (focus click)
 	- add TextEdit for git log information of the selected version
 	- improved text rendering
+
+6. November 2022 :
+	- animation skipped if difference from/to is too small

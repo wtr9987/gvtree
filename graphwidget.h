@@ -186,8 +186,9 @@ public slots:
     void setBlockItemChanged(bool _val);
 
 protected:
-    void animatedFocus(QRectF& _from, QRectF& _to);
-    QRectF animatedFocus(QRectF& _from, QRectF& _to, double _morph, bool _aspect = true);
+    void animatedFocus(const QRectF& _from, const QRectF& _to);
+    QRectF animatedFocus(const QRectF& _from, const QRectF& _to, double _morph);
+    void aspectCenter(QRectF& _from, QRectF& _to);
 
     virtual void contextMenuEvent(QContextMenuEvent* _event);
 

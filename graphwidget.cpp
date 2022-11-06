@@ -135,7 +135,7 @@ void GraphWidget::test()
                              << "A" << "B" << "C" << "D" << "E" << "F" << "G" << "H"
                              << "I" << "J" << "K" << "L" << "M" << "N" << "O");
 
-    foreach (const QString &n, nodeNames)
+    foreach (const QString& n, nodeNames)
     {
         QString line = "#0#0##(tag: " + n + ")#";
         QStringList parts = line.split(QChar('#'));
@@ -150,7 +150,7 @@ void GraphWidget::test()
                             << "OE" << "OF" << "ON" << "EA" << "ED" << "DB" << "DC" << "NG"
                             << "NM" << "MH" << "MI" << "MJ" << "MK" << "ML");
 
-    foreach (const QString &e, edgeData)
+    foreach (const QString& e, edgeData)
     {
         scene()->addItem(new Edge(nodes[QString(e[0])],
                                   nodes[QString(e[1])],
@@ -593,7 +593,7 @@ void GraphWidget::process(QList<QString> _cache)
 
     QList<QString> swap_cache;
 
-    foreach (const QString &line, _cache)
+    foreach (const QString& line, _cache)
     {
         swap_cache.push_front(line);
         linecount++;
@@ -609,7 +609,7 @@ void GraphWidget::process(QList<QString> _cache)
 
     int linenumber = 0;
 
-    foreach (const QString &line, swap_cache)
+    foreach (const QString& line, swap_cache)
     {
         // get the tree pattern
         int pos = treePattern.indexIn(line, 0);
@@ -861,7 +861,7 @@ void GraphWidget::commitInfo(const Version* _v, QTextEdit* _tedi)
     QList<QString> cache;
 
     execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
-    foreach(const QString &str, cache)
+    foreach(const QString& str, cache)
     {
         _tedi->insertPlainText(str);
     }
@@ -970,6 +970,7 @@ void GraphWidget::compareVersions(Version* _v1, Version* _v2)
     fillCompareWidgetFromToInfo();
 
     QStringList fromVersionHashes(_v1->getHash());
+
     compareTree->compareHashes(fromVersionHashes, _v2->getHash());
 
     // ensure visibility of Compare Versions dock
@@ -1271,6 +1272,7 @@ bool GraphWidget::focusElements(const QString& _text, bool _exactMatch)
     resetMatches();
 
     QList<Version*> matches;
+
     matchVersions(_text, matches, _exactMatch);
 
     displayHits(matches);
@@ -1294,27 +1296,14 @@ void GraphWidget::getMarkedupVersions(QList<Version*>& _markup, bool _selected)
 
 bool GraphWidget::focusElements(const QList<Version*>& _markup)
 {
-    QList<Version*> hits;
-    foreach(QGraphicsItem * it, scene()->items())
+    resetMatches();
+
+    foreach(Version * v, _markup)
     {
-        if (it->type() != QGraphicsItem::UserType + 1)
-            continue;
-
-        Version* v = dynamic_cast<Version*>(it);
-
-        if (!_markup.contains(v))
-        {
-            v->setMatched(false);
-        }
-        else
-        {
-            v->setMatched(true);
-            v->ensureUnfolded();
-            hits.push_back(v);
-        }
+        v->setMatched(true);
+        v->ensureUnfolded();
     }
-
-    displayHits(hits);
+    displayHits(_markup);
 
     return _markup.size() > 0;
 }
@@ -1322,6 +1311,7 @@ bool GraphWidget::focusElements(const QList<Version*>& _markup)
 void GraphWidget::displayHits(Version* _v)
 {
     QList<Version*> tmp;
+
     tmp.push_back(_v);
     displayHits(tmp);
 }
@@ -1333,7 +1323,7 @@ void GraphWidget::displayHits(const QList<Version*>& _hits)
 
     if (_hits.size() > 0)
     {
-        // ensure visibility
+        // ensure visibility (TODO update only if folding has changed)
         updateGraphFolding();
 
         QGraphicsItem* it = _hits.front();
@@ -1365,36 +1355,89 @@ void GraphWidget::displayHits(const QList<Version*>& _hits)
         }
     }
 
-    if (mwin->getAnimated())
-        animatedFocus(from, to);
+    // expand to rectangle to have the same aspect ratio than from
+    aspectCenter(from, to);
 
-    QGraphicsView::fitInView(to, Qt::KeepAspectRatio);
+    // check if animation does make sense...
+    QGraphicsView::fitInView(to);
+    QRectF comp = mapToScene(viewport()->geometry()).boundingRect();
+
+    qreal fx, fy, fw, fh;
+    qreal tx, ty, tw, th;
+
+    from.getRect(&fx, &fy, &fw, &fh);
+    comp.getRect(&tx, &ty, &tw, &th);
+
+    qreal delta = fabs(fx - tx) + fabs(fy - ty) + fabs(fw - tw) + fabs(fh - th);
+
+    // from is different to to
+    if (delta > 25)
+    {
+        QGraphicsView::fitInView(from);
+        if (mwin->getAnimated())
+            animatedFocus(from, to);
+
+        QGraphicsView::fitInView(to);
+    }
     viewport()->repaint();
 }
 
-void GraphWidget::animatedFocus(QRectF& _from, QRectF& _to)
+void GraphWidget::animatedFocus(const QRectF& _from, const QRectF& _to)
 {
-    qint64 elapsed = 0;
     QElapsedTimer timer;
 
     timer.start();
-    QGraphicsView::fitInView(animatedFocus(_from, _to, 0.0, true), Qt::KeepAspectRatio);
+    QGraphicsView::fitInView(animatedFocus(_from, _to, 0.0));
     viewport()->repaint();
-    elapsed = timer.nsecsElapsed();
+    qint64 elapsed = timer.nsecsElapsed() + 1; // ensure > 0
+
     timer.invalidate();
 
-    qint64 frames = 24;
-    if (elapsed > 0)
-    {
-        frames = 1000000000 / elapsed;
-    }
+    qint64 frames = 1000000000 / elapsed;
     double add = 1.0 / (frames + 1);
 
     for (double morph = add; morph < 1.0; morph += add)
     {
-        QGraphicsView::fitInView(animatedFocus(_from, _to, morph, true), Qt::KeepAspectRatio);
+        QGraphicsView::fitInView(animatedFocus(_from, _to, morph));
         viewport()->repaint();
     }
+}
+
+void GraphWidget::aspectCenter(QRectF& _from, QRectF& _to)
+{
+    // give _to the same aspect than _from.
+    // old _to is centered in the new one
+
+    double rf = _from.width() / _from.height();
+    double rt = _to.width() / _to.height();
+
+    if (rf > rt)
+    {
+        double w = rf * _to.height();
+        _to = QRectF(_to.left() - 0.5 * (w - _to.width()),
+                     _to.top(),
+                     w,
+                     _to.height());
+    }
+    else
+    {
+        double h = _to.width() * _from.height() / _from.width();
+        _to = QRectF(_to.left(),
+                     _to.top() - 0.5 * (h - _to.height()),
+                     _to.width(),
+                     h);
+    }
+}
+
+QRectF GraphWidget::animatedFocus(
+    const QRectF& _from,
+    const QRectF& _to,
+    double _morph)
+{
+    return QRectF (_from.left() + _morph * (_to.left() - _from.left()),
+                   _from.top() + _morph * (_to.top() - _from.top()),
+                   _from.width() + _morph * (_to.width() - _from.width()),
+                   _from.height() + _morph * (_to.height() - _from.height()));
 }
 
 void GraphWidget::flipY()
@@ -1476,6 +1519,7 @@ void GraphWidget::preferencesUpdated(bool _forceUpdate)
     }
 
     int columns, maxlen;
+
     mwin->getCommentProperties(columns, maxlen);
     if (commentColumns != columns || commentMaxlen != maxlen)
     {
@@ -1852,50 +1896,4 @@ bool GraphWidget::restoreImportantVersions()
     }
 
     return success;
-}
-
-QRectF GraphWidget::animatedFocus(
-    QRectF& _from,
-    QRectF& _to,
-    double _morph,
-    bool _aspect)
-{
-
-    QRectF from = _from.normalized();
-    QRectF to = _to.normalized();
-
-    double dl = to.left() - from.left();
-    double dt = to.top() - from.top();
-    double dw = to.width() - from.width();
-    double dh = to.height() - from.height();
-
-    QRectF result(from.left() + _morph* dl,
-                  from.top() + _morph* dt,
-                  from.width() + _morph* dw,
-                  from.height() + _morph* dh);
-
-    double rf = from.width() / from.height();
-    double rt = to.width() / to.height();
-
-    if (_aspect || rf != rt)
-    {
-        if (rf > rt)
-        {
-            // width gets smaller and aspect
-            double w = result.height() * from.width() / from.height();
-            result = QRectF(result.left() - 0.5 * (w - result.width()),
-                            result.top(),
-                            w,
-                            result.height());
-        }
-        else
-        {
-            double h = result.width() * from.height() / from.width();
-            result = QRectF(result.left(),
-                            result.top() - 0.5 * (h - result.height()),
-                            result.width(),
-                            h);
-        }
-    }
-    return result;
 }
