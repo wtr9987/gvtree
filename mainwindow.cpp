@@ -851,6 +851,7 @@ void MainWindow::reloadCurrentRepository()
             graphwidget->verticalScrollBar()->setValue(shift.y());
         }
     }
+    updateGitStatus(repositoryPath);
     pbRepositoryRefresh->hide();
 }
 
@@ -984,22 +985,7 @@ bool MainWindow::checkGitLocalRepository(const QString& _path,
         _fileConstraintPath = path.mid(_repoPath.size());
     }
 
-    // set watchdog
-    if (watcher)
-    {
-        if (watcher->directories().size())
-            watcher->removePaths(watcher->directories());
-        if (watcher->files().size())
-            watcher->removePaths(watcher->files());
-    }
-
     updateGitStatus(_repoPath);
-
-    if (watcher)
-    {
-        QString gitpath = _repoPath + "/.git";
-        watcher->addPath(gitpath);
-    }
 
     return true;
 }
@@ -1454,6 +1440,15 @@ void MainWindow::showRefreshButton(const QString&)
 
 void MainWindow::updateGitStatus(const QString& _repoPath)
 {
+// set watchdog
+    if (watcher)
+    {
+        if (watcher->directories().size())
+            watcher->removePaths(watcher->directories());
+        if (watcher->files().size())
+            watcher->removePaths(watcher->files());
+    }
+
     gitstatus->clear();
 
     // get data
@@ -1466,6 +1461,12 @@ void MainWindow::updateGitStatus(const QString& _repoPath)
         gitstatus->insertPlainText(str);
     }
     gitstatus->moveCursor(QTextCursor::Start);
+
+    if (watcher)
+    {
+        QString gitpath = _repoPath + "/.git";
+        watcher->addPath(gitpath);
+    }
 }
 
 bool MainWindow::initCbCodecForCStrings(QString _default)

@@ -1023,11 +1023,6 @@ void GraphWidget::compareToPrevious(Version* _v)
     fromToInfo->show();
 }
 
-void GraphWidget::focusVersion(const Version* _v)
-{
-    focusNeighbourBox(_v->getNeighbourBox());
-}
-
 void GraphWidget::focusCurrent()
 {
     if (localHeadVersion)
@@ -1052,7 +1047,7 @@ void GraphWidget::focusFromVersion()
         {
             updateGraphFolding();
         }
-        focusVersion(v);
+        displayHits(v);
     }
 }
 
@@ -1066,7 +1061,7 @@ void GraphWidget::focusToVersion()
         {
             updateGraphFolding();
         }
-        focusVersion(toVersion);
+        displayHits(toVersion);
     }
 }
 

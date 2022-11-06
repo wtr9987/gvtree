@@ -109,17 +109,17 @@ void Version::viewThisVersion()
 
 void Version::focusNeighbourBox()
 {
-    graph->focusNeighbourBox(getNeighbourBox());
+    graph->displayHits(getNeighbourBox());
 }
 
-QRectF Version::getNeighbourBox() const
+QList<Version*> Version::getNeighbourBox()
 {
     // in case of a folder...
     if (isFolder() && isFolded())
         return linear.front()->getNeighbourBox();
 
-    // normal case
-    QRectF focusBox(QGraphicsItem::scenePos(), QSizeF(1.0, 1.0));
+    QList<Version*> result;
+    result.push_back(this);
 
     foreach (const Edge * edge, edgeList)
     {
@@ -131,13 +131,12 @@ QRectF Version::getNeighbourBox() const
             dynamic_cast<Version*>(
                 this == edge->sourceVersion()
                 ? edge->destVersion() : edge->sourceVersion());
+
         if (v)
-            focusBox |= QRectF(v->scenePos(), QSizeF(1.0, 1.0));
+            result.push_back(v);
     }
 
-    focusBox.adjust(-graph->getXFactor() / 2, -graph->getYFactor() / 2, graph->getXFactor() / 2, graph->getYFactor() / 2);
-
-    return focusBox;
+    return result;
 }
 
 void Version::setBlockItemChanged(bool _val)
@@ -156,13 +155,14 @@ void Version::setSelected(bool _val)
     selected = _val;
 
     QTextEdit* t = graph->getMainWindow()->getCompareTreeSelectedLog();
+
     if (_val == false)
     {
-      t->clear();
+        t->clear();
     }
     else
     {
-      graph->commitInfo(this, t);
+        graph->commitInfo(this, t);
     }
 }
 
@@ -237,7 +237,7 @@ void Version::paint(QPainter* _painter, const QStyleOptionGraphicsItem* _option,
     {
         int height = -10;
 
-        foreach(const QString &info, graph->getMainWindow()->getNodeInfo())
+        foreach(const QString& info, graph->getMainWindow()->getNodeInfo())
         {
             if (globalVersionInfo.contains(info)
                 || localVersionInfo.contains(info))
@@ -345,7 +345,8 @@ void Version::updateCommentInformation(int _columns, int _maxlen)
     int len = 0;
     QString part;
     QStringList tmp = info.split(' ');
-    foreach (const QString &str, tmp)
+
+    foreach (const QString& str, tmp)
     {
         if (len == 0)
         {
@@ -377,6 +378,7 @@ void Version::processGitLogCommentInformation(const QString& _comment)
     keyInformation[QString("CommentRaw")].push_back(_comment);
 
     int columns, maxlen;
+
     graph->getMainWindow()->getCommentProperties(columns, maxlen);
     updateCommentInformation(columns, maxlen);
 }
@@ -391,7 +393,7 @@ void Version::processGitLogTagInformation(const QString& _tagInfo)
         QStringList matches = _tagInfo.mid(cstart, cend - cstart).split(',');
         QStringList tags;
 
-        foreach (const QString &str, matches)
+        foreach (const QString& str, matches)
         {
             tags << str.trimmed();
         }
@@ -405,7 +407,7 @@ void Version::processGitLogTagInformation(const QString& _tagInfo)
                                << QString("Branch")
                                << QString("Other Tags"));
 
-        foreach(const QString &it, scanItems)
+        foreach(const QString& it, scanItems)
         {
             const TagPreference* tp =
                 graph->getMainWindow()->getTagPreference(it);
@@ -413,7 +415,7 @@ void Version::processGitLogTagInformation(const QString& _tagInfo)
             if (tp)
             {
                 QRegExp r = tp->getRegExp();
-                foreach (const QString &str, tags)
+                foreach (const QString& str, tags)
                 {
                     if (r.indexIn(str, 0) != -1)
                     {
@@ -432,6 +434,7 @@ bool Version::findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatc
     bool newmatched = false;
 
     QSet<QString> oldLocalVersionInfo = localVersionInfo;
+
     localVersionInfo.clear();
 
     QString rawInput = keyInformation["_input"].join(" ")
@@ -451,7 +454,7 @@ bool Version::findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatc
 
             if (_exactMatch == true)
             {
-                foreach (const QString &str, kit.value())
+                foreach (const QString& str, kit.value())
                 {
                     if (str == _text)
                     {
@@ -521,6 +524,7 @@ bool Version::getTextBoundingBox(const QString& _key, const QStringList& _values
 
     QRectF textbox = QFontMetricsF(tp->getFont()).boundingRect("X");
     int hadd = textbox.height() + 1;
+
     foreach(const QString it, _values)
     {
         textbox = QFontMetricsF(tp->getFont()).boundingRect(it);
@@ -539,10 +543,11 @@ bool Version::drawTextBox(const QString& _key, const QStringList& _values, int& 
         return false;
 
     QRectF textbox = QFontMetricsF(tp->getFont()).boundingRect("X");
+
     if (textbox.height() * _lod > 7)
     {
         int hadd = textbox.height() + 1;
-        foreach(const QString &it, _values)
+        foreach(const QString& it, _values)
         {
             textbox = QFontMetricsF(tp->getFont()).boundingRect(it);
             _painter->setFont(tp->getFont());
@@ -584,7 +589,7 @@ void Version::calculateLocalBoundingBox()
 
     int height = 0;
 
-    foreach(const QString &info, graph->getMainWindow()->getNodeInfo())
+    foreach(const QString& info, graph->getMainWindow()->getNodeInfo())
     {
         if (globalVersionInfo.contains(info)
             || localVersionInfo.contains(info))
@@ -596,7 +601,7 @@ void Version::calculateLocalBoundingBox()
             }
         }
     }
-    localBoundingBox.adjust(0,0,0,10);
+    localBoundingBox.adjust(0, 0, 0, 10);
 
     // done
     updateBoundingRect = false;
@@ -803,6 +808,7 @@ int Version::getPredecessorHashes(QStringList& _result)
     _result.clear();
 
     QSet<Version*> predecessors;
+
     getPredecessors(predecessors);
     foreach(Version * it, predecessors)
     {

@@ -272,8 +272,7 @@ void Edge::focusSource()
     if (invalid)
         return;
 
-    QRectF box = source->getNeighbourBox();
-    graph->focusNeighbourBox(box);
+    graph->displayHits(source);
 }
 
 void Edge::focusDestination()
@@ -281,8 +280,7 @@ void Edge::focusDestination()
     if (invalid)
         return;
 
-    QRectF box = dest->getNeighbourBox();
-    graph->focusNeighbourBox(box);
+    graph->displayHits(dest);
 }
 
 void Edge::focusNeighbourBox()
@@ -290,6 +288,8 @@ void Edge::focusNeighbourBox()
     if (invalid)
         return;
 
-    QRectF box = source->getNeighbourBox() | dest->getNeighbourBox();
-    graph->focusNeighbourBox(box);
+    QList<Version*> tmp;
+    tmp.push_back(source);
+    tmp.push_back(dest);
+    graph->displayHits(tmp);
 }

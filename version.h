@@ -120,7 +120,7 @@ public:
 
     const QString& getHash() const;
 
-    QRectF getNeighbourBox() const;
+    QList<Version*> getNeighbourBox();
 
     void calculateCoordinates(float _scaleX, float _scaleY);
     void linkTreenodes(Version* _parent);

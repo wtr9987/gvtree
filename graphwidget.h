@@ -115,7 +115,6 @@ public:
 
     Version* getLocalHeadVersion() const;
     void updateFromToInfo();
-    void focusVersion(const Version* _v);
 
     // style
     const QColor& getBackgroundColor() const
