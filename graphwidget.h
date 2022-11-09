@@ -67,7 +67,6 @@ public:
     void compareVersions(Version* _v1, Version* _v2);
 
     // focus
-    void focusNeighbourBox(const QRectF& _rect);
     int matchVersions(const QString& _text, QList<Version*>& _matches, bool _exactMatch);
     bool focusElements(const QString& _text, bool _exactMatch = false);
     bool focusElements(const QList<Version*>& _markup);
@@ -185,6 +184,7 @@ public slots:
     void setBlockItemChanged(bool _val);
 
 protected:
+    void focusFromTo(const QRectF& _from, const QRectF& _to);
     void animatedFocus(const QRectF& _from, const QRectF& _to);
     QRectF animatedFocus(const QRectF& _from, const QRectF& _to, double _morph);
     void aspectCenter(QRectF& _from, QRectF& _to);

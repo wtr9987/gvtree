@@ -167,7 +167,10 @@ void GraphWidget::test()
 
 void GraphWidget::fitInView()
 {
-    setMinSize();
+    QRectF from = mapToScene(viewport()->geometry()).boundingRect();
+    QRectF to = scene()->itemsBoundingRect();
+    aspectCenter(from, to);
+    focusFromTo(from, to);
 }
 
 void GraphWidget::mousePressEvent(QMouseEvent* _event)
@@ -300,8 +303,8 @@ void GraphWidget::keyPressEvent(QKeyEvent* _event)
             zoomOut();
             break;
         case Qt::Key_1:
-            QGraphicsView::fitInView(scene()->itemsBoundingRect(), Qt::KeepAspectRatio);
-            break;
+            fitInView();
+                        break;
         case Qt::Key_O:
             focusElements("HEAD", true);
             break;
@@ -1065,12 +1068,6 @@ void GraphWidget::focusToVersion()
     }
 }
 
-void GraphWidget::focusNeighbourBox(const QRectF& _rect)
-{
-    pan = false;
-    QGraphicsView::fitInView(_rect, Qt::KeepAspectRatio);
-}
-
 void GraphWidget::setMinSize(bool _resize)
 {
     QRectF r = scene()->itemsBoundingRect().adjusted(-100, -100, 100, 100);
@@ -1353,14 +1350,21 @@ void GraphWidget::displayHits(const QList<Version*>& _hits)
     // expand to rectangle to have the same aspect ratio than from
     aspectCenter(from, to);
 
+    // focus including animation if set
+    focusFromTo(from, to);
+
+}
+
+void GraphWidget::focusFromTo(const QRectF& _from, const QRectF& _to)
+{
     // check if animation does make sense...
-    QGraphicsView::fitInView(to);
+    QGraphicsView::fitInView(_to);
     QRectF comp = mapToScene(viewport()->geometry()).boundingRect();
 
     qreal fx, fy, fw, fh;
     qreal tx, ty, tw, th;
 
-    from.getRect(&fx, &fy, &fw, &fh);
+    _from.getRect(&fx, &fy, &fw, &fh);
     comp.getRect(&tx, &ty, &tw, &th);
 
     qreal delta = fabs(fx - tx) + fabs(fy - ty) + fabs(fw - tw) + fabs(fh - th);
@@ -1368,11 +1372,11 @@ void GraphWidget::displayHits(const QList<Version*>& _hits)
     // from is different to to
     if (delta > 25)
     {
-        QGraphicsView::fitInView(from);
+        QGraphicsView::fitInView(_from);
         if (mwin->getAnimated())
-            animatedFocus(from, to);
+            animatedFocus(_from, _to);
 
-        QGraphicsView::fitInView(to);
+        QGraphicsView::fitInView(_to);
     }
     viewport()->repaint();
 }
