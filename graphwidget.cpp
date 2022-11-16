@@ -69,6 +69,7 @@ GraphWidget::GraphWidget(MainWindow* _parent)
     headVersion(NULL),
     mwin(_parent),
     compareTree(NULL),
+    pan(false),
     connectorStyle(0),
     maxLines(0),
     currentLines(0),
@@ -175,7 +176,8 @@ void GraphWidget::fitInView()
 
 void GraphWidget::mousePressEvent(QMouseEvent* _event)
 {
-    if (_event->button() == Qt::MidButton
+    //if (_event->button() == Qt::MidButton
+    if (_event->button() == Qt::MiddleButton
         || (
             _event->button() == Qt::LeftButton
             && (_event->modifiers() & Qt::ControlModifier)
@@ -1288,8 +1290,6 @@ void GraphWidget::getMarkedupVersions(QList<Version*>& _markup, bool _selected)
 
 bool GraphWidget::focusElements(const QList<Version*>& _markup)
 {
-    resetMatches();
-
     foreach(Version * v, _markup)
     {
         v->setMatched(true);

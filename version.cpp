@@ -528,9 +528,8 @@ bool Version::getTextBoundingBox(const QString& _key, const QStringList& _values
     foreach(const QString it, _values)
     {
         textbox = QFontMetricsF(tp->getFont()).boundingRect(it);
-
-        _updatedBox |= textbox.translated(20, _height).adjusted(0, 0, 20, 0);
         _height += hadd;
+        _updatedBox |= textbox.translated(20, _height).adjusted(0, 0, 20, 0);
     }
     return true;
 }
