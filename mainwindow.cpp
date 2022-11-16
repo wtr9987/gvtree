@@ -860,9 +860,7 @@ void MainWindow::changeCssFilePath()
     QFileDialog dialog(this, tr("Change Path to CSS Style Sheet File"), gvtree_preferences.pbCssPath->text());
 
     dialog.setFilter(QDir::NoDotAndDotDot | QDir::Hidden | QDir::AllEntries);
-    //dialog.setFileMode(QFileDialog::ExistingFile);
     dialog.setOption(QFileDialog::ShowDirsOnly, true);
-
     if (dialog.exec())
     {
         applyStyleSheetFile(dialog.selectedFiles().at(0));
@@ -874,7 +872,6 @@ void MainWindow::changeTempPath()
     QFileDialog dialog(this, tr("Change Path for Temporary Files"), gvtree_preferences.pbTempPath->text());
 
     dialog.setFilter(QDir::NoDotAndDotDot | QDir::Hidden | QDir::AllDirs);
-    //dialog.setFileMode(QFileDialog::DirectoryOnly);
     dialog.setOption(QFileDialog::ShowDirsOnly, true);
     if (dialog.exec())
     {
@@ -905,7 +902,6 @@ void MainWindow::setGitLocalRepository()
     QString oldRepositoryPath = repositoryPath;
 
     dialog.setFilter(QDir::NoDotAndDotDot | QDir::Hidden | QDir::AllDirs);
-    //dialog.setFileMode(QFileDialog::DirectoryOnly);
     dialog.setOption(QFileDialog::ShowDirsOnly, true);
     if (dialog.exec())
     {

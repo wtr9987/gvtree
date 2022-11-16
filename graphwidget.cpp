@@ -176,7 +176,6 @@ void GraphWidget::fitInView()
 
 void GraphWidget::mousePressEvent(QMouseEvent* _event)
 {
-    //if (_event->button() == Qt::MidButton
     if (_event->button() == Qt::MiddleButton
         || (
             _event->button() == Qt::LeftButton
