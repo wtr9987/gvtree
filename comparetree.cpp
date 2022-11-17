@@ -42,7 +42,7 @@ void CompareTree::compareHashes(const QStringList& _hash1, const QString& _hash2
     treemodel->setHorizontalHeaderItem(0, new QStandardItem(QString("Path")));
     treemodel->setHorizontalHeaderItem(1, new QStandardItem(QString("File")));
 
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     header()->setSectionResizeMode(QHeaderView::Stretch);
 #else
     header()->setResizeMode(QHeaderView::Stretch);
@@ -376,7 +376,7 @@ void CompareTree::setGraphWidget(class GraphWidget* _graph)
 void CompareTree::viewLocalChanges(bool _staged)
 {
     // get data
-    QString cmd = "git -C " + graph->getLocalRepositoryPath() + (_staged==true?" diff --cached --name-only":" ls-files -m");
+    QString cmd = "git -C " + graph->getLocalRepositoryPath() + (_staged == true ? " diff --cached --name-only" : " ls-files -m");
 
     QList<QString> cache;
     execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
@@ -386,7 +386,7 @@ void CompareTree::viewLocalChanges(bool _staged)
     treemodel->setHorizontalHeaderItem(0, new QStandardItem(QString("Path")));
     treemodel->setHorizontalHeaderItem(1, new QStandardItem(QString("File")));
 
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     header()->setSectionResizeMode(QHeaderView::Stretch);
 #else
     header()->setResizeMode(QHeaderView::Stretch);
@@ -472,7 +472,7 @@ void CompareTree::viewThisVersion(const QString& _hash)
     treemodel->setHorizontalHeaderItem(0, new QStandardItem(QString("Path")));
     treemodel->setHorizontalHeaderItem(1, new QStandardItem(QString("File")));
 
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     header()->setSectionResizeMode(QHeaderView::Stretch);
 #else
     header()->setResizeMode(QHeaderView::Stretch);
@@ -589,18 +589,22 @@ void CompareTree::compareFileVersions(
     {
         QString localFile = graph->getLocalRepositoryPath() + "/" + _path;
 
-        QStringList tmp;
-        foreach(QString fname, diffFiles)
+        if (QFile::exists(localFile))
         {
-            QString cmd = "diff " + fname + " " + localFile;
 
-            QList<QString> cache;
-            execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
-            if (cache.size())
-                tmp.push_back(fname);
+            QStringList tmp;
+            foreach(QString fname, diffFiles)
+            {
+                QString cmd = "diff " + fname + " " + localFile;
+
+                QList<QString> cache;
+                execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
+                if (cache.size())
+                    tmp.push_back(fname);
+            }
+            diffFiles = tmp;
+            diffFiles.push_back(localFile);
         }
-        diffFiles = tmp;
-        diffFiles.push_back(localFile);
     }
 
     // mime type to tool
@@ -624,8 +628,6 @@ void CompareTree::compareFileVersions(
     QString fnameList = diffFiles.join(QString(" "));
 
     difftool.replace("%1", fnameList);
-    difftool.replace("%2", QString());
-    difftool.replace("%3", QString());
 
     system(difftool.toUtf8().data());
 }
