@@ -75,6 +75,7 @@ GraphWidget::GraphWidget(MainWindow* _parent)
     currentLines(0),
     shortHashes(false),
     topDownView(false),
+    horizontalSort(0),
     remotes(false),
     xfactor(1),
     yfactor(1),
@@ -89,6 +90,7 @@ GraphWidget::GraphWidget(MainWindow* _parent)
         connectorStyle = mwin->getConnectorStyle();
         shortHashes = mwin->getShortHashes();
         topDownView = mwin->getTopDownView();
+        horizontalSort = mwin->getHorizontalSort();
         remotes = mwin->getRemotes();
     }
 
@@ -170,6 +172,7 @@ void GraphWidget::fitInView()
 {
     QRectF from = mapToScene(viewport()->geometry()).boundingRect();
     QRectF to = scene()->itemsBoundingRect();
+
     aspectCenter(from, to);
     focusFromTo(from, to);
 }
@@ -305,7 +308,7 @@ void GraphWidget::keyPressEvent(QKeyEvent* _event)
             break;
         case Qt::Key_1:
             fitInView();
-                        break;
+            break;
         case Qt::Key_O:
             focusElements("HEAD", true);
             break;
@@ -880,7 +883,7 @@ void GraphWidget::fillCompareWidgetFromToInfo()
     foreach(Version * it, fromVersions)
     {
         it->setMatched(true);
-        mwin->getFromComboBox()->addItem(it->getCommitDate(), QVariant::fromValue(VersionPointer(it)));
+        mwin->getFromComboBox()->addItem(it->getCommitDateString(), QVariant::fromValue(VersionPointer(it)));
     }
     mwin->getCompareTreeFromPushButton()->setEnabled(fromVersions.size() > 0);
 
@@ -889,7 +892,7 @@ void GraphWidget::fillCompareWidgetFromToInfo()
     if (toVersion)
     {
         toVersion->setMatched(true);
-        mwin->getToDateLabel()->setText(toVersion->getCommitDate());
+        mwin->getToDateLabel()->setText(toVersion->getCommitDateString());
         mwin->getCompareTreeToPushButton()->setEnabled(true);
         commitInfo(toVersion, mwin->getCompareTreeToTextEdit());
     }
@@ -1115,6 +1118,18 @@ void GraphWidget::calculateGraphicsViewPosition()
 void GraphWidget::normalizeGraph()
 {
     setBlockItemChanged(true);
+
+    int sort = mwin->getHorizontalSort();
+
+    if (sort == 1 || sort == 2)
+    {
+        rootVersion->calculateWeightRecurse();
+    }
+
+    if (sort)
+    {
+        rootVersion->applyHorizontalSort(sort);
+    }
 
     // the following 5 commands create a collision free tree graph
     rootVersion->simpleTreeGeometry(NULL);
@@ -1351,7 +1366,6 @@ void GraphWidget::displayHits(const QList<Version*>& _hits)
 
     // focus including animation if set
     focusFromTo(from, to);
-
 }
 
 void GraphWidget::focusFromTo(const QRectF& _from, const QRectF& _to)
@@ -1507,6 +1521,12 @@ void GraphWidget::preferencesUpdated(bool _forceUpdate)
     if (topDownView != mwin->getTopDownView())
     {
         topDownView = mwin->getTopDownView();
+        updateAll = true;
+    }
+
+    if (horizontalSort != mwin->getHorizontalSort())
+    {
+        horizontalSort = mwin->getHorizontalSort();
         updateAll = true;
     }
 

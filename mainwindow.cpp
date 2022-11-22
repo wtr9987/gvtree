@@ -466,8 +466,12 @@ void MainWindow::restorePreferencesSettings()
     gvtree_preferences.git_short_hashes->setChecked(settings.value("gitShortHashes").toBool());
 
     if (!settings.contains("topDownView"))
-        settings.setValue("topDownView", false);
-    gvtree_preferences.top_down_view->setChecked(settings.value("topDownView").toBool());
+        settings.setValue("topDownView", 0);
+    gvtree_preferences.top_down_sort->setCurrentIndex(settings.value("topDownView").toInt());
+
+    if (!settings.contains("horizontalSort"))
+        settings.setValue("horizontalSort", 0);
+    gvtree_preferences.horizontal_sort->setCurrentIndex(settings.value("horizontalSort").toInt());
 
     if (!settings.contains("includeSelected"))
         settings.setValue("includeSelected", false);
@@ -1161,7 +1165,12 @@ bool MainWindow::getShortHashes() const
 
 bool MainWindow::getTopDownView() const
 {
-    return gvtree_preferences.top_down_view->isChecked();
+    return gvtree_preferences.top_down_sort->currentIndex()>0;
+}
+
+int MainWindow::getHorizontalSort() const
+{
+    return gvtree_preferences.horizontal_sort->currentIndex();
 }
 
 bool MainWindow::getRemotes() const
@@ -1206,7 +1215,8 @@ void MainWindow::saveChangedSettings()
         forceUpdate = true;
     }
 #endif
-    settings.setValue("topDownView", gvtree_preferences.top_down_view->isChecked());
+    settings.setValue("topDownView", gvtree_preferences.top_down_sort->currentIndex());
+    settings.setValue("horizontalSort", gvtree_preferences.horizontal_sort->currentIndex());
     settings.setValue("gitShortHashes", gvtree_preferences.git_short_hashes->isChecked());
     settings.setValue("openGLRendering", gvtree_preferences.open_gl_rendering->isChecked());
     settings.setValue("includeSelected", gvtree_preferences.include_selected->isChecked());

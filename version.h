@@ -80,7 +80,7 @@ public:
 
     void setKeyInformation(const QMap<QString, QStringList>& _data);
 
-    QString getCommitDate() const;
+    QString getCommitDateString() const;
 
     /**
      * \brief The git log information _input is checked against
@@ -139,6 +139,10 @@ public:
     void clearFolderVersions();
 
     void updateFolderBox();
+    void applyHorizontalSort(int _sort);
+    int calculateWeightRecurse();
+    int getWeight() const;
+    long getCommitDate() const;
     int getPredecessors(QSet<Version*>& _result);
     int getPredecessorHashes(QStringList& _result);
     void calculateLocalBoundingBox();
@@ -244,6 +248,10 @@ private:
     bool fileConstraint;
 
     bool selected;
+
+    int weight;
+
+    long commitDate;
 };
 
 typedef struct Version* VersionPointer;

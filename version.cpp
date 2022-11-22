@@ -48,7 +48,9 @@ Version::Version(GraphWidget* _graphWidget, QGraphicsItem* _parent) :
     updateBoundingRect(false),
     main(false),
     fileConstraint(false),
-    selected(false)
+    selected(false),
+    weight(0),
+    commitDate(0)
 {
     // flags
     setFlag(ItemSendsGeometryChanges);
@@ -72,7 +74,9 @@ Version::Version(const QStringList& _globalVersionInfo,
     updateBoundingRect(false),
     main(false),
     fileConstraint(false),
-    selected(false)
+    selected(false),
+    weight(0),
+    commitDate(0)
 {
     // flags
     setFlag(ItemIsMovable);
@@ -288,7 +292,7 @@ void Version::adjustEdges()
     }
 }
 
-QString Version::getCommitDate() const
+QString Version::getCommitDateString() const
 {
     return keyInformation.value("Commit Date", QStringList()).join(QString());
 }
@@ -312,6 +316,7 @@ bool Version::processGitLogInfo(const QString& _input, const QStringList& _parts
         QStringList(
             QDateTime::fromTime_t(_parts.at(2).toInt())
             .toString("yyyy.MM.dd HH:mm:ss"));
+    commitDate = _parts.at(2).toInt();
     keyInformation[QString("User Name")] = QStringList(_parts.at(3));
 
     // tag information
@@ -754,7 +759,7 @@ void Version::foldAction()
     {
         float h = graph->getYFactor() * linear.size();
         folderBox = QRectF(-30, -30, 60, 60 + h)
-            .translated(0, (graph->getTopDownView() ? 1.0 : -1.0) * h);
+            .translated(0, graph->getTopDownView() ? 0.0 : -1.0 * h);
     }
     update();
 }
@@ -987,4 +992,114 @@ bool Version::isFoldable() const
 void Version::setIsFoldable(bool _val)
 {
     foldable = _val;
+}
+
+void Version::applyHorizontalSort(int _sort)
+{
+    foreach (const Edge * edge, outEdges)
+    {
+        Version* next = dynamic_cast<Version*>(edge->destVersion());
+
+        if (next)
+            next->applyHorizontalSort(_sort);
+    }
+
+    if (outEdges.size() < 2)
+        return;
+
+    switch (_sort)
+    {
+        case 1:
+        {
+            struct
+            {
+                bool operator ()(const Edge* a, const Edge* b) const
+                {
+                    const Version* av = dynamic_cast<Version*>(a->destVersion());
+                    const Version* bv = dynamic_cast<Version*>(b->destVersion());
+                    int aw = !av ? 0 : av->getWeight();
+                    int bw = !bv ? 0 : bv->getWeight();
+
+                    return aw < bw;
+                }
+            } weightLt;
+            std::sort(outEdges.begin(), outEdges.end(), weightLt);
+        }
+
+        break;
+        case 2:
+        {
+            struct
+            {
+                bool operator ()(const Edge* a, const Edge* b) const
+                {
+                    const Version* av = dynamic_cast<Version*>(a->destVersion());
+                    const Version* bv = dynamic_cast<Version*>(b->destVersion());
+                    int aw = !av ? 0 : av->getWeight();
+                    int bw = !bv ? 0 : bv->getWeight();
+
+                    return aw > bw;
+                }
+            } weightGt;
+            std::sort(outEdges.begin(), outEdges.end(), weightGt);
+        }
+
+        break;
+        case 3:
+        {
+            struct
+            {
+                bool operator ()(const Edge* a, const Edge* b) const
+                {
+                    const Version* av = dynamic_cast<Version*>(a->destVersion());
+                    const Version* bv = dynamic_cast<Version*>(b->destVersion());
+                    long aw = av->getCommitDate();
+                    long bw = bv->getCommitDate();
+
+                    return aw < bw;
+                }
+            } commitDateLt;
+            std::sort(outEdges.begin(), outEdges.end(), commitDateLt);
+        }
+        break;
+        case 4:
+        {
+            struct
+            {
+                bool operator ()(const Edge* a, const Edge* b) const
+                {
+                    const Version* av = dynamic_cast<Version*>(a->destVersion());
+                    const Version* bv = dynamic_cast<Version*>(b->destVersion());
+                    long aw = av->getCommitDate();
+                    long bw = bv->getCommitDate();
+
+                    return aw > bw;
+                }
+            } commitDateGt;
+            std::sort(outEdges.begin(), outEdges.end(), commitDateGt);
+        }
+        break;
+    }
+}
+
+int Version::calculateWeightRecurse()
+{
+    weight = 1 + linear.size();
+    foreach (const Edge * edge, outEdges)
+    {
+        Version* next = dynamic_cast<Version*>(edge->destVersion());
+
+        weight += next ? next->calculateWeightRecurse() : 0;
+    }
+    return weight;
+}
+
+int Version::getWeight() const
+{
+    return weight;
+}
+
+long Version::getCommitDate() const
+{
+    return commitDate;
 }

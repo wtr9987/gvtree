@@ -76,6 +76,7 @@ public:
     int getMaxLines() const;
     bool getShortHashes() const;
     bool getTopDownView() const;
+    int getHorizontalSort() const;
     bool getRemotes() const;
     bool getIncludeSelected() const;
     bool getAnimated() const;

@@ -218,5 +218,5 @@ int Node::getNumOutEdges() const
 
 bool Node::isLeaf() const
 {
-  return outEdges.size() == 0;
+    return outEdges.size() == 0;
 }

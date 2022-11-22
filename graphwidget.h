@@ -259,6 +259,7 @@ private:
     int currentLines;
     bool shortHashes;
     bool topDownView;
+    int horizontalSort;
     bool remotes;
     int xfactor;
     int yfactor;
