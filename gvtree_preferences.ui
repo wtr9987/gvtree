@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>871</width>
-    <height>768</height>
+    <width>592</width>
+    <height>738</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>Preferences</string>
@@ -47,39 +53,86 @@
        <string>Basic Settings</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_2">
-       <item row="0" column="1">
-        <widget class="QGroupBox" name="gbRepoPath">
-         <property name="toolTip">
-          <string>If no repository path is set with -r use the current one or the repository of the last session.</string>
+       <item row="9" column="1">
+        <widget class="QGroupBox" name="gbGitLog">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
          </property>
          <property name="title">
-          <string>Initial git Repository Path</string>
+          <string>git log</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_4">
-          <item>
-           <widget class="QRadioButton" name="rbCurrentPathRepo">
-            <property name="toolTip">
-             <string>If this option is selected the current path, when starting gvtree is looked up for a local git repository.</string>
+         <layout class="QGridLayout" name="gridLayout_11">
+          <item row="0" column="0">
+           <widget class="QLabel" name="lbGitLogLength">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
             </property>
             <property name="text">
-             <string>current path</string>
+             <string>length</string>
             </property>
            </widget>
           </item>
-          <item>
-           <widget class="QRadioButton" name="rbLastRepo">
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="remotes">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
             <property name="toolTip">
-             <string>If this option is selected the git repository used in the last gvtree session is used.</string>
+             <string>Add the --remotes option to git log calls.</string>
             </property>
             <property name="text">
-             <string>last repository path</string>
+             <string>--remotes</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="git_log_lines">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::ClickFocus</enum>
+            </property>
+            <property name="toolTip">
+             <string>The number of versions processed from the git log output can be limited here.</string>
+            </property>
+            <property name="text">
+             <string>1000</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QCheckBox" name="git_short_hashes">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="toolTip">
+             <string>This option controls if %h or %H is used to retrieve hash values from git. </string>
+            </property>
+            <property name="text">
+             <string>short hashes</string>
             </property>
            </widget>
           </item>
          </layout>
         </widget>
        </item>
-       <item row="21" column="1">
+       <item row="25" column="1">
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -92,80 +145,245 @@
          </property>
         </spacer>
        </item>
-       <item row="4" column="1">
-        <widget class="QLabel" name="lbTempPath">
+       <item row="1" column="1">
+        <widget class="QGroupBox" name="groupBox_7">
          <property name="font">
           <font>
            <weight>75</weight>
            <bold>true</bold>
           </font>
          </property>
-         <property name="text">
-          <string>Temporary File Path</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="2" colspan="2">
-        <widget class="QPushButton" name="pbTempPath">
-         <property name="toolTip">
-          <string>The path to store temporary files to. When comparing files a temporary copy is created in this directory with the file name pattern [git-hash]_[process id].[file extension]. When the program exits (regulary) the temporary files are cleaned up. The recommended path is /tmp.</string>
-         </property>
-         <property name="text">
-          <string>/tmp</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QLabel" name="lbCurrentLocalRepositoryPath">
-         <property name="font">
-          <font>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Current git Repository Path</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="2" colspan="2">
-        <widget class="QPushButton" name="pbLocalRepositoryPath">
-         <property name="toolTip">
-          <string>The path of the current local repository.</string>
-         </property>
-         <property name="text">
-          <string>local repository path</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="2" colspan="2">
-        <widget class="QPushButton" name="pbCssPath">
-         <property name="text">
-          <string>css path</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1">
-        <widget class="QLabel" name="lbCssPath">
-         <property name="font">
-          <font>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>CSS Style Sheet Path</string>
-         </property>
-        </widget>
-       </item>
-       <item row="15" column="1" colspan="2">
-        <widget class="QGroupBox" name="gbSort">
          <property name="title">
-          <string>Sort</string>
+          <string>git Repository Path</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_13">
+          <item row="0" column="0">
+           <widget class="QLabel" name="lbCurrentLocalRepositoryPath">
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Current Path</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QPushButton" name="pbLocalRepositoryPath">
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="toolTip">
+             <string>The path of the current local repository.</string>
+            </property>
+            <property name="text">
+             <string>local repository path</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0" colspan="2">
+           <widget class="QGroupBox" name="gbRepoPath">
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="toolTip">
+             <string>If no repository path is set with -r use the current one or the repository of the last session.</string>
+            </property>
+            <property name="title">
+             <string>Initial git Repository Path</string>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_4">
+             <item>
+              <widget class="QRadioButton" name="rbCurrentPathRepo">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="toolTip">
+                <string>If this option is selected the current path, when starting gvtree is looked up for a local git repository.</string>
+               </property>
+               <property name="text">
+                <string>current working directory</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="rbLastRepo">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="toolTip">
+                <string>If this option is selected the git repository used in the last gvtree session is used.</string>
+               </property>
+               <property name="text">
+                <string>last repository path</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="20" column="1">
+        <widget class="QGroupBox" name="gbMisc">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="title">
+          <string>Misc</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_12">
+          <item row="2" column="0">
+           <widget class="QCheckBox" name="print_cmd_to_stdout">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="toolTip">
+             <string>If an external program is called from gvtree the used commandline is echoed to stdout.</string>
+            </property>
+            <property name="text">
+             <string>print commandline to stdout</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="lbTempPath">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Temporary File Path</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0">
+           <widget class="QLabel" name="lbCssPath">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>CSS Style Sheet Path</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="1">
+           <widget class="QPushButton" name="pbCssPath">
+            <property name="text">
+             <string>css path</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="diff_local_files">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
+            </property>
+            <property name="toolTip">
+             <string>If checked, the current local file is added to the comparison of different versions. </string>
+            </property>
+            <property name="text">
+             <string>add local version to diff</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QCheckBox" name="include_selected">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>focus includes selected version</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QPushButton" name="pbTempPath">
+            <property name="toolTip">
+             <string>The path to store temporary files to. When comparing files a temporary copy is created in this directory with the file name pattern [git-hash]_[process id].[file extension]. When the program exits (regulary) the temporary files are cleaned up. The recommended path is /tmp.</string>
+            </property>
+            <property name="text">
+             <string>/tmp</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="lbCodecForCStrings">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="toolTip">
+             <string>Obsolete in Qt5. If changed restart might be necessary.</string>
+            </property>
+            <property name="text">
+             <string>Codec for C strings</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QComboBox" name="cbCodecForCStrings"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="10" column="1">
+        <widget class="QGroupBox" name="gbSort">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="title">
+          <string>Tree Sort</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_10">
           <item row="0" column="0">
            <widget class="QLabel" name="lbVerticalSort">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
             <property name="text">
              <string>Vertical</string>
             </property>
@@ -173,6 +391,12 @@
           </item>
           <item row="2" column="0">
            <widget class="QLabel" name="lbHorizontalSort">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
             <property name="text">
              <string>Horizontal</string>
             </property>
@@ -220,119 +444,6 @@
              </property>
             </item>
            </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="5" column="1" colspan="2">
-        <widget class="QGroupBox" name="gbGitLog">
-         <property name="title">
-          <string>git log</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_11">
-          <item row="0" column="0">
-           <widget class="QLabel" name="lbGitLogLength">
-            <property name="font">
-             <font>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>length</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QCheckBox" name="remotes">
-            <property name="toolTip">
-             <string>Add the --remotes option to git log calls.</string>
-            </property>
-            <property name="text">
-             <string>--remotes</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="git_log_lines">
-            <property name="focusPolicy">
-             <enum>Qt::ClickFocus</enum>
-            </property>
-            <property name="toolTip">
-             <string>The number of versions processed from the git log output can be limited here.</string>
-            </property>
-            <property name="text">
-             <string>1000</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QCheckBox" name="git_short_hashes">
-            <property name="toolTip">
-             <string>This option controls if %h or %H is used to retrieve hash values from git. </string>
-            </property>
-            <property name="text">
-             <string>short hashes</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="16" column="1">
-        <widget class="QGroupBox" name="gbMisc">
-         <property name="title">
-          <string>Misc</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_12">
-          <item row="2" column="0">
-           <widget class="QCheckBox" name="print_cmd_to_stdout">
-            <property name="toolTip">
-             <string>If an external program is called from gvtree the used commandline is echoed to stdout.</string>
-            </property>
-            <property name="text">
-             <string>print commandline to stdout</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="lbCodecForCStrings">
-            <property name="font">
-             <font>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="toolTip">
-             <string>Obsolete in Qt5. If changed restart might be necessary.</string>
-            </property>
-            <property name="text">
-             <string>Codec for C strings</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QCheckBox" name="diff_local_files">
-            <property name="focusPolicy">
-             <enum>Qt::NoFocus</enum>
-            </property>
-            <property name="toolTip">
-             <string>If checked, the current local file is added to the comparison of different versions. </string>
-            </property>
-            <property name="text">
-             <string>add local version to diff</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QCheckBox" name="include_selected">
-            <property name="text">
-             <string>focus includes selected version</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QComboBox" name="cbCodecForCStrings"/>
           </item>
          </layout>
         </widget>
