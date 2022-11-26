@@ -1584,12 +1584,14 @@ void GraphWidget::foldAll()
 {
     rootVersion->foldRecurse(true);
     updateGraphFolding();
+    setMinSize();
 }
 
 void GraphWidget::unfoldAll()
 {
     rootVersion->foldRecurse(false);
     updateGraphFolding();
+    setMinSize();
 }
 
 void GraphWidget::contextMenuEvent(QContextMenuEvent* _event)
