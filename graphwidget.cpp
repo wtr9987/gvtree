@@ -1214,19 +1214,23 @@ Version* GraphWidget::findVersion(const QString& _hash)
 
 void GraphWidget::updateGraphFolding(Version* _v)
 {
-    if (_v)
+    if (_v && _v->isFolder())
     {
-        QPoint restoreVersionPosition = mapFromScene(_v->scenePos());
+        QList<Version*> versions;
 
+        if (mwin->getAnimated())
+        {
+            versions.push_back(_v->isFolded() ? _v : _v->getFolderVersions().front());
+            displayHits(versions, false);
+        }
+
+        _v->foldAction();
         normalizeGraph();
         setMinSize(false);
 
-        horizontalScrollBar()->setValue(0);
-        verticalScrollBar()->setValue(0);
-
-        QPoint shift = mapFromScene(_v->scenePos()) - restoreVersionPosition;
-        horizontalScrollBar()->setValue(shift.x());
-        verticalScrollBar()->setValue(shift.y());
+        versions.clear();
+        versions.push_back(_v);
+        displayHits(versions, false);
     }
     else
     {
@@ -1322,7 +1326,7 @@ void GraphWidget::displayHits(Version* _v)
     displayHits(tmp);
 }
 
-void GraphWidget::displayHits(const QList<Version*>& _hits)
+void GraphWidget::displayHits(const QList<Version*>& _hits, bool _unfold)
 {
     QRectF from = mapToScene(viewport()->geometry()).boundingRect();
     QRectF to;
@@ -1330,7 +1334,8 @@ void GraphWidget::displayHits(const QList<Version*>& _hits)
     if (_hits.size() > 0)
     {
         // ensure visibility (TODO update only if folding has changed)
-        updateGraphFolding();
+        if (_unfold)
+            updateGraphFolding();
 
         QGraphicsItem* it = _hits.front();
         QRectF tmp = QRectF(-10, -10, 20, 20).translated(it->scenePos());
@@ -1644,20 +1649,6 @@ void GraphWidget::contextMenuEvent(QContextMenuEvent* _event)
                 connect(&adapter, SIGNAL(foldSignal(Version*)), this, SLOT(updateGraphFolding(Version*)));
                 menu.addSeparator();
             }
-            /*
-             * TODO check if it does make sense to hide/show subtrees
-               if (v->getSubtreeHidden())
-               {
-                action = menu.addAction(QString("Show subtree"));
-                connect(action, SIGNAL(triggered()), v, SLOT(showSubtree()));
-               }
-               else
-               {
-                action = menu.addAction(QString("Hide subtree"));
-                connect(action, SIGNAL(triggered()), v, SLOT(hideSubtree()));
-               }
-               menu.addSeparator();
-             */
             if (selectedVersion && (v != selectedVersion))
             {
                 action = menu.addAction(QString("Compare to selected"));
@@ -1679,6 +1670,22 @@ void GraphWidget::contextMenuEvent(QContextMenuEvent* _event)
             action = menu.addAction(QString("View this version"));
             connect(action, SIGNAL(triggered()), &adapter, SLOT(viewThisVersion()));
             menu.addSeparator();
+            // Experimental TODO markup that a subtree exists
+            if (!v->isLeaf())
+            {
+                if (v->getSubtreeHidden())
+                {
+                    action = menu.addAction(QString("Show subtree"));
+                    connect(action, SIGNAL(triggered()), &adapter, SLOT(showSubtree()));
+                }
+                else
+                {
+                    action = menu.addAction(QString("Hide subtree"));
+                    connect(action, SIGNAL(triggered()), &adapter, SLOT(hideSubtree()));
+                }
+                menu.addSeparator();
+            }
+
             action = menu.addAction(QString("Focus neighbours"));
             connect(action, SIGNAL(triggered()), &adapter, SLOT(focusNeighbourBox()));
             menu.exec(_event->globalPos());

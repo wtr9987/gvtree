@@ -55,7 +55,6 @@ void VersionAdapter::focusNeighbourBox()
 
 void VersionAdapter::foldAction()
 {
-    v->foldAction();
     emit foldSignal(v);
 }
 

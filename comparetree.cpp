@@ -19,6 +19,8 @@
 
 #include <QMenu>
 #include <QFileInfo>
+#include <QClipboard>
+#include <QApplication>
 #include "comparetree.h"
 #include "execute_cmd.h"
 #include "mainwindow.h"
@@ -245,11 +247,13 @@ void CompareTree::compareFileVersionsAction(QAction* _act)
         return;
 
     QString path = tmp.front();
+
     tmp.pop_front();
     if (tmp.isEmpty())
         return;
 
     QString status = tmp.front();
+
     tmp.pop_front();
 
     QString path_old = (!tmp.isEmpty()) ? tmp.front() : path;
@@ -270,12 +274,19 @@ void CompareTree::gitLogFileAction(QAction* _act)
         if (tmp.isEmpty())
             return;
 
-        // graph->gitlog(tmp.front());
         graph->setGitLogFileConstraint(tmp.front());
     }
     else if (tmp.front() == "ACT4")
     {
         graph->removeFilter();
+    }
+    else if (tmp.front() == "ACT5")
+    {
+        tmp.pop_front();
+        if (tmp.isEmpty())
+            return;
+
+        QApplication::clipboard()->setText(tmp.front());
     }
 }
 
@@ -356,6 +367,13 @@ void CompareTree::onCustomContextMenu(const QPoint& point)
             menu->addAction(act);
         }
 
+        menu->addSeparator();
+        act = new QAction("Copy path", this);
+        tmp << "ACT5" << path;
+        act->setData(QVariant(tmp));
+        tmp.clear();
+        menu->addAction(act);
+
         connect(menu, SIGNAL(triggered(QAction*)), this, SLOT(compareFileVersionsAction(QAction*)));
         connect(menu, SIGNAL(triggered(QAction*)), this, SLOT(editCurrentVersionAction(QAction*)));
         connect(menu, SIGNAL(triggered(QAction*)), this, SLOT(gitLogFileAction(QAction*)));
@@ -379,6 +397,7 @@ void CompareTree::viewLocalChanges(bool _staged)
     QString cmd = "git -C " + graph->getLocalRepositoryPath() + (_staged == true ? " diff --cached --name-only" : " ls-files -m");
 
     QList<QString> cache;
+
     execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
 
     QStandardItemModel* treemodel = new QStandardItemModel(NULL);
@@ -465,6 +484,7 @@ void CompareTree::viewThisVersion(const QString& _hash)
     QString cmd = "git -C " + graph->getLocalRepositoryPath() + " ls-tree --full-tree --name-only -r " + _hash;
 
     QList<QString> cache;
+
     execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
 
     QStandardItemModel* treemodel = new QStandardItemModel(NULL);
@@ -551,6 +571,7 @@ QString CompareTree::createTempVersionFile(const QString& _hash, const QString& 
     QString cmd = "git -C " + graph->getLocalRepositoryPath() + " show " + _hash + ":" + _path + " > " + fname;
 
     QList<QString> dummy;
+
     execute_cmd(cmd.toUtf8().data(), dummy, mwin->getPrintCmdToStdout());
 
     mwin->addToCleanupFiles(fname);
@@ -573,6 +594,7 @@ void CompareTree::compareFileVersions(
     QStringList diffFiles;
 
     QSet<Version*> predecessors = graph->getPredecessors();
+
     foreach(Version * it, predecessors)
     {
         diffFiles.push_back(createTempVersionFile(it->getHash(), _path_old));
@@ -598,6 +620,7 @@ void CompareTree::compareFileVersions(
                 QString cmd = "diff " + fname + " " + localFile;
 
                 QList<QString> cache;
+
                 execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
                 if (cache.size())
                     tmp.push_back(fname);
@@ -610,6 +633,7 @@ void CompareTree::compareFileVersions(
     // mime type to tool
     QString difftool;
     QString dummy;
+
     mwin->getMimeTypeTools(getMimeType(diffFiles.front()), difftool, dummy);
 
     // drop empty files
@@ -649,6 +673,7 @@ QString CompareTree::getMimeType(const QString& _path) const
     QString cmd = "file --mime-type -b " + _path;
 
     QList<QString> cache;
+
     execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
 
     if (cache.size())

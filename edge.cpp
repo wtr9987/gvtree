@@ -200,6 +200,9 @@ void Edge::paint(QPainter* _painter,
     if (invalid)
         return;
 
+    if (!source->isVisible() || !dest->isVisible())
+      return;
+
     QLineF line(sourcePoint, destPoint);
     if (qFuzzyCompare(line.length(), 0.0))
         return;

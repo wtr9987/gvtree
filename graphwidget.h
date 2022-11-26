@@ -71,7 +71,7 @@ public:
     bool focusElements(const QString& _text, bool _exactMatch = false);
     bool focusElements(const QList<Version*>& _markup);
     void displayHits(Version* _v);
-    void displayHits(const QList<Version*>& _hits);
+    void displayHits(const QList<Version*>& _hits, bool _unfold = true);
 
     void clear();
     void getMarkedupVersions(QList<Version*>& _markup, bool _selected = true);
