@@ -1616,6 +1616,18 @@ void GraphWidget::contextMenuEvent(QContextMenuEvent* _event)
                 it = uit;
                 break;
             }
+            else if (v && !v->isFolded())
+            {
+              // tricky, if unfolded, the node itself must be matched.
+              // check if inside ... path.addEllipse(-15, -15, 30, 30);
+              QPointF mpos = mapToScene(_event->pos());
+              QPointF gpos = v->scenePos();
+              if (QLineF(mpos, gpos).length() <= 15.0)
+              {
+                it = uit;
+                break;
+              }
+            }
             else if (!it || it->type() != QGraphicsItem::UserType + 1)
             {
                 it = uit;

@@ -682,7 +682,6 @@ void Version::collectFolderVersions(Version* _rootNode, Version* _parent)
     if (_parent
         && _parent != _rootNode
         && _parent->getNumOutEdges() == 1
-        //&& getNumOutEdges() <= 1
         && (numEdges() - getNumOutEdges() <= 1)
         && _parent->isFoldable()
        )
