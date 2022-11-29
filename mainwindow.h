@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.4-0                */
+/*                  gvtree V1.5-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -57,6 +57,7 @@ public:
     QTextEdit* getCompareTreeToTextEdit();
     QPushButton* getCompareTreeFromPushButton();
     QPushButton* getCompareTreeToPushButton();
+    QTextEdit* getCompareTreeSelectedLog() const;
     QComboBox* getFromComboBox();
     QLabel* getToDateLabel();
     QDockWidget* getBranchDock();
@@ -75,7 +76,10 @@ public:
     int getMaxLines() const;
     bool getShortHashes() const;
     bool getTopDownView() const;
+    int getHorizontalSort() const;
     bool getRemotes() const;
+    bool getIncludeSelected() const;
+    bool getAnimated() const;
     bool getOpenGLRendering() const;
     bool getDiffLocalFiles() const;
     int getConnectorStyle() const;

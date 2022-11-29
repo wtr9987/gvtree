@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.4-0                */
+/*                  gvtree V1.5-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -218,5 +218,5 @@ int Node::getNumOutEdges() const
 
 bool Node::isLeaf() const
 {
-  return outEdges.size() == 0;
+    return outEdges.size() == 0;
 }

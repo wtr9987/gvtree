@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.4-0                */
+/*                  gvtree V1.5-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -146,7 +146,6 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
     ctwin = new QWidget;
     gvtree_comparetree.setupUi(ctwin);
     graphwidget->setCompareTree(gvtree_comparetree.compareTree);
-
     gvtree_comparetree.compareTree->setMainWindow(this);
     gvtree_comparetree.compareTree->setGraphWidget(graphwidget);
     gvtree_comparetree.compareTree->resetCompareTree();
@@ -467,8 +466,20 @@ void MainWindow::restorePreferencesSettings()
     gvtree_preferences.git_short_hashes->setChecked(settings.value("gitShortHashes").toBool());
 
     if (!settings.contains("topDownView"))
-        settings.setValue("topDownView", false);
-    gvtree_preferences.top_down_view->setChecked(settings.value("topDownView").toBool());
+        settings.setValue("topDownView", 0);
+    gvtree_preferences.top_down_sort->setCurrentIndex(settings.value("topDownView").toInt());
+
+    if (!settings.contains("horizontalSort"))
+        settings.setValue("horizontalSort", 0);
+    gvtree_preferences.horizontal_sort->setCurrentIndex(settings.value("horizontalSort").toInt());
+
+    if (!settings.contains("includeSelected"))
+        settings.setValue("includeSelected", false);
+    gvtree_preferences.include_selected->setChecked(settings.value("includeSelected").toBool());
+
+    if (!settings.contains("animated"))
+        settings.setValue("animated", false);
+    gvtree_preferences.animated->setChecked(settings.value("animated").toBool());
 
     if (!settings.contains("openGLRendering"))
         settings.setValue("openGLRendering", false);
@@ -844,6 +855,7 @@ void MainWindow::reloadCurrentRepository()
             graphwidget->verticalScrollBar()->setValue(shift.y());
         }
     }
+    updateGitStatus(repositoryPath);
     pbRepositoryRefresh->hide();
 }
 
@@ -852,8 +864,7 @@ void MainWindow::changeCssFilePath()
     QFileDialog dialog(this, tr("Change Path to CSS Style Sheet File"), gvtree_preferences.pbCssPath->text());
 
     dialog.setFilter(QDir::NoDotAndDotDot | QDir::Hidden | QDir::AllEntries);
-    dialog.setFileMode(QFileDialog::ExistingFile);
-
+    dialog.setOption(QFileDialog::ShowDirsOnly, true);
     if (dialog.exec())
     {
         applyStyleSheetFile(dialog.selectedFiles().at(0));
@@ -865,7 +876,8 @@ void MainWindow::changeTempPath()
     QFileDialog dialog(this, tr("Change Path for Temporary Files"), gvtree_preferences.pbTempPath->text());
 
     dialog.setFilter(QDir::NoDotAndDotDot | QDir::Hidden | QDir::AllDirs);
-    dialog.setFileMode(QFileDialog::DirectoryOnly);
+    dialog.setOption(QFileDialog::ShowDirsOnly, true);
+    dialog.setFileMode(QFileDialog::Directory);
     if (dialog.exec())
     {
         QStringList directoryNames = dialog.selectedFiles();
@@ -895,7 +907,8 @@ void MainWindow::setGitLocalRepository()
     QString oldRepositoryPath = repositoryPath;
 
     dialog.setFilter(QDir::NoDotAndDotDot | QDir::Hidden | QDir::AllDirs);
-    dialog.setFileMode(QFileDialog::DirectoryOnly);
+    dialog.setOption(QFileDialog::ShowDirsOnly, true);
+    dialog.setFileMode(QFileDialog::Directory);
     if (dialog.exec())
     {
         QStringList directoryNames = dialog.selectedFiles();
@@ -977,22 +990,7 @@ bool MainWindow::checkGitLocalRepository(const QString& _path,
         _fileConstraintPath = path.mid(_repoPath.size());
     }
 
-    // set watchdog
-    if (watcher)
-    {
-        if (watcher->directories().size())
-            watcher->removePaths(watcher->directories());
-        if (watcher->files().size())
-            watcher->removePaths(watcher->files());
-    }
-
     updateGitStatus(_repoPath);
-
-    if (watcher)
-    {
-        QString gitpath = _repoPath + "/.git";
-        watcher->addPath(gitpath);
-    }
 
     return true;
 }
@@ -1047,6 +1045,11 @@ void MainWindow::resizeEvent(QResizeEvent* event)
 CompareTree* MainWindow::getCompareTree()
 {
     return gvtree_comparetree.compareTree;
+}
+
+QTextEdit* MainWindow::getCompareTreeSelectedLog() const
+{
+    return gvtree_comparetree.selectedLog;
 }
 
 QTextEdit* MainWindow::getCompareTreeFromTextEdit()
@@ -1164,12 +1167,27 @@ bool MainWindow::getShortHashes() const
 
 bool MainWindow::getTopDownView() const
 {
-    return gvtree_preferences.top_down_view->isChecked();
+    return gvtree_preferences.top_down_sort->currentIndex()>0;
+}
+
+int MainWindow::getHorizontalSort() const
+{
+    return gvtree_preferences.horizontal_sort->currentIndex();
 }
 
 bool MainWindow::getRemotes() const
 {
     return gvtree_preferences.remotes->isChecked();
+}
+
+bool MainWindow::getIncludeSelected() const
+{
+    return gvtree_preferences.include_selected->isChecked();
+}
+
+bool MainWindow::getAnimated() const
+{
+    return gvtree_preferences.animated->isChecked();
 }
 
 bool MainWindow::getOpenGLRendering() const
@@ -1199,9 +1217,12 @@ void MainWindow::saveChangedSettings()
         forceUpdate = true;
     }
 #endif
-    settings.setValue("topDownView", gvtree_preferences.top_down_view->isChecked());
+    settings.setValue("topDownView", gvtree_preferences.top_down_sort->currentIndex());
+    settings.setValue("horizontalSort", gvtree_preferences.horizontal_sort->currentIndex());
     settings.setValue("gitShortHashes", gvtree_preferences.git_short_hashes->isChecked());
     settings.setValue("openGLRendering", gvtree_preferences.open_gl_rendering->isChecked());
+    settings.setValue("includeSelected", gvtree_preferences.include_selected->isChecked());
+    settings.setValue("animated", gvtree_preferences.animated->isChecked());
     settings.setValue("diffLocalFile", gvtree_preferences.diff_local_files->isChecked());
     settings.setValue("remotes", gvtree_preferences.remotes->isChecked());
 
@@ -1430,6 +1451,15 @@ void MainWindow::showRefreshButton(const QString&)
 
 void MainWindow::updateGitStatus(const QString& _repoPath)
 {
+// set watchdog
+    if (watcher)
+    {
+        if (watcher->directories().size())
+            watcher->removePaths(watcher->directories());
+        if (watcher->files().size())
+            watcher->removePaths(watcher->files());
+    }
+
     gitstatus->clear();
 
     // get data
@@ -1442,6 +1472,12 @@ void MainWindow::updateGitStatus(const QString& _repoPath)
         gitstatus->insertPlainText(str);
     }
     gitstatus->moveCursor(QTextCursor::Start);
+
+    if (watcher)
+    {
+        QString gitpath = _repoPath + "/.git";
+        watcher->addPath(gitpath);
+    }
 }
 
 bool MainWindow::initCbCodecForCStrings(QString _default)

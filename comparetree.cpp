@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.4-0                */
+/*                  gvtree V1.5-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -19,6 +19,8 @@
 
 #include <QMenu>
 #include <QFileInfo>
+#include <QClipboard>
+#include <QApplication>
 #include "comparetree.h"
 #include "execute_cmd.h"
 #include "mainwindow.h"
@@ -42,7 +44,7 @@ void CompareTree::compareHashes(const QStringList& _hash1, const QString& _hash2
     treemodel->setHorizontalHeaderItem(0, new QStandardItem(QString("Path")));
     treemodel->setHorizontalHeaderItem(1, new QStandardItem(QString("File")));
 
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     header()->setSectionResizeMode(QHeaderView::Stretch);
 #else
     header()->setResizeMode(QHeaderView::Stretch);
@@ -245,11 +247,13 @@ void CompareTree::compareFileVersionsAction(QAction* _act)
         return;
 
     QString path = tmp.front();
+
     tmp.pop_front();
     if (tmp.isEmpty())
         return;
 
     QString status = tmp.front();
+
     tmp.pop_front();
 
     QString path_old = (!tmp.isEmpty()) ? tmp.front() : path;
@@ -270,12 +274,19 @@ void CompareTree::gitLogFileAction(QAction* _act)
         if (tmp.isEmpty())
             return;
 
-        // graph->gitlog(tmp.front());
         graph->setGitLogFileConstraint(tmp.front());
     }
     else if (tmp.front() == "ACT4")
     {
         graph->removeFilter();
+    }
+    else if (tmp.front() == "ACT5")
+    {
+        tmp.pop_front();
+        if (tmp.isEmpty())
+            return;
+
+        QApplication::clipboard()->setText(tmp.front());
     }
 }
 
@@ -356,6 +367,13 @@ void CompareTree::onCustomContextMenu(const QPoint& point)
             menu->addAction(act);
         }
 
+        menu->addSeparator();
+        act = new QAction("Copy path", this);
+        tmp << "ACT5" << path;
+        act->setData(QVariant(tmp));
+        tmp.clear();
+        menu->addAction(act);
+
         connect(menu, SIGNAL(triggered(QAction*)), this, SLOT(compareFileVersionsAction(QAction*)));
         connect(menu, SIGNAL(triggered(QAction*)), this, SLOT(editCurrentVersionAction(QAction*)));
         connect(menu, SIGNAL(triggered(QAction*)), this, SLOT(gitLogFileAction(QAction*)));
@@ -376,9 +394,10 @@ void CompareTree::setGraphWidget(class GraphWidget* _graph)
 void CompareTree::viewLocalChanges(bool _staged)
 {
     // get data
-    QString cmd = "git -C " + graph->getLocalRepositoryPath() + (_staged==true?" diff --cached --name-only":" ls-files -m");
+    QString cmd = "git -C " + graph->getLocalRepositoryPath() + (_staged == true ? " diff --cached --name-only" : " ls-files -m");
 
     QList<QString> cache;
+
     execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
 
     QStandardItemModel* treemodel = new QStandardItemModel(NULL);
@@ -386,7 +405,7 @@ void CompareTree::viewLocalChanges(bool _staged)
     treemodel->setHorizontalHeaderItem(0, new QStandardItem(QString("Path")));
     treemodel->setHorizontalHeaderItem(1, new QStandardItem(QString("File")));
 
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     header()->setSectionResizeMode(QHeaderView::Stretch);
 #else
     header()->setResizeMode(QHeaderView::Stretch);
@@ -465,6 +484,7 @@ void CompareTree::viewThisVersion(const QString& _hash)
     QString cmd = "git -C " + graph->getLocalRepositoryPath() + " ls-tree --full-tree --name-only -r " + _hash;
 
     QList<QString> cache;
+
     execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
 
     QStandardItemModel* treemodel = new QStandardItemModel(NULL);
@@ -472,7 +492,7 @@ void CompareTree::viewThisVersion(const QString& _hash)
     treemodel->setHorizontalHeaderItem(0, new QStandardItem(QString("Path")));
     treemodel->setHorizontalHeaderItem(1, new QStandardItem(QString("File")));
 
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     header()->setSectionResizeMode(QHeaderView::Stretch);
 #else
     header()->setResizeMode(QHeaderView::Stretch);
@@ -551,6 +571,7 @@ QString CompareTree::createTempVersionFile(const QString& _hash, const QString& 
     QString cmd = "git -C " + graph->getLocalRepositoryPath() + " show " + _hash + ":" + _path + " > " + fname;
 
     QList<QString> dummy;
+
     execute_cmd(cmd.toUtf8().data(), dummy, mwin->getPrintCmdToStdout());
 
     mwin->addToCleanupFiles(fname);
@@ -573,6 +594,7 @@ void CompareTree::compareFileVersions(
     QStringList diffFiles;
 
     QSet<Version*> predecessors = graph->getPredecessors();
+
     foreach(Version * it, predecessors)
     {
         diffFiles.push_back(createTempVersionFile(it->getHash(), _path_old));
@@ -589,23 +611,29 @@ void CompareTree::compareFileVersions(
     {
         QString localFile = graph->getLocalRepositoryPath() + "/" + _path;
 
-        QStringList tmp;
-        foreach(QString fname, diffFiles)
+        if (QFile::exists(localFile))
         {
-            QString cmd = "diff " + fname + " " + localFile;
 
-            QList<QString> cache;
-            execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
-            if (cache.size())
-                tmp.push_back(fname);
+            QStringList tmp;
+            foreach(QString fname, diffFiles)
+            {
+                QString cmd = "diff " + fname + " " + localFile;
+
+                QList<QString> cache;
+
+                execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
+                if (cache.size())
+                    tmp.push_back(fname);
+            }
+            diffFiles = tmp;
+            diffFiles.push_back(localFile);
         }
-        diffFiles = tmp;
-        diffFiles.push_back(localFile);
     }
 
     // mime type to tool
     QString difftool;
     QString dummy;
+
     mwin->getMimeTypeTools(getMimeType(diffFiles.front()), difftool, dummy);
 
     // drop empty files
@@ -624,8 +652,6 @@ void CompareTree::compareFileVersions(
     QString fnameList = diffFiles.join(QString(" "));
 
     difftool.replace("%1", fnameList);
-    difftool.replace("%2", QString());
-    difftool.replace("%3", QString());
 
     system(difftool.toUtf8().data());
 }
@@ -647,6 +673,7 @@ QString CompareTree::getMimeType(const QString& _path) const
     QString cmd = "file --mime-type -b " + _path;
 
     QList<QString> cache;
+
     execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
 
     if (cache.size())

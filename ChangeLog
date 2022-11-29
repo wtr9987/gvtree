@@ -58,3 +58,13 @@ ChangeLog gvtree V1.2-0 dev_1.2
 	-	version information tree compressed
 	- decorations
 	- selection of version node instead of merge arrow
+
+5. November 2022 :
+	- level of detail refinement in version and edge
+	- animated focus version
+	- lineEdit/TextEdit with Copy function (focus click)
+	- add TextEdit for git log information of the selected version
+	- improved text rendering
+
+6. November 2022 :
+	- animation skipped if difference from/to is too small

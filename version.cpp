@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.4-0                */
+/*                  gvtree V1.5-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -48,7 +48,9 @@ Version::Version(GraphWidget* _graphWidget, QGraphicsItem* _parent) :
     updateBoundingRect(false),
     main(false),
     fileConstraint(false),
-    selected(false)
+    selected(false),
+    weight(0),
+    commitDate(0)
 {
     // flags
     setFlag(ItemSendsGeometryChanges);
@@ -72,7 +74,9 @@ Version::Version(const QStringList& _globalVersionInfo,
     updateBoundingRect(false),
     main(false),
     fileConstraint(false),
-    selected(false)
+    selected(false),
+    weight(0),
+    commitDate(0)
 {
     // flags
     setFlag(ItemIsMovable);
@@ -109,17 +113,17 @@ void Version::viewThisVersion()
 
 void Version::focusNeighbourBox()
 {
-    graph->focusNeighbourBox(getNeighbourBox());
+    graph->displayHits(getNeighbourBox());
 }
 
-QRectF Version::getNeighbourBox() const
+QList<Version*> Version::getNeighbourBox()
 {
     // in case of a folder...
     if (isFolder() && isFolded())
         return linear.front()->getNeighbourBox();
 
-    // normal case
-    QRectF focusBox(QGraphicsItem::scenePos(), QSizeF(1.0, 1.0));
+    QList<Version*> result;
+    result.push_back(this);
 
     foreach (const Edge * edge, edgeList)
     {
@@ -131,13 +135,12 @@ QRectF Version::getNeighbourBox() const
             dynamic_cast<Version*>(
                 this == edge->sourceVersion()
                 ? edge->destVersion() : edge->sourceVersion());
+
         if (v)
-            focusBox |= QRectF(v->scenePos(), QSizeF(1.0, 1.0));
+            result.push_back(v);
     }
 
-    focusBox.adjust(-graph->getXFactor() / 2, -graph->getYFactor() / 2, graph->getXFactor() / 2, graph->getYFactor() / 2);
-
-    return focusBox;
+    return result;
 }
 
 void Version::setBlockItemChanged(bool _val)
@@ -154,6 +157,17 @@ void Version::setSelected(bool _val)
 {
     QApplication::clipboard()->setText(_val ? hash : QString(), QClipboard::Selection);
     selected = _val;
+
+    QTextEdit* t = graph->getMainWindow()->getCompareTreeSelectedLog();
+
+    if (_val == false)
+    {
+        t->clear();
+    }
+    else
+    {
+        graph->commitInfo(this, t);
+    }
 }
 
 void Version::addInEdge(Edge* _edge)
@@ -225,9 +239,9 @@ void Version::paint(QPainter* _painter, const QStyleOptionGraphicsItem* _option,
 
     if (lod > 0.3)
     {
-        int height = 0;
+        int height = -10;
 
-        foreach(const QString &info, graph->getMainWindow()->getNodeInfo())
+        foreach(const QString& info, graph->getMainWindow()->getNodeInfo())
         {
             if (globalVersionInfo.contains(info)
                 || localVersionInfo.contains(info))
@@ -235,7 +249,7 @@ void Version::paint(QPainter* _painter, const QStyleOptionGraphicsItem* _option,
                 QMap<QString, QStringList>::const_iterator kit = keyInformation.find(info);
                 if (kit != keyInformation.end())
                 {
-                    drawTextBox(info, kit.value(), height, _painter);
+                    drawTextBox(info, kit.value(), height, lod, _painter);
                 }
             }
         }
@@ -278,7 +292,7 @@ void Version::adjustEdges()
     }
 }
 
-QString Version::getCommitDate() const
+QString Version::getCommitDateString() const
 {
     return keyInformation.value("Commit Date", QStringList()).join(QString());
 }
@@ -302,6 +316,7 @@ bool Version::processGitLogInfo(const QString& _input, const QStringList& _parts
         QStringList(
             QDateTime::fromTime_t(_parts.at(2).toInt())
             .toString("yyyy.MM.dd HH:mm:ss"));
+    commitDate = _parts.at(2).toInt();
     keyInformation[QString("User Name")] = QStringList(_parts.at(3));
 
     // tag information
@@ -335,7 +350,8 @@ void Version::updateCommentInformation(int _columns, int _maxlen)
     int len = 0;
     QString part;
     QStringList tmp = info.split(' ');
-    foreach (const QString &str, tmp)
+
+    foreach (const QString& str, tmp)
     {
         if (len == 0)
         {
@@ -367,6 +383,7 @@ void Version::processGitLogCommentInformation(const QString& _comment)
     keyInformation[QString("CommentRaw")].push_back(_comment);
 
     int columns, maxlen;
+
     graph->getMainWindow()->getCommentProperties(columns, maxlen);
     updateCommentInformation(columns, maxlen);
 }
@@ -381,7 +398,7 @@ void Version::processGitLogTagInformation(const QString& _tagInfo)
         QStringList matches = _tagInfo.mid(cstart, cend - cstart).split(',');
         QStringList tags;
 
-        foreach (const QString &str, matches)
+        foreach (const QString& str, matches)
         {
             tags << str.trimmed();
         }
@@ -395,7 +412,7 @@ void Version::processGitLogTagInformation(const QString& _tagInfo)
                                << QString("Branch")
                                << QString("Other Tags"));
 
-        foreach(const QString &it, scanItems)
+        foreach(const QString& it, scanItems)
         {
             const TagPreference* tp =
                 graph->getMainWindow()->getTagPreference(it);
@@ -403,7 +420,7 @@ void Version::processGitLogTagInformation(const QString& _tagInfo)
             if (tp)
             {
                 QRegExp r = tp->getRegExp();
-                foreach (const QString &str, tags)
+                foreach (const QString& str, tags)
                 {
                     if (r.indexIn(str, 0) != -1)
                     {
@@ -422,6 +439,7 @@ bool Version::findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatc
     bool newmatched = false;
 
     QSet<QString> oldLocalVersionInfo = localVersionInfo;
+
     localVersionInfo.clear();
 
     QString rawInput = keyInformation["_input"].join(" ")
@@ -441,7 +459,7 @@ bool Version::findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatc
 
             if (_exactMatch == true)
             {
-                foreach (const QString &str, kit.value())
+                foreach (const QString& str, kit.value())
                 {
                     if (str == _text)
                     {
@@ -509,31 +527,38 @@ bool Version::getTextBoundingBox(const QString& _key, const QStringList& _values
     if (!tp)
         return false;
 
+    QRectF textbox = QFontMetricsF(tp->getFont()).boundingRect("X");
+    int hadd = textbox.height() + 1;
+
     foreach(const QString it, _values)
     {
-        QRectF textbox = QFontMetricsF(tp->getFont()).boundingRect(it);
-
+        textbox = QFontMetricsF(tp->getFont()).boundingRect(it);
+        _height += hadd;
         _updatedBox |= textbox.translated(20, _height).adjusted(0, 0, 20, 0);
-        _height += textbox.height() + 1;
     }
     return true;
 }
 
-bool Version::drawTextBox(const QString& _key, const QStringList& _values, int& _height, QPainter* _painter)
+bool Version::drawTextBox(const QString& _key, const QStringList& _values, int& _height, const qreal& _lod, QPainter* _painter)
 {
     const TagPreference* tp = graph->getMainWindow()->getTagPreference(_key);
 
     if (!tp)
         return false;
 
-    foreach(const QString &it, _values)
-    {
-        QRectF textbox = QFontMetricsF(tp->getFont()).boundingRect(it);
+    QRectF textbox = QFontMetricsF(tp->getFont()).boundingRect("X");
 
-        _painter->setFont(tp->getFont());
-        _painter->setPen(QPen(tp->getColor(), 0));
-        _painter->drawText(textbox.translated(20, _height).adjusted(0, 0, 20, 0), Qt::AlignLeft, it);
-        _height += textbox.height() + 1;
+    if (textbox.height() * _lod > 7)
+    {
+        int hadd = textbox.height() + 1;
+        foreach(const QString& it, _values)
+        {
+            textbox = QFontMetricsF(tp->getFont()).boundingRect(it);
+            _painter->setFont(tp->getFont());
+            _painter->setPen(QPen(tp->getColor(), 0));
+            _height += hadd;
+            _painter->drawText(textbox.translated(20, _height).adjusted(0, 0, 20, 0), Qt::AlignLeft, it);
+        }
     }
     return true;
 }
@@ -568,7 +593,7 @@ void Version::calculateLocalBoundingBox()
 
     int height = 0;
 
-    foreach(const QString &info, graph->getMainWindow()->getNodeInfo())
+    foreach(const QString& info, graph->getMainWindow()->getNodeInfo())
     {
         if (globalVersionInfo.contains(info)
             || localVersionInfo.contains(info))
@@ -580,6 +605,7 @@ void Version::calculateLocalBoundingBox()
             }
         }
     }
+    localBoundingBox.adjust(0, 0, 0, 10);
 
     // done
     updateBoundingRect = false;
@@ -656,7 +682,6 @@ void Version::collectFolderVersions(Version* _rootNode, Version* _parent)
     if (_parent
         && _parent != _rootNode
         && _parent->getNumOutEdges() == 1
-        //&& getNumOutEdges() <= 1
         && (numEdges() - getNumOutEdges() <= 1)
         && _parent->isFoldable()
        )
@@ -733,7 +758,7 @@ void Version::foldAction()
     {
         float h = graph->getYFactor() * linear.size();
         folderBox = QRectF(-30, -30, 60, 60 + h)
-            .translated(0, (graph->getTopDownView() ? 1.0 : -1.0) * h);
+            .translated(0, graph->getTopDownView() ? 0.0 : -1.0 * h);
     }
     update();
 }
@@ -786,6 +811,7 @@ int Version::getPredecessorHashes(QStringList& _result)
     _result.clear();
 
     QSet<Version*> predecessors;
+
     getPredecessors(predecessors);
     foreach(Version * it, predecessors)
     {
@@ -965,4 +991,114 @@ bool Version::isFoldable() const
 void Version::setIsFoldable(bool _val)
 {
     foldable = _val;
+}
+
+void Version::applyHorizontalSort(int _sort)
+{
+    foreach (const Edge * edge, outEdges)
+    {
+        Version* next = dynamic_cast<Version*>(edge->destVersion());
+
+        if (next)
+            next->applyHorizontalSort(_sort);
+    }
+
+    if (outEdges.size() < 2)
+        return;
+
+    switch (_sort)
+    {
+        case 1:
+        {
+            struct
+            {
+                bool operator ()(const Edge* a, const Edge* b) const
+                {
+                    const Version* av = dynamic_cast<Version*>(a->destVersion());
+                    const Version* bv = dynamic_cast<Version*>(b->destVersion());
+                    int aw = !av ? 0 : av->getWeight();
+                    int bw = !bv ? 0 : bv->getWeight();
+
+                    return aw < bw;
+                }
+            } weightLt;
+            std::sort(outEdges.begin(), outEdges.end(), weightLt);
+        }
+
+        break;
+        case 2:
+        {
+            struct
+            {
+                bool operator ()(const Edge* a, const Edge* b) const
+                {
+                    const Version* av = dynamic_cast<Version*>(a->destVersion());
+                    const Version* bv = dynamic_cast<Version*>(b->destVersion());
+                    int aw = !av ? 0 : av->getWeight();
+                    int bw = !bv ? 0 : bv->getWeight();
+
+                    return aw > bw;
+                }
+            } weightGt;
+            std::sort(outEdges.begin(), outEdges.end(), weightGt);
+        }
+
+        break;
+        case 3:
+        {
+            struct
+            {
+                bool operator ()(const Edge* a, const Edge* b) const
+                {
+                    const Version* av = dynamic_cast<Version*>(a->destVersion());
+                    const Version* bv = dynamic_cast<Version*>(b->destVersion());
+                    long aw = av->getCommitDate();
+                    long bw = bv->getCommitDate();
+
+                    return aw < bw;
+                }
+            } commitDateLt;
+            std::sort(outEdges.begin(), outEdges.end(), commitDateLt);
+        }
+        break;
+        case 4:
+        {
+            struct
+            {
+                bool operator ()(const Edge* a, const Edge* b) const
+                {
+                    const Version* av = dynamic_cast<Version*>(a->destVersion());
+                    const Version* bv = dynamic_cast<Version*>(b->destVersion());
+                    long aw = av->getCommitDate();
+                    long bw = bv->getCommitDate();
+
+                    return aw > bw;
+                }
+            } commitDateGt;
+            std::sort(outEdges.begin(), outEdges.end(), commitDateGt);
+        }
+        break;
+    }
+}
+
+int Version::calculateWeightRecurse()
+{
+    weight = 1 + linear.size();
+    foreach (const Edge * edge, outEdges)
+    {
+        Version* next = dynamic_cast<Version*>(edge->destVersion());
+
+        weight += next ? next->calculateWeightRecurse() : 0;
+    }
+    return weight;
+}
+
+int Version::getWeight() const
+{
+    return weight;
+}
+
+long Version::getCommitDate() const
+{
+    return commitDate;
 }

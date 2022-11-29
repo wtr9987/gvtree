@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.4-0                */
+/*                  gvtree V1.5-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -36,6 +36,8 @@ TagTree::TagTree(GraphWidget* _graph, MainWindow* _mwin) : QTreeView(_mwin),
 
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
             this, SLOT(onCustomContextMenu(const QPoint&)));
+    connect(this, SIGNAL(clicked(const QModelIndex&)),
+            this, SLOT(focusSelection(const QModelIndex&)));
 
     treemodel = new QStandardItemModel(NULL);
     setModel(treemodel);
@@ -172,7 +174,7 @@ void TagTree::addData(const Version* _v)
 
             QStringList ts = QStringList() << year << month << day << daytime;
 
-            foreach(const QString& tmp, ts)
+            foreach(const QString &tmp, ts)
             {
                 p = findOrInsert(p, tmp);
             }
@@ -181,7 +183,7 @@ void TagTree::addData(const Version* _v)
         }
         else
         {
-            foreach(const QString& val, it.value())
+            foreach(const QString &val, it.value())
             {
                 insertLeaf(findOrInsert(p, val), timestamp, _v);
             }
@@ -252,7 +254,7 @@ void TagTree::resetTagTree()
              << "Comment"  // ... don't know if useful, maby not
              << "Hash"; // ... not useful, use search instead
 
-    foreach(const QString& key, nodeInfo)
+    foreach(const QString &key, nodeInfo)
     {
         QStandardItem* t = new QStandardItem(key);
 
@@ -291,15 +293,13 @@ void TagTree::mousePressEvent (QMouseEvent* event)
         QTreeView::mousePressEvent(event);
 }
 
-void TagTree::selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
+void TagTree::focusSelection(const QModelIndex&)
 {
-    QTreeView::selectionChanged(selected, deselected);
+    const QModelIndexList& sel = selectedIndexes();
 
     graph->resetMatches();
 
-    const QModelIndexList& sel = selected.indexes();
-
-    foreach (const QModelIndex& idx, sel)
+    foreach (const QModelIndex &idx, sel)
     {
         if (idx.column() == 0)
         {
@@ -307,6 +307,7 @@ void TagTree::selectionChanged(const QItemSelection& selected, const QItemSelect
             collectSubitems(idx, collect);
 
             graph->focusElements(collect);
+            graph->setFocus();
             break;
         }
     }

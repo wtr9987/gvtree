@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.4-0                */
+/*                  gvtree V1.5-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -80,7 +80,7 @@ public:
 
     void setKeyInformation(const QMap<QString, QStringList>& _data);
 
-    QString getCommitDate() const;
+    QString getCommitDateString() const;
 
     /**
      * \brief The git log information _input is checked against
@@ -120,7 +120,7 @@ public:
 
     const QString& getHash() const;
 
-    QRectF getNeighbourBox() const;
+    QList<Version*> getNeighbourBox();
 
     void calculateCoordinates(float _scaleX, float _scaleY);
     void linkTreenodes(Version* _parent);
@@ -139,6 +139,10 @@ public:
     void clearFolderVersions();
 
     void updateFolderBox();
+    void applyHorizontalSort(int _sort);
+    int calculateWeightRecurse();
+    int getWeight() const;
+    long getCommitDate() const;
     int getPredecessors(QSet<Version*>& _result);
     int getPredecessorHashes(QStringList& _result);
     void calculateLocalBoundingBox();
@@ -179,7 +183,7 @@ protected:
     virtual void mouseMoveEvent(QGraphicsSceneMouseEvent* _event);
 
     bool getTextBoundingBox(const QString& _key, const QStringList& _values, int& _height, QRectF& _updatedBox) const;
-    bool drawTextBox(const QString& _key, const QStringList& _values, int& _height, QPainter* _painter);
+    bool drawTextBox(const QString& _key, const QStringList& _values, int& _height, const qreal& _lod, QPainter* _painter);
 
     QVariant itemChange(GraphicsItemChange change, const QVariant& value);
     void adjustEdges();
@@ -244,6 +248,10 @@ private:
     bool fileConstraint;
 
     bool selected;
+
+    int weight;
+
+    long commitDate;
 };
 
 typedef struct Version* VersionPointer;

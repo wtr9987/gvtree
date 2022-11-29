@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.4-0                */
+/*                  gvtree V1.5-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -67,13 +67,14 @@ public:
     void compareVersions(Version* _v1, Version* _v2);
 
     // focus
-    void focusNeighbourBox(const QRectF& _rect);
     int matchVersions(const QString& _text, QList<Version*>& _matches, bool _exactMatch);
     bool focusElements(const QString& _text, bool _exactMatch = false);
     bool focusElements(const QList<Version*>& _markup);
-    void displayHits(const QList<Version*>& _hits);
+    void displayHits(Version* _v);
+    void displayHits(const QList<Version*>& _hits, bool _unfold = true);
 
     void clear();
+    void getMarkedupVersions(QList<Version*>& _markup, bool _selected = true);
     void resetMatches();
     void setMinSize(bool _resize = true);
 
@@ -113,7 +114,6 @@ public:
 
     Version* getLocalHeadVersion() const;
     void updateFromToInfo();
-    void focusVersion(const Version* _v);
 
     // style
     const QColor& getBackgroundColor() const
@@ -184,6 +184,11 @@ public slots:
     void setBlockItemChanged(bool _val);
 
 protected:
+    void focusFromTo(const QRectF& _from, const QRectF& _to);
+    void animatedFocus(const QRectF& _from, const QRectF& _to);
+    QRectF animatedFocus(const QRectF& _from, const QRectF& _to, double _morph);
+    void aspectCenter(QRectF& _from, QRectF& _to);
+
     virtual void contextMenuEvent(QContextMenuEvent* _event);
 
     virtual void keyPressEvent(QKeyEvent* event);
@@ -254,6 +259,7 @@ private:
     int currentLines;
     bool shortHashes;
     bool topDownView;
+    int horizontalSort;
     bool remotes;
     int xfactor;
     int yfactor;

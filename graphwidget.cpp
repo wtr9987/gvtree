@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.4-0                */
+/*                  gvtree V1.5-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -69,11 +69,13 @@ GraphWidget::GraphWidget(MainWindow* _parent)
     headVersion(NULL),
     mwin(_parent),
     compareTree(NULL),
+    pan(false),
     connectorStyle(0),
     maxLines(0),
     currentLines(0),
     shortHashes(false),
     topDownView(false),
+    horizontalSort(0),
     remotes(false),
     xfactor(1),
     yfactor(1),
@@ -88,6 +90,7 @@ GraphWidget::GraphWidget(MainWindow* _parent)
         connectorStyle = mwin->getConnectorStyle();
         shortHashes = mwin->getShortHashes();
         topDownView = mwin->getTopDownView();
+        horizontalSort = mwin->getHorizontalSort();
         remotes = mwin->getRemotes();
     }
 
@@ -135,7 +138,7 @@ void GraphWidget::test()
                              << "A" << "B" << "C" << "D" << "E" << "F" << "G" << "H"
                              << "I" << "J" << "K" << "L" << "M" << "N" << "O");
 
-    foreach (const QString &n, nodeNames)
+    foreach (const QString& n, nodeNames)
     {
         QString line = "#0#0##(tag: " + n + ")#";
         QStringList parts = line.split(QChar('#'));
@@ -150,7 +153,7 @@ void GraphWidget::test()
                             << "OE" << "OF" << "ON" << "EA" << "ED" << "DB" << "DC" << "NG"
                             << "NM" << "MH" << "MI" << "MJ" << "MK" << "ML");
 
-    foreach (const QString &e, edgeData)
+    foreach (const QString& e, edgeData)
     {
         scene()->addItem(new Edge(nodes[QString(e[0])],
                                   nodes[QString(e[1])],
@@ -167,12 +170,16 @@ void GraphWidget::test()
 
 void GraphWidget::fitInView()
 {
-    setMinSize();
+    QRectF from = mapToScene(viewport()->geometry()).boundingRect();
+    QRectF to = scene()->itemsBoundingRect();
+
+    aspectCenter(from, to);
+    focusFromTo(from, to);
 }
 
 void GraphWidget::mousePressEvent(QMouseEvent* _event)
 {
-    if (_event->button() == Qt::MidButton
+    if (_event->button() == Qt::MiddleButton
         || (
             _event->button() == Qt::LeftButton
             && (_event->modifiers() & Qt::ControlModifier)
@@ -300,7 +307,7 @@ void GraphWidget::keyPressEvent(QKeyEvent* _event)
             zoomOut();
             break;
         case Qt::Key_1:
-            QGraphicsView::fitInView(scene()->itemsBoundingRect(), Qt::KeepAspectRatio);
+            fitInView();
             break;
         case Qt::Key_O:
             focusElements("HEAD", true);
@@ -593,7 +600,7 @@ void GraphWidget::process(QList<QString> _cache)
 
     QList<QString> swap_cache;
 
-    foreach (const QString &line, _cache)
+    foreach (const QString& line, _cache)
     {
         swap_cache.push_front(line);
         linecount++;
@@ -609,7 +616,7 @@ void GraphWidget::process(QList<QString> _cache)
 
     int linenumber = 0;
 
-    foreach (const QString &line, swap_cache)
+    foreach (const QString& line, swap_cache)
     {
         // get the tree pattern
         int pos = treePattern.indexIn(line, 0);
@@ -861,7 +868,7 @@ void GraphWidget::commitInfo(const Version* _v, QTextEdit* _tedi)
     QList<QString> cache;
 
     execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
-    foreach(const QString &str, cache)
+    foreach(const QString& str, cache)
     {
         _tedi->insertPlainText(str);
     }
@@ -876,7 +883,7 @@ void GraphWidget::fillCompareWidgetFromToInfo()
     foreach(Version * it, fromVersions)
     {
         it->setMatched(true);
-        mwin->getFromComboBox()->addItem(it->getCommitDate(), QVariant::fromValue(VersionPointer(it)));
+        mwin->getFromComboBox()->addItem(it->getCommitDateString(), QVariant::fromValue(VersionPointer(it)));
     }
     mwin->getCompareTreeFromPushButton()->setEnabled(fromVersions.size() > 0);
 
@@ -885,7 +892,7 @@ void GraphWidget::fillCompareWidgetFromToInfo()
     if (toVersion)
     {
         toVersion->setMatched(true);
-        mwin->getToDateLabel()->setText(toVersion->getCommitDate());
+        mwin->getToDateLabel()->setText(toVersion->getCommitDateString());
         mwin->getCompareTreeToPushButton()->setEnabled(true);
         commitInfo(toVersion, mwin->getCompareTreeToTextEdit());
     }
@@ -970,6 +977,7 @@ void GraphWidget::compareVersions(Version* _v1, Version* _v2)
     fillCompareWidgetFromToInfo();
 
     QStringList fromVersionHashes(_v1->getHash());
+
     compareTree->compareHashes(fromVersionHashes, _v2->getHash());
 
     // ensure visibility of Compare Versions dock
@@ -1022,18 +1030,13 @@ void GraphWidget::compareToPrevious(Version* _v)
     fromToInfo->show();
 }
 
-void GraphWidget::focusVersion(const Version* _v)
-{
-    focusNeighbourBox(_v->getNeighbourBox());
-}
-
 void GraphWidget::focusCurrent()
 {
     if (localHeadVersion)
     {
         resetMatches();
         localHeadVersion->setMatched(true);
-        focusVersion(localHeadVersion);
+        displayHits(localHeadVersion);
     }
 }
 
@@ -1051,7 +1054,7 @@ void GraphWidget::focusFromVersion()
         {
             updateGraphFolding();
         }
-        focusVersion(v);
+        displayHits(v);
     }
 }
 
@@ -1065,14 +1068,8 @@ void GraphWidget::focusToVersion()
         {
             updateGraphFolding();
         }
-        focusVersion(toVersion);
+        displayHits(toVersion);
     }
-}
-
-void GraphWidget::focusNeighbourBox(const QRectF& _rect)
-{
-    pan = false;
-    QGraphicsView::fitInView(_rect, Qt::KeepAspectRatio);
 }
 
 void GraphWidget::setMinSize(bool _resize)
@@ -1121,6 +1118,18 @@ void GraphWidget::calculateGraphicsViewPosition()
 void GraphWidget::normalizeGraph()
 {
     setBlockItemChanged(true);
+
+    int sort = mwin->getHorizontalSort();
+
+    if (sort == 1 || sort == 2)
+    {
+        rootVersion->calculateWeightRecurse();
+    }
+
+    if (sort)
+    {
+        rootVersion->applyHorizontalSort(sort);
+    }
 
     // the following 5 commands create a collision free tree graph
     rootVersion->simpleTreeGeometry(NULL);
@@ -1205,19 +1214,23 @@ Version* GraphWidget::findVersion(const QString& _hash)
 
 void GraphWidget::updateGraphFolding(Version* _v)
 {
-    if (_v)
+    if (_v && _v->isFolder())
     {
-        QPoint restoreVersionPosition = mapFromScene(_v->scenePos());
+        QList<Version*> versions;
 
+        if (mwin->getAnimated())
+        {
+            versions.push_back(_v->isFolded() ? _v : _v->getFolderVersions().front());
+            displayHits(versions, false);
+        }
+
+        _v->foldAction();
         normalizeGraph();
         setMinSize(false);
 
-        horizontalScrollBar()->setValue(0);
-        verticalScrollBar()->setValue(0);
-
-        QPoint shift = mapFromScene(_v->scenePos()) - restoreVersionPosition;
-        horizontalScrollBar()->setValue(shift.x());
-        verticalScrollBar()->setValue(shift.y());
+        versions.clear();
+        versions.push_back(_v);
+        displayHits(versions, false);
     }
     else
     {
@@ -1271,6 +1284,7 @@ bool GraphWidget::focusElements(const QString& _text, bool _exactMatch)
     resetMatches();
 
     QList<Version*> matches;
+
     matchVersions(_text, matches, _exactMatch);
 
     displayHits(matches);
@@ -1278,9 +1292,8 @@ bool GraphWidget::focusElements(const QString& _text, bool _exactMatch)
     return matches.size() > 0;
 }
 
-bool GraphWidget::focusElements(const QList<Version*>& _markup)
+void GraphWidget::getMarkedupVersions(QList<Version*>& _markup, bool _selected)
 {
-    QList<Version*> hits;
     foreach(QGraphicsItem * it, scene()->items())
     {
         if (it->type() != QGraphicsItem::UserType + 1)
@@ -1288,29 +1301,41 @@ bool GraphWidget::focusElements(const QList<Version*>& _markup)
 
         Version* v = dynamic_cast<Version*>(it);
 
-        if (!_markup.contains(v))
-        {
-            v->setMatched(false);
-        }
-        else
-        {
-            v->setMatched(true);
-            v->ensureUnfolded();
-            hits.push_back(v);
-        }
+        if (v && (v->getMatched() || (_selected && v->isSelected())))
+            _markup.push_back(v);
     }
+}
 
-    displayHits(hits);
+bool GraphWidget::focusElements(const QList<Version*>& _markup)
+{
+    foreach(Version * v, _markup)
+    {
+        v->setMatched(true);
+        v->ensureUnfolded();
+    }
+    displayHits(_markup);
 
     return _markup.size() > 0;
 }
 
-void GraphWidget::displayHits(const QList<Version*>& _hits)
+void GraphWidget::displayHits(Version* _v)
 {
+    QList<Version*> tmp;
+
+    tmp.push_back(_v);
+    displayHits(tmp);
+}
+
+void GraphWidget::displayHits(const QList<Version*>& _hits, bool _unfold)
+{
+    QRectF from = mapToScene(viewport()->geometry()).boundingRect();
+    QRectF to;
+
     if (_hits.size() > 0)
     {
-        // ensure visibility
-        updateGraphFolding();
+        // ensure visibility (TODO update only if folding has changed)
+        if (_unfold)
+            updateGraphFolding();
 
         QGraphicsItem* it = _hits.front();
         QRectF tmp = QRectF(-10, -10, 20, 20).translated(it->scenePos());
@@ -1320,13 +1345,116 @@ void GraphWidget::displayHits(const QList<Version*>& _hits)
             tmp |= QRectF(-10, -10, 20, 20).translated(it->scenePos());
         }
 
+        if (mwin->getIncludeSelected() && selectedVersion)
+        {
+            tmp |= QRectF(-10, -10, 20, 20).translated(selectedVersion->scenePos());
+        }
+
         tmp.adjust(-getXFactor(), -getYFactor(), getXFactor(), getYFactor());
-        QGraphicsView::fitInView(tmp, Qt::KeepAspectRatio);
+        to = tmp;
     }
     else
     {
-        QGraphicsView::fitInView(scene()->itemsBoundingRect(), Qt::KeepAspectRatio);
+        if (mwin->getIncludeSelected() && selectedVersion)
+        {
+            to = QRectF(-10, -10, 20, 20).translated(selectedVersion->scenePos());
+            to.adjust(-getXFactor(), -getYFactor(), getXFactor(), getYFactor());
+        }
+        else
+        {
+            to = scene()->itemsBoundingRect();
+        }
     }
+
+    // expand to rectangle to have the same aspect ratio than from
+    aspectCenter(from, to);
+
+    // focus including animation if set
+    focusFromTo(from, to);
+}
+
+void GraphWidget::focusFromTo(const QRectF& _from, const QRectF& _to)
+{
+    // check if animation does make sense...
+    QGraphicsView::fitInView(_to);
+    QRectF comp = mapToScene(viewport()->geometry()).boundingRect();
+
+    qreal fx, fy, fw, fh;
+    qreal tx, ty, tw, th;
+
+    _from.getRect(&fx, &fy, &fw, &fh);
+    comp.getRect(&tx, &ty, &tw, &th);
+
+    qreal delta = fabs(fx - tx) + fabs(fy - ty) + fabs(fw - tw) + fabs(fh - th);
+
+    // from is different to to
+    if (delta > 25)
+    {
+        QGraphicsView::fitInView(_from);
+        if (mwin->getAnimated())
+            animatedFocus(_from, _to);
+
+        QGraphicsView::fitInView(_to);
+    }
+    viewport()->repaint();
+}
+
+void GraphWidget::animatedFocus(const QRectF& _from, const QRectF& _to)
+{
+    QElapsedTimer timer;
+
+    timer.start();
+    QGraphicsView::fitInView(animatedFocus(_from, _to, 0.0));
+    viewport()->repaint();
+    qint64 elapsed = timer.nsecsElapsed() + 1; // ensure > 0
+
+    timer.invalidate();
+
+    qint64 frames = 1000000000 / elapsed;
+    double add = 1.0 / (frames + 1);
+
+    for (double morph = add; morph < 1.0; morph += add)
+    {
+        QGraphicsView::fitInView(animatedFocus(_from, _to, morph));
+        viewport()->repaint();
+    }
+}
+
+void GraphWidget::aspectCenter(QRectF& _from, QRectF& _to)
+{
+    // give _to the same aspect than _from.
+    // old _to is centered in the new one
+
+    double rf = _from.width() / _from.height();
+    double rt = _to.width() / _to.height();
+
+    if (rf > rt)
+    {
+        double w = rf * _to.height();
+        _to = QRectF(_to.left() - 0.5 * (w - _to.width()),
+                     _to.top(),
+                     w,
+                     _to.height());
+    }
+    else
+    {
+        double h = _to.width() * _from.height() / _from.width();
+        _to = QRectF(_to.left(),
+                     _to.top() - 0.5 * (h - _to.height()),
+                     _to.width(),
+                     h);
+    }
+}
+
+QRectF GraphWidget::animatedFocus(
+    const QRectF& _from,
+    const QRectF& _to,
+    double _morph)
+{
+    return QRectF (_from.left() + _morph * (_to.left() - _from.left()),
+                   _from.top() + _morph * (_to.top() - _from.top()),
+                   _from.width() + _morph * (_to.width() - _from.width()),
+                   _from.height() + _morph * (_to.height() - _from.height()));
 }
 
 void GraphWidget::flipY()
@@ -1401,6 +1529,12 @@ void GraphWidget::preferencesUpdated(bool _forceUpdate)
         updateAll = true;
     }
 
+    if (horizontalSort != mwin->getHorizontalSort())
+    {
+        horizontalSort = mwin->getHorizontalSort();
+        updateAll = true;
+    }
+
     if (remotes != mwin->getRemotes())
     {
         remotes = mwin->getRemotes();
@@ -1408,6 +1542,7 @@ void GraphWidget::preferencesUpdated(bool _forceUpdate)
     }
 
     int columns, maxlen;
+
     mwin->getCommentProperties(columns, maxlen);
     if (commentColumns != columns || commentMaxlen != maxlen)
     {
@@ -1449,12 +1584,14 @@ void GraphWidget::foldAll()
 {
     rootVersion->foldRecurse(true);
     updateGraphFolding();
+    setMinSize();
 }
 
 void GraphWidget::unfoldAll()
 {
     rootVersion->foldRecurse(false);
     updateGraphFolding();
+    setMinSize();
 }
 
 void GraphWidget::contextMenuEvent(QContextMenuEvent* _event)
@@ -1479,9 +1616,25 @@ void GraphWidget::contextMenuEvent(QContextMenuEvent* _event)
                 it = uit;
                 break;
             }
-            else if (!it || it->type() != QGraphicsItem::UserType +1)
+            else if (v && !v->isFolded())
             {
-              it = uit;
+              // tricky, if unfolded, the node itself must be matched.
+              // check if inside ... path.addEllipse(-15, -15, 30, 30);
+              QPointF mpos = mapToScene(_event->pos());
+              QPointF gpos = v->scenePos();
+              if (QLineF(mpos, gpos).length() <= 15.0)
+              {
+                it = uit;
+                break;
+              }
+              else if (!it)
+              {
+                it = uit;
+              }
+            }
+            else if (!it || it->type() != QGraphicsItem::UserType + 1)
+            {
+                it = uit;
             }
         }
         else if (uit->type() == QGraphicsItem::UserType + 2 && uit == NULL)
@@ -1514,20 +1667,6 @@ void GraphWidget::contextMenuEvent(QContextMenuEvent* _event)
                 connect(&adapter, SIGNAL(foldSignal(Version*)), this, SLOT(updateGraphFolding(Version*)));
                 menu.addSeparator();
             }
-            /*
-             * TODO check if it does make sense to hide/show subtrees
-               if (v->getSubtreeHidden())
-               {
-                action = menu.addAction(QString("Show subtree"));
-                connect(action, SIGNAL(triggered()), v, SLOT(showSubtree()));
-               }
-               else
-               {
-                action = menu.addAction(QString("Hide subtree"));
-                connect(action, SIGNAL(triggered()), v, SLOT(hideSubtree()));
-               }
-               menu.addSeparator();
-             */
             if (selectedVersion && (v != selectedVersion))
             {
                 action = menu.addAction(QString("Compare to selected"));
@@ -1549,6 +1688,22 @@ void GraphWidget::contextMenuEvent(QContextMenuEvent* _event)
             action = menu.addAction(QString("View this version"));
             connect(action, SIGNAL(triggered()), &adapter, SLOT(viewThisVersion()));
             menu.addSeparator();
+            // Experimental TODO markup that a subtree exists
+            if (!v->isLeaf())
+            {
+                if (v->getSubtreeHidden())
+                {
+                    action = menu.addAction(QString("Show subtree"));
+                    connect(action, SIGNAL(triggered()), &adapter, SLOT(showSubtree()));
+                }
+                else
+                {
+                    action = menu.addAction(QString("Hide subtree"));
+                    connect(action, SIGNAL(triggered()), &adapter, SLOT(hideSubtree()));
+                }
+                menu.addSeparator();
+            }
+
             action = menu.addAction(QString("Focus neighbours"));
             connect(action, SIGNAL(triggered()), &adapter, SLOT(focusNeighbourBox()));
             menu.exec(_event->globalPos());

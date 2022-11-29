@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.4-0                */
+/*                  gvtree V1.5-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -200,6 +200,9 @@ void Edge::paint(QPainter* _painter,
     if (invalid)
         return;
 
+    if (!source->isVisible() || !dest->isVisible())
+      return;
+
     QLineF line(sourcePoint, destPoint);
     if (qFuzzyCompare(line.length(), 0.0))
         return;
@@ -217,9 +220,12 @@ void Edge::paint(QPainter* _painter,
         col = graph->getFileConstraintColor();
     }
 
+    if (lod < 0.4)
+      col.setAlpha(128);
+
     _painter->setPen(
         QPen(col, pw,
-             info ? Qt::DotLine : merge ? Qt::DashLine : Qt::SolidLine,
+                (lod>0.2) ? info ? Qt::DotLine : merge ? Qt::DashLine : Qt::SolidLine : Qt::SolidLine,
              Qt::RoundCap,
              Qt::RoundJoin));
 
@@ -269,8 +275,7 @@ void Edge::focusSource()
     if (invalid)
         return;
 
-    QRectF box = source->getNeighbourBox();
-    graph->focusNeighbourBox(box);
+    graph->displayHits(source);
 }
 
 void Edge::focusDestination()
@@ -278,8 +283,7 @@ void Edge::focusDestination()
     if (invalid)
         return;
 
-    QRectF box = dest->getNeighbourBox();
-    graph->focusNeighbourBox(box);
+    graph->displayHits(dest);
 }
 
 void Edge::focusNeighbourBox()
@@ -287,6 +291,8 @@ void Edge::focusNeighbourBox()
     if (invalid)
         return;
 
-    QRectF box = source->getNeighbourBox() | dest->getNeighbourBox();
-    graph->focusNeighbourBox(box);
+    QList<Version*> tmp;
+    tmp.push_back(source);
+    tmp.push_back(dest);
+    graph->displayHits(tmp);
 }

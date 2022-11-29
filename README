@@ -59,7 +59,7 @@ After installation
 gvtree -h 
 will give you the following information:
 
-gvtree-1.4-0
+gvtree-1.5-0
 
 Tool to display git log graph
 
@@ -110,5 +110,5 @@ Parameters:
 
 --------------------------------------------------------------------------------
 
-For more details please refer to doc/gvtree/gvtree-1.4-0.pdf
+For more details please refer to doc/gvtree/gvtree-1.5-0.pdf
 

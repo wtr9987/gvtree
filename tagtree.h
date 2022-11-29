@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.4-0                */
+/*                  gvtree V1.5-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -73,8 +73,8 @@ public slots:
     void onCustomContextMenu(const QPoint& point);
 
 protected slots:
-    // focus selected items in main view
-    void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
+    // (re-)focus selected items in main view
+    void focusSelection(const QModelIndex& _index);
     // perform search
     void lookupId(const QString& _text, bool _exactMatch = false);
     // change focus to main view
