@@ -877,6 +877,7 @@ void MainWindow::changeTempPath()
 
     dialog.setFilter(QDir::NoDotAndDotDot | QDir::Hidden | QDir::AllDirs);
     dialog.setOption(QFileDialog::ShowDirsOnly, true);
+    dialog.setFileMode(QFileDialog::Directory);
     if (dialog.exec())
     {
         QStringList directoryNames = dialog.selectedFiles();
@@ -907,6 +908,7 @@ void MainWindow::setGitLocalRepository()
 
     dialog.setFilter(QDir::NoDotAndDotDot | QDir::Hidden | QDir::AllDirs);
     dialog.setOption(QFileDialog::ShowDirsOnly, true);
+    dialog.setFileMode(QFileDialog::Directory);
     if (dialog.exec())
     {
         QStringList directoryNames = dialog.selectedFiles();

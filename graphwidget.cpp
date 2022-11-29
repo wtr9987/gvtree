@@ -1627,6 +1627,10 @@ void GraphWidget::contextMenuEvent(QContextMenuEvent* _event)
                 it = uit;
                 break;
               }
+              else if (!it)
+              {
+                it = uit;
+              }
             }
             else if (!it || it->type() != QGraphicsItem::UserType + 1)
             {
