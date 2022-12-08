@@ -255,6 +255,6 @@ private:
 };
 
 typedef struct Version* VersionPointer;
-Q_DECLARE_METATYPE(VersionPointer);
+Q_DECLARE_METATYPE(VersionPointer)
 
 #endif
