@@ -5,3 +5,7 @@ gvtree
 ui_*
 .qmake.stash
 Makefile
+.cproject
+.project
+.settings/
+
