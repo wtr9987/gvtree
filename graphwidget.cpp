@@ -662,7 +662,7 @@ void GraphWidget::process(QList<QString> _cache)
             char cm = tree[i].toLatin1();
             // char cr = (tree.size() >= i) ? tree[i + 1].toLatin1() : 0;
             char pll = (i > 1 && previousTree.size() > i - 2) ? previousTree[i - 2].toLatin1() : 0;
-            char pl = (previousTree.size() >= i) ? previousTree[i - 1].toLatin1() : 0;
+            char pl = ((previousTree.size() >= i) && (i > 0)) ? previousTree[i - 1].toLatin1() : 0;
             char pm = (previousTree.size() > i) ? previousTree[i].toLatin1() : 0;
             char pr = (previousTree.size() > i + 1) ? previousTree[i + 1].toLatin1() : 0;
 
@@ -734,7 +734,7 @@ void GraphWidget::process(QList<QString> _cache)
             // char cm = tree[i].toLatin1();
             char cr = (tree.size() >= i) ? tree[i + 1].toLatin1() : 0;
             // char pll = (i > 1 && previousTree.size() > i - 2) ? previousTree[i - 2].toLatin1() : 0;
-            char pl = (previousTree.size() >= i) ? previousTree[i - 1].toLatin1() : 0;
+            char pl = ((previousTree.size() >= i) && (i > 0)) ? previousTree[i - 1].toLatin1() : 0;
             char pm = (previousTree.size() > i) ? previousTree[i].toLatin1() : 0;
             char pr = (previousTree.size() > i + 1) ? previousTree[i + 1].toLatin1() : 0;
 
