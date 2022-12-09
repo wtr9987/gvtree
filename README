@@ -47,7 +47,21 @@ Build
 -------------------------------------------------------------------------------
 
 Just run the following commands:
+
+ qmake
+-------
+
 qmake PREFIX=/usr/local
+make
+sudo make install
+
+
+ cmake (Qt > 5.0)
+------------------
+
+cmake CMakeLists.txt
+cmake -DCMAKE_BUILD_TYPE=Release or
+cmake -DCMAKE_BUILD_TYPE=Debug
 make
 sudo make install
 
