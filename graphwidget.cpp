@@ -842,12 +842,21 @@ void GraphWidget::process(QList<QString> _cache)
 
 void GraphWidget::clear()
 {
-    if (rootVersion)
+    if (rootVersion != nullptr)
+    {
         scene()->removeItem(rootVersion);
+        delete (rootVersion);
+    }
+    if (fromToInfo != nullptr)
+    {
+        scene()->removeItem(fromToInfo);
+        delete (fromToInfo);
+    }
 
     foreach(QGraphicsItem * it, scene()->items())
     {
         scene()->removeItem(it);
+        delete (it);
     }
 
     rootVersion = new Version(this);
