@@ -8,5 +8,10 @@ Makefile
 .cproject
 .project
 .settings/
-build
-
+build/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+gvtree.qrc.depends
+gvtree_autogen/
+install_manifest.txt
