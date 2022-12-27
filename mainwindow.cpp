@@ -656,7 +656,7 @@ void MainWindow::restoreLocalRepository()
 
             lrp = QString(wdir);
             repoFound = checkGitLocalRepository(lrp, repositoryPath, fileConstraintPath, true);
-            free (wdir);
+            free(wdir);
         }
 
         if (repoFound == true)

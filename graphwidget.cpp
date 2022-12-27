@@ -658,9 +658,9 @@ void GraphWidget::process(QList<QString> _cache)
             // cll cl cm cr
             // pll pl pm pr
             char cll = (i > 1) ? tree.at(i - 2).toLatin1() : 0;
-            // char cl = (i > 0) ? tree[i - 1].toLatin1() : 0;
+            // char cl = (i > 0) ? tree.at(i - 1).toLatin1() : 0;
             char cm = tree.at(i).toLatin1();
-            // char cr = (tree.size() >= i) ? tree[i + 1].toLatin1() : 0;
+            // char cr = (tree.size() > i + 1) ? tree.at(i + 1).toLatin1() : 0;
             char pll = (i > 1 && previousTree.size() > i - 2) ? previousTree.at(i - 2).toLatin1() : 0;
             char pl = ((previousTree.size() >= i) && (i > 0)) ? previousTree.at(i - 1).toLatin1() : 0;
             char pm = (previousTree.size() > i) ? previousTree.at(i).toLatin1() : 0;
@@ -729,11 +729,11 @@ void GraphWidget::process(QList<QString> _cache)
             QList<Version*> mergeSources;
 
             int i = newVersion;
-            // char cll = (i > 1) ? tree[i - 2].toLatin1() : 0;
-            // char cl = (i > 0) ? tree[i - 1].toLatin1() : 0;
-            // char cm = tree[i].toLatin1();
+            // char cll = (i > 1) ? tree.at(i - 2).toLatin1() : 0;
+            // char cl = (i > 0) ? tree.at(i - 1).toLatin1() : 0;
+            // char cm = tree.at(i).toLatin1();
             char cr = (tree.size() > i + 1) ? tree.at(i + 1).toLatin1() : 0;
-            // char pll = (i > 1 && previousTree.size() > i - 2) ? previousTree[i - 2].toLatin1() : 0;
+            // char pll = (i > 1 && previousTree.size() > i - 2) ? previousTree.at(i - 2).toLatin1() : 0;
             char pl = ((previousTree.size() >= i) && (i > 0)) ? previousTree.at(i - 1).toLatin1() : 0;
             char pm = (previousTree.size() > i) ? previousTree.at(i).toLatin1() : 0;
             char pr = (previousTree.size() > i + 1) ? previousTree.at(i + 1).toLatin1() : 0;
@@ -842,18 +842,18 @@ void GraphWidget::process(QList<QString> _cache)
 
 void GraphWidget::clear()
 {
-    if (rootVersion != nullptr)
+    if (rootVersion)
     {
         scene()->removeItem(rootVersion);
-        delete (rootVersion);
+        delete(rootVersion);
     }
-    if (fromToInfo != nullptr)
+    if (fromToInfo)
     {
         scene()->removeItem(fromToInfo);
-        delete (fromToInfo);
+        delete(fromToInfo);
     }
 
-    foreach(QGraphicsItem * it, scene()->items())
+    foreach(QGraphicsItem* it, scene()->items())
     {
         scene()->removeItem(it);
         delete (it);
@@ -1627,19 +1627,19 @@ void GraphWidget::contextMenuEvent(QContextMenuEvent* _event)
             }
             else if (v && !v->isFolded())
             {
-              // tricky, if unfolded, the node itself must be matched.
-              // check if inside ... path.addEllipse(-15, -15, 30, 30);
-              QPointF mpos = mapToScene(_event->pos());
-              QPointF gpos = v->scenePos();
-              if (QLineF(mpos, gpos).length() <= 15.0)
-              {
-                it = uit;
-                break;
-              }
-              else if (!it)
-              {
-                it = uit;
-              }
+                // tricky, if unfolded, the node itself must be matched.
+                // check if inside ... path.addEllipse(-15, -15, 30, 30);
+                QPointF mpos = mapToScene(_event->pos());
+                QPointF gpos = v->scenePos();
+                if (QLineF(mpos, gpos).length() <= 15.0)
+                {
+                    it = uit;
+                    break;
+                }
+                else if (!it)
+                {
+                    it = uit;
+                }
             }
             else if (!it || it->type() != QGraphicsItem::UserType + 1)
             {
