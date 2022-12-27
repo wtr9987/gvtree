@@ -657,14 +657,14 @@ void GraphWidget::process(QList<QString> _cache)
             // current characters
             // cll cl cm cr
             // pll pl pm pr
-            char cll = (i > 1) ? tree[i - 2].toLatin1() : 0;
+            char cll = (i > 1) ? tree.at(i - 2).toLatin1() : 0;
             // char cl = (i > 0) ? tree[i - 1].toLatin1() : 0;
-            char cm = tree[i].toLatin1();
+            char cm = tree.at(i).toLatin1();
             // char cr = (tree.size() >= i) ? tree[i + 1].toLatin1() : 0;
-            char pll = (i > 1 && previousTree.size() > i - 2) ? previousTree[i - 2].toLatin1() : 0;
-            char pl = ((previousTree.size() >= i) && (i > 0)) ? previousTree[i - 1].toLatin1() : 0;
-            char pm = (previousTree.size() > i) ? previousTree[i].toLatin1() : 0;
-            char pr = (previousTree.size() > i + 1) ? previousTree[i + 1].toLatin1() : 0;
+            char pll = (i > 1 && previousTree.size() > i - 2) ? previousTree.at(i - 2).toLatin1() : 0;
+            char pl = ((previousTree.size() >= i) && (i > 0)) ? previousTree.at(i - 1).toLatin1() : 0;
+            char pm = (previousTree.size() > i) ? previousTree.at(i).toLatin1() : 0;
+            char pr = (previousTree.size() > i + 1) ? previousTree.at(i + 1).toLatin1() : 0;
 
             // hope' all cases are covered
             switch (cm)
@@ -732,11 +732,11 @@ void GraphWidget::process(QList<QString> _cache)
             // char cll = (i > 1) ? tree[i - 2].toLatin1() : 0;
             // char cl = (i > 0) ? tree[i - 1].toLatin1() : 0;
             // char cm = tree[i].toLatin1();
-            char cr = (tree.size() >= i) ? tree[i + 1].toLatin1() : 0;
+            char cr = (tree.size() >= i) ? tree.at(i + 1).toLatin1() : 0;
             // char pll = (i > 1 && previousTree.size() > i - 2) ? previousTree[i - 2].toLatin1() : 0;
-            char pl = ((previousTree.size() >= i) && (i > 0)) ? previousTree[i - 1].toLatin1() : 0;
-            char pm = (previousTree.size() > i) ? previousTree[i].toLatin1() : 0;
-            char pr = (previousTree.size() > i + 1) ? previousTree[i + 1].toLatin1() : 0;
+            char pl = ((previousTree.size() >= i) && (i > 0)) ? previousTree.at(i - 1).toLatin1() : 0;
+            char pm = (previousTree.size() > i) ? previousTree.at(i).toLatin1() : 0;
+            char pr = (previousTree.size() > i + 1) ? previousTree.at(i + 1).toLatin1() : 0;
 
             if (pl == '/')
                 parent = previousBranchslots[i - 1];
@@ -758,7 +758,7 @@ void GraphWidget::process(QList<QString> _cache)
             if (cr == '-')
             {
                 int j = i + 1;
-                while (j < tree.size() && (tree[j] == '-' || tree[j] == '.'))
+                while (j < tree.size() && (tree.at(j) == '-' || tree.at(j) == '.'))
                 {
                     Version* tmp = branchslots[j];
                     if (tmp != NULL && tmp != parent)
