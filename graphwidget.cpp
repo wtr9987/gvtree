@@ -732,7 +732,7 @@ void GraphWidget::process(QList<QString> _cache)
             // char cll = (i > 1) ? tree[i - 2].toLatin1() : 0;
             // char cl = (i > 0) ? tree[i - 1].toLatin1() : 0;
             // char cm = tree[i].toLatin1();
-            char cr = (tree.size() >= i) ? tree.at(i + 1).toLatin1() : 0;
+            char cr = (tree.size() > i + 1) ? tree.at(i + 1).toLatin1() : 0;
             // char pll = (i > 1 && previousTree.size() > i - 2) ? previousTree[i - 2].toLatin1() : 0;
             char pl = ((previousTree.size() >= i) && (i > 0)) ? previousTree.at(i - 1).toLatin1() : 0;
             char pm = (previousTree.size() > i) ? previousTree.at(i).toLatin1() : 0;
@@ -842,12 +842,21 @@ void GraphWidget::process(QList<QString> _cache)
 
 void GraphWidget::clear()
 {
-    if (rootVersion)
+    if (rootVersion != nullptr)
+    {
         scene()->removeItem(rootVersion);
+        delete (rootVersion);
+    }
+    if (fromToInfo != nullptr)
+    {
+        scene()->removeItem(fromToInfo);
+        delete (fromToInfo);
+    }
 
     foreach(QGraphicsItem * it, scene()->items())
     {
         scene()->removeItem(it);
+        delete (it);
     }
 
     rootVersion = new Version(this);
