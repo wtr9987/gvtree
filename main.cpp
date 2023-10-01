@@ -72,8 +72,7 @@ int main(int argc, char** argv)
 #endif
 
     // main window
-    MainWindow* win = new MainWindow(QCoreApplication::arguments());
-    win->show(); // done by constructor
+    new MainWindow(QCoreApplication::arguments());
 
     return app.exec();
 }

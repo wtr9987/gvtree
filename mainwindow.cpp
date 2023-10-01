@@ -185,9 +185,6 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
             gvtree_branchlist.branchList, SLOT(resetSelection()));
     restoreBranchListSettings();
 
-    show();
-    restoreWindowSettings();
-
     // parse arguments
     QString fileConstraint;
 
@@ -310,6 +307,9 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
                 fileConstraint = _argv.at(i);
         }
     }
+
+    show();
+    restoreWindowSettings();
 
     if (fromfile == false)
     {
@@ -487,6 +487,9 @@ void MainWindow::restorePreferencesSettings()
 
     if (settings.contains("diffLocalFile"))
         gvtree_preferences.diff_local_files->setChecked(settings.value("diffLocalFile").toBool());
+
+    if (settings.contains("reduceTree"))
+        gvtree_preferences.reduce_tree->setChecked(settings.value("reduceTree").toBool());
 
     if (settings.contains("printCmdToStdout"))
         gvtree_preferences.print_cmd_to_stdout->setChecked(settings.value("printCmdToStdout").toBool());
@@ -1166,6 +1169,11 @@ bool MainWindow::getShortHashes() const
     return gvtree_preferences.git_short_hashes->isChecked();
 }
 
+bool MainWindow::getReduceTree() const
+{
+    return gvtree_preferences.reduce_tree->isChecked();
+}
+
 bool MainWindow::getTopDownView() const
 {
     return gvtree_preferences.top_down_sort->currentIndex()>0;
@@ -1225,6 +1233,7 @@ void MainWindow::saveChangedSettings()
     settings.setValue("includeSelected", gvtree_preferences.include_selected->isChecked());
     settings.setValue("animated", gvtree_preferences.animated->isChecked());
     settings.setValue("diffLocalFile", gvtree_preferences.diff_local_files->isChecked());
+    settings.setValue("reduceTree", gvtree_preferences.reduce_tree->isChecked());
     settings.setValue("remotes", gvtree_preferences.remotes->isChecked());
 
     forceUpdate = forceUpdate || !settings.contains("fold_no_tag")

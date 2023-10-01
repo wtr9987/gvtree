@@ -89,6 +89,7 @@ GraphWidget::GraphWidget(MainWindow* _parent)
         maxLines = mwin->getMaxLines();
         connectorStyle = mwin->getConnectorStyle();
         shortHashes = mwin->getShortHashes();
+        reduceTree = mwin->getReduceTree();
         topDownView = mwin->getTopDownView();
         horizontalSort = mwin->getHorizontalSort();
         remotes = mwin->getRemotes();
@@ -403,6 +404,12 @@ void GraphWidget::setGitLogFileConstraint(const QString& _fileConstraint)
         rootVersion->reduceToFileConstraint(rootVersion);
     }
 
+    // force update
+    if (reduceTree == true)
+    {
+      preferencesUpdated(true);
+    }
+
     //
     update();
 }
@@ -425,6 +432,9 @@ Version* GraphWidget::gitlogSingle(QString _hash, bool _create)
         cmd += " " + _hash;
     else if (mwin->getSelectedBranch().size())
         cmd += " " + mwin->getSelectedBranch();
+
+    if (reduceTree == true && fileConstraint.size())
+        cmd += " -- " + fileConstraint;
 
     QList<QString> cache;
 
@@ -495,6 +505,9 @@ void GraphWidget::gitlog(bool _changed)
     if (mwin->getSelectedBranch().size())
         cmd += " " + mwin->getSelectedBranch();
 
+    if (reduceTree == true && fileConstraint.size())
+        cmd += " -- " + fileConstraint;
+
     QList<QString> cache;
 
     execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
@@ -504,6 +517,11 @@ void GraphWidget::gitlog(bool _changed)
 
     restoreImportantVersions();
     setUpdatesEnabled(true);
+
+    if (reduceTree == false && fileConstraint.isEmpty() == false)
+    {
+        setGitLogFileConstraint(fileConstraint);
+    }
 }
 
 void GraphWidget::setCompareTree(CompareTree* _tree)
@@ -550,13 +568,13 @@ void GraphWidget::debugExit(char _c,
                             const QString& _previousTree,
                             const QString& _line)
 {
-    std::cerr << "Unknown sequence: current [" << _c
-              << "] line [" << _lineNumber << "] column [" << _column << "]" << std::endl;
-    std::cerr << _line.toUtf8().data() << std::endl;
-    std::cerr << std::endl;
-    std::cerr << _tree.toUtf8().data() << std::endl;
-    std::cerr << _previousTree.toUtf8().data() << std::endl;
-    std::cerr << std::endl;
+    cerr << "Unknown sequence: current [" << _c
+              << "] line [" << _lineNumber << "] column [" << _column << "]" << endl;
+    cerr << _line.toUtf8().data() << endl;
+    cerr << endl;
+    cerr << _tree.toUtf8().data() << endl;
+    cerr << _previousTree.toUtf8().data() << endl;
+    cerr << endl;
     exit(0);
 }
 
@@ -564,12 +582,12 @@ void GraphWidget::debugGraphParser(
     const QString& _tree,
     const QVector<Version*>& _slots)
 {
-    std::cout << _tree.toUtf8().data() << std::endl;
+    cout << _tree.toUtf8().data() << endl;
     foreach(const Version * v, _slots)
     {
-        std::cout << v << "  ";
+        cout << v << "  ";
     }
-    std::cout << std::endl;
+    cout << endl;
 }
 
 void GraphWidget::process(QList<QString> _cache)
@@ -623,7 +641,7 @@ void GraphWidget::process(QList<QString> _cache)
 
         if (pos == -1)
         {
-            std::cerr << "No --graph pattern contained in line " << linenumber << " : " << line.toUtf8().data() << std::endl;
+            cerr << "No --graph pattern contained in line " << linenumber << " : " << line.toUtf8().data() << endl;
             continue;
         }
 
@@ -715,7 +733,7 @@ void GraphWidget::process(QList<QString> _cache)
                 case ' ':
                     break;
                 default:
-                    std::cerr << "Character " << cm << " not recognized." << std::endl;
+                    cerr << "Character " << cm << " not recognized." << endl;
                     exit(0);
                     break;
             }
@@ -837,6 +855,11 @@ void GraphWidget::process(QList<QString> _cache)
     mwin->getTagTree()->compress();
     mwin->getTagTree()->blockSignals(false);
 
+    if (reduceTree == false && fileConstraint.isEmpty() == false)
+    {
+        setGitLogFileConstraint(fileConstraint);
+    }
+
     // cerr << "process end " << timestamp() << endl;
 }
 
@@ -853,7 +876,7 @@ void GraphWidget::clear()
         delete(fromToInfo);
     }
 
-    foreach(QGraphicsItem* it, scene()->items())
+    foreach(QGraphicsItem * it, scene()->items())
     {
         scene()->removeItem(it);
         delete (it);
@@ -1530,6 +1553,15 @@ void GraphWidget::preferencesUpdated(bool _forceUpdate)
     {
         shortHashes = mwin->getShortHashes();
         updateAll = true;
+    }
+
+    if (reduceTree != mwin->getReduceTree())
+    {
+        reduceTree = mwin->getReduceTree();
+        if (fileConstraint.isEmpty() == false)
+        {
+            updateAll = true;
+        }
     }
 
     if (topDownView != mwin->getTopDownView())

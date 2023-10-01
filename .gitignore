@@ -1,4 +1,5 @@
 *.o
+.*.sw*
 moc_*
 qrc_*
 gvtree

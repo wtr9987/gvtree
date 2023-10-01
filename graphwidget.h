@@ -258,6 +258,7 @@ private:
     int maxLines;
     int currentLines;
     bool shortHashes;
+    bool reduceTree;
     bool topDownView;
     int horizontalSort;
     bool remotes;

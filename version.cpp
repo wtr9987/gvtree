@@ -901,7 +901,7 @@ bool Version::getFileConstraint() const
 
 void Version::reduceToFileConstraint(Version* _parent, bool _merge)
 {
-    // in case of rootVersion this and _paren are identical
+    // in case of rootVersion this and _parent are identical
     foreach (const Edge * edge, edgeList)
     {
         if (edge->sourceVersion() != this)
