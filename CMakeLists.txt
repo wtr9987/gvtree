@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 3.0)
 
 project(gvtree
-        VERSION 1.5.0
+        VERSION 1.6.0
         LANGUAGES CXX)
 
 include(FeatureSummary)
@@ -32,14 +32,14 @@ feature_summary(WHAT ALL FATAL_ON_MISSING_REQUIRED_PACKAGES)
 add_compile_options(-Wall
                     -Wextra
                     -Wpedantic 
-                    $<$<CONFIG:DEBUG>:-fno-omit-frame-pointer>
-                    $<$<CONFIG:DEBUG>:-fsanitize=address>)
+                    $<$<CONFIG:DEBUG>:-fsanitize=address>
+                    $<$<CONFIG:DEBUG>:-fno-omit-frame-pointer>)
                     
 add_compile_definitions (VERSION="${PROJECT_VERSION}"
                          $<$<CONFIG:RELEASE>:QT_NO_DEBUG_OUTPUT>)
 
-add_link_options ("$<$<CONFIG:DEBUG>:-fno-omit-frame-pointer>"
-                  "$<$<CONFIG:DEBUG>:-fsanitize=address>")
+add_link_options ("$<$<CONFIG:DEBUG>:-fsanitize=address>"
+                  "$<$<CONFIG:DEBUG>:-fno-omit-frame-pointer>")
 
 message("Buildtype: ${CMAKE_BUILD_TYPE}")
 
@@ -114,7 +114,7 @@ target_compile_definitions(gvtree PUBLIC
     -DAPPLICATION_NAME=${PROJECT_NAME}
 )
 
-target_link_libraries(gvtree ${QTMODULES} )
+target_link_libraries(gvtree ${QTMODULES})
 
 install(TARGETS gvtree
         EXPORT gvtree
