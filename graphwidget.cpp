@@ -1915,6 +1915,11 @@ void GraphWidget::resetDiff()
     toHashSave = QString();
 }
 
+bool GraphWidget::isFromToVersion(Version* _v) const
+{
+  return (toVersion == _v || fromVersions.contains(_v));
+}
+
 float GraphWidget::getXFactor() const
 {
     return 16.0 * xfactor;

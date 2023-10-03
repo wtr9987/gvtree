@@ -81,9 +81,13 @@ void VersionAdapter::foldAction()
 void VersionAdapter::hideSubtree()
 {
     v->setSubtreeVisible(false);
+    v->calculateLocalBoundingBox();
+    v->update();
 }
 
 void VersionAdapter::showSubtree()
 {
     v->setSubtreeVisible(true);
+    v->calculateLocalBoundingBox();
+    v->update();
 }

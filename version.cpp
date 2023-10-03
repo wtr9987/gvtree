@@ -203,7 +203,6 @@ QPainterPath Version::shape() const
 
 void Version::paint(QPainter* _painter, const QStyleOptionGraphicsItem* _option, QWidget*)
 {
-
     if (getH() == 0)
         return;
 
@@ -872,11 +871,17 @@ void Version::setSubtreeVisible(bool _value)
             {
                 v->QGraphicsItem::setVisible(_value);
                 v->setSubtreeVisible(_value);
+                if (graph->isFromToVersion(v))
+                {
+                  graph->resetDiff();
+                }
+                if (_value == false && v->isSelected())
+                {
+                  graph->resetSelection();
+                }
             }
         }
     }
-    calculateLocalBoundingBox();
-    QGraphicsItem::update();
 }
 
 void Version::setUpdateBoundingRect(bool _val)

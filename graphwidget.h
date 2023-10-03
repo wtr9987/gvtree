@@ -161,6 +161,8 @@ public:
         return connectorStyle;
     }
 
+    bool isFromToVersion(Version* _v) const;
+
 public slots:
     void diffStagedChanges();
     void diffLocalChanges();
