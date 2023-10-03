@@ -481,10 +481,6 @@ void MainWindow::restorePreferencesSettings()
         settings.setValue("animated", false);
     gvtree_preferences.animated->setChecked(settings.value("animated").toBool());
 
-    if (!settings.contains("openGLRendering"))
-        settings.setValue("openGLRendering", false);
-    gvtree_preferences.open_gl_rendering->setChecked(settings.value("openGLRendering").toBool());
-
     if (settings.contains("diffLocalFile"))
         gvtree_preferences.diff_local_files->setChecked(settings.value("diffLocalFile").toBool());
 
@@ -1199,11 +1195,6 @@ bool MainWindow::getAnimated() const
     return gvtree_preferences.animated->isChecked();
 }
 
-bool MainWindow::getOpenGLRendering() const
-{
-    return gvtree_preferences.open_gl_rendering->isChecked();
-}
-
 bool MainWindow::getDiffLocalFiles() const
 {
     return gvtree_preferences.diff_local_files->isChecked();
@@ -1229,7 +1220,6 @@ void MainWindow::saveChangedSettings()
     settings.setValue("topDownView", gvtree_preferences.top_down_sort->currentIndex());
     settings.setValue("horizontalSort", gvtree_preferences.horizontal_sort->currentIndex());
     settings.setValue("gitShortHashes", gvtree_preferences.git_short_hashes->isChecked());
-    settings.setValue("openGLRendering", gvtree_preferences.open_gl_rendering->isChecked());
     settings.setValue("includeSelected", gvtree_preferences.include_selected->isChecked());
     settings.setValue("animated", gvtree_preferences.animated->isChecked());
     settings.setValue("diffLocalFile", gvtree_preferences.diff_local_files->isChecked());

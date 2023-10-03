@@ -5,7 +5,7 @@ INCLUDEPATH += .
 VERSION = -1.6-0
 RC_ICONS = gvtree.ico
 CPPFLAGS += -O3
-QT += opengl widgets
+QT += widgets
 INSTALLS += target documentation
 
 isEmpty(PREFIX) {

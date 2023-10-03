@@ -24,8 +24,6 @@
 
 #include <QtGui>
 #include <QRegExp>
-#include <QtOpenGL/QGLWidget>
-#include <QSettings>
 #include <QAction>
 #include <QMenu>
 #include <QScrollBar>
@@ -100,20 +98,6 @@ GraphWidget::GraphWidget(MainWindow* _parent)
 
     scene->setItemIndexMethod(QGraphicsScene::NoIndex);
     setScene(scene);
-
-    // try to get hardware acceleration
-    QSettings settings;
-    QGLWidget* gl = new QGLWidget();
-
-    if (gl->isValid() && mwin->getOpenGLRendering())
-    {
-        setViewport(gl);
-        settings.setValue("openGLRendering", true);
-    }
-    else
-    {
-        settings.setValue("openGLRendering", false);
-    }
 
     // view settings
     setRenderHint(QPainter::Antialiasing);
@@ -407,7 +391,7 @@ void GraphWidget::setGitLogFileConstraint(const QString& _fileConstraint)
     // force update
     if (reduceTree == true)
     {
-      preferencesUpdated(true);
+        preferencesUpdated(true);
     }
 
     //
@@ -569,7 +553,7 @@ void GraphWidget::debugExit(char _c,
                             const QString& _line)
 {
     cerr << "Unknown sequence: current [" << _c
-              << "] line [" << _lineNumber << "] column [" << _column << "]" << endl;
+         << "] line [" << _lineNumber << "] column [" << _column << "]" << endl;
     cerr << _line.toUtf8().data() << endl;
     cerr << endl;
     cerr << _tree.toUtf8().data() << endl;
@@ -998,7 +982,7 @@ void GraphWidget::diffLocalChanges()
     fromToInfo->show();
 }
 
-void GraphWidget::compareVersions(Version* _v1, Version* _v2)
+void GraphWidget::compareVersions(Version* _v1, Version* _v2, bool _showDiff)
 {
     resetMatches();
 
@@ -1010,7 +994,7 @@ void GraphWidget::compareVersions(Version* _v1, Version* _v2)
 
     QStringList fromVersionHashes(_v1->getHash());
 
-    compareTree->compareHashes(fromVersionHashes, _v2->getHash());
+    compareTree->compareHashes(fromVersionHashes, _v2->getHash(), _showDiff);
 
     // ensure visibility of Compare Versions dock
     mwin->getCompareTreeDock()->show();
@@ -1020,25 +1004,25 @@ void GraphWidget::compareVersions(Version* _v1, Version* _v2)
     fromToInfo->show();
 }
 
-void GraphWidget::compareToSelected(Version* _v)
+void GraphWidget::compareToSelected(Version* _v, bool _view)
 {
-    compareVersions(selectedVersion, _v);
+    compareVersions(selectedVersion, _v, _view);
 }
 
-void GraphWidget::compareToLocalHead(Version* _v)
+void GraphWidget::compareToLocalHead(Version* _v, bool _view)
 {
-    compareVersions(_v, localHeadVersion);
+    compareVersions(_v, localHeadVersion, _view);
 }
 
-void GraphWidget::compareToBranchBaseline(Version* _v)
+void GraphWidget::compareToBranchBaseline(Version* _v, bool _view)
 {
     Version* baseline = _v->lookupBranchBaseline();
 
     if (baseline)
-        compareVersions(baseline, _v);
+        compareVersions(baseline, _v, _view);
 }
 
-void GraphWidget::compareToPrevious(Version* _v)
+void GraphWidget::compareToPrevious(Version* _v, bool _view)
 {
     // more complex because multiple predecessors are possible
     resetMatches();
@@ -1052,7 +1036,7 @@ void GraphWidget::compareToPrevious(Version* _v)
     QStringList fromVersionHashes;
 
     _v->getPredecessorHashes(fromVersionHashes);
-    compareTree->compareHashes(fromVersionHashes, _v->getHash());
+    compareTree->compareHashes(fromVersionHashes, _v->getHash(), _view);
 
     // ensure visibility of Compare Versions dock
     mwin->getCompareTreeDock()->show();
@@ -1699,6 +1683,8 @@ void GraphWidget::contextMenuEvent(QContextMenuEvent* _event)
         {
             VersionAdapter adapter(v);
 
+            bool fc = fileConstraint.isEmpty() == false;
+
             QMenu menu(&adapter);
             QAction* action = NULL;
             if (v->isFolder())
@@ -1710,21 +1696,69 @@ void GraphWidget::contextMenuEvent(QContextMenuEvent* _event)
             }
             if (selectedVersion && (v != selectedVersion))
             {
-                action = menu.addAction(QString("Compare to selected"));
-                connect(action, SIGNAL(triggered()), &adapter, SLOT(compareToSelected()));
+                if (fc)
+                {
+                    QMenu* sub = menu.addMenu("Compare to selected");
+                    action = sub->addAction(QString("Update"));
+                    connect(action, SIGNAL(triggered()), &adapter, SLOT(compareToSelected()));
+                    action = sub->addAction(QString("Show diff"));
+                    connect(action, SIGNAL(triggered()), &adapter, SLOT(diffToSelected()));
+                }
+                else
+                {
+                    action = menu.addAction(QString("Compare to selected"));
+                    connect(action, SIGNAL(triggered()), &adapter, SLOT(compareToSelected()));
+                }
             }
-            action = menu.addAction(QString("Compare to previous"));
-            connect(action, SIGNAL(triggered()), &adapter, SLOT(compareToPrevious()));
+
+            if (fc)
+            {
+                QMenu* sub = menu.addMenu("Compare to previous");
+                action = sub->addAction(QString("Update"));
+                connect(action, SIGNAL(triggered()), &adapter, SLOT(compareToPrevious()));
+                action = sub->addAction(QString("Show diff"));
+                connect(action, SIGNAL(triggered()), &adapter, SLOT(diffToPrevious()));
+            }
+            else
+            {
+                action = menu.addAction(QString("Compare to previous"));
+                connect(action, SIGNAL(triggered()), &adapter, SLOT(compareToPrevious()));
+            }
+
             if (v != localHeadVersion)
             {
-                action = menu.addAction(QString("Compare to local HEAD"));
-                connect(action, SIGNAL(triggered()), &adapter, SLOT(compareToLocalHead()));
+                if (fc)
+                {
+                    QMenu* sub = menu.addMenu("Compare to local HEAD");
+                    action = sub->addAction(QString("Update"));
+                    connect(action, SIGNAL(triggered()), &adapter, SLOT(compareToLocalHead()));
+                    action = sub->addAction(QString("Show diff"));
+                    connect(action, SIGNAL(triggered()), &adapter, SLOT(diffToLocalHead()));
+                }
+                else
+                {
+                    action = menu.addAction(QString("Compare to local HEAD"));
+                    connect(action, SIGNAL(triggered()), &adapter, SLOT(compareToLocalHead()));
+                }
             }
+            // TODO perhaps feature to remove?
+            // It is actually not tha baseline, but the latest fork of the branch
             Version* branchBaseline = v->lookupBranchBaseline();
             if (branchBaseline && v != branchBaseline)
             {
-                action = menu.addAction(QString("Compare to branch baseline"));
-                connect(action, SIGNAL(triggered()), &adapter, SLOT(compareToBranchBaseline()));
+                if (fc)
+                {
+                    QMenu* sub = menu.addMenu("Compare to latest branch fork");
+                    action = sub->addAction(QString("Update"));
+                    connect(action, SIGNAL(triggered()), &adapter, SLOT(compareToBranchBaseline()));
+                    action = sub->addAction(QString("Show diff"));
+                    connect(action, SIGNAL(triggered()), &adapter, SLOT(diffToBranchBaseline()));
+                }
+                else
+                {
+                    action = menu.addAction(QString("Compare to latest branch fork"));
+                    connect(action, SIGNAL(triggered()), &adapter, SLOT(compareToBranchBaseline()));
+                }
             }
             action = menu.addAction(QString("View this version"));
             connect(action, SIGNAL(triggered()), &adapter, SLOT(viewThisVersion()));

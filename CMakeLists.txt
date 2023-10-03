@@ -25,7 +25,6 @@ find_package(Qt5Core ${QT_MIN_VERSION} REQUIRED)
 find_package(Qt5Gui ${QT_MIN_VERSION} REQUIRED)
 find_package(Qt5Network ${QT_MIN_VERSION} REQUIRED)
 find_package(Qt5Widgets ${QT_MIN_VERSION} REQUIRED)
-find_package(Qt5OpenGL ${QT_MIN_VERSION} REQUIRED)
 
 feature_summary(WHAT ALL FATAL_ON_MISSING_REQUIRED_PACKAGES)
 
@@ -100,7 +99,6 @@ set ( QTMODULES
   Qt5::Core 
   Qt5::Widgets 
   Qt5::Network
-  Qt5::OpenGL
  )
  
 qt5_wrap_ui(UI_HDRS ${UIS})

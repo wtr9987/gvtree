@@ -43,7 +43,7 @@
    <item row="1" column="1" colspan="2">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tabWidgetPage1">
       <property name="statusTip">
@@ -602,16 +602,6 @@
           <string>Rendering</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_5">
-          <item>
-           <widget class="QCheckBox" name="open_gl_rendering">
-            <property name="focusPolicy">
-             <enum>Qt::NoFocus</enum>
-            </property>
-            <property name="text">
-             <string>Hardware Acceleration</string>
-            </property>
-           </widget>
-          </item>
           <item>
            <widget class="QCheckBox" name="animated">
             <property name="text">

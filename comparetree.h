@@ -54,7 +54,7 @@ public:
     void compareHashToLocal(const QString& _hash);
 
     // compare versions
-    void compareHashes(const QStringList& _hash1, const QString& _hash2);
+    void compareHashes(const QStringList& _hash1, const QString& _hash2, bool _showDiff = false);
 
     // remove all current data
     void resetCompareTree();
@@ -63,6 +63,7 @@ public:
     // else everything up to level 10
     void expandTree();
 
+    void compareFileVersionsAction(QStringList& _tmp);
 
 protected:
     // called by compareFileVersions to create temporary files

@@ -86,24 +86,24 @@ Version::Version(const QStringList& _globalVersionInfo,
     setZValue(5);
 }
 
-void Version::compareToSelected()
+void Version::compareToSelected(bool _view)
 {
-    graph->compareToSelected(this);
+    graph->compareToSelected(this, _view);
 }
 
-void Version::compareToPrevious()
+void Version::compareToPrevious(bool _view)
 {
-    graph->compareToPrevious(this);
+    graph->compareToPrevious(this, _view);
 }
 
-void Version::compareToLocalHead()
+void Version::compareToLocalHead(bool _view)
 {
-    graph->compareToLocalHead(this);
+    graph->compareToLocalHead(this, _view);
 }
 
-void Version::compareToBranchBaseline()
+void Version::compareToBranchBaseline(bool _view)
 {
-    graph->compareToBranchBaseline(this);
+    graph->compareToBranchBaseline(this, _view);
 }
 
 void Version::viewThisVersion()

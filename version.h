@@ -149,10 +149,10 @@ public:
     bool getSubtreeHidden() const;
     void setSubtreeVisible(bool _value);
 
-    void compareToSelected();
-    void compareToPrevious();
-    void compareToLocalHead();
-    void compareToBranchBaseline();
+    void compareToSelected(bool _view = false);
+    void compareToPrevious(bool _view = false);
+    void compareToLocalHead(bool _view = false);
+    void compareToBranchBaseline(bool _view = false);
     void viewThisVersion();
     void focusNeighbourBox();
     // all elements in linear will then get Node::height = 0

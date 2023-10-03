@@ -33,6 +33,10 @@ public slots:
     void compareToPrevious();
     void compareToLocalHead();
     void compareToBranchBaseline();
+    void diffToSelected();
+    void diffToPrevious();
+    void diffToLocalHead();
+    void diffToBranchBaseline();
     void viewThisVersion();
     void focusNeighbourBox();
     void foldAction();

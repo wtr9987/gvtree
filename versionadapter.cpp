@@ -25,22 +25,42 @@ VersionAdapter::VersionAdapter(Version* _v, QWidget* _parent) :
 
 void VersionAdapter::compareToSelected()
 {
-    v->compareToSelected();
+    v->compareToSelected(false);
 }
 
 void VersionAdapter::compareToPrevious()
 {
-    v->compareToPrevious();
+    v->compareToPrevious(false);
 }
 
 void VersionAdapter::compareToLocalHead()
 {
-    v->compareToLocalHead();
+    v->compareToLocalHead(false);
 }
 
 void VersionAdapter::compareToBranchBaseline()
 {
-    v->compareToBranchBaseline();
+    v->compareToBranchBaseline(false);
+}
+
+void VersionAdapter::diffToSelected()
+{
+    v->compareToSelected(true);
+}
+
+void VersionAdapter::diffToPrevious()
+{
+    v->compareToPrevious(true);
+}
+
+void VersionAdapter::diffToLocalHead()
+{
+    v->compareToLocalHead(true);
+}
+
+void VersionAdapter::diffToBranchBaseline()
+{
+    v->compareToBranchBaseline(true);
 }
 
 void VersionAdapter::viewThisVersion()

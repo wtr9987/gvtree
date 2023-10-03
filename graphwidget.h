@@ -59,12 +59,12 @@ public:
     void forceUpdate();
 
     // Compare or view versions
-    void compareToSelected(Version* _v);
-    void compareToPrevious(Version* _v);
-    void compareToLocalHead(Version* _v);
-    void compareToBranchBaseline(Version* _v);
+    void compareToSelected(Version* _v, bool _view = false);
+    void compareToPrevious(Version* _v, bool _view = false);
+    void compareToLocalHead(Version* _v, bool _view = false);
+    void compareToBranchBaseline(Version* _v, bool _view = false);
     void viewThisVersion(Version* _v);
-    void compareVersions(Version* _v1, Version* _v2);
+    void compareVersions(Version* _v1, Version* _v2, bool _showDiff = false);
 
     // focus
     int matchVersions(const QString& _text, QList<Version*>& _matches, bool _exactMatch);

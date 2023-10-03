@@ -37,8 +37,10 @@ CompareTree::CompareTree(QWidget* _parent) : QTreeView(_parent)
             this, SLOT(onCustomContextMenu(const QPoint&)));
 }
 
-void CompareTree::compareHashes(const QStringList& _hash1, const QString& _hash2)
+void CompareTree::compareHashes(const QStringList& _hash1, const QString& _hash2, bool _showDiff)
 {
+    QStandardItem* showDiffItem = NULL;
+
     QStandardItemModel* treemodel = new QStandardItemModel(NULL);
 
     treemodel->setHorizontalHeaderItem(0, new QStandardItem(QString("Path")));
@@ -147,6 +149,11 @@ void CompareTree::compareHashes(const QStringList& _hash1, const QString& _hash2
                     actitem->setData(path_old, Qt::UserRole + 2);
                     columns << actitem;
                     p->appendRow(columns);
+
+                    if (_showDiff == true && graph->getFileConstraint() == path)
+                    {
+                        showDiffItem = actitem;
+                    }
                 }
                 else
                 {
@@ -161,6 +168,37 @@ void CompareTree::compareHashes(const QStringList& _hash1, const QString& _hash2
     expandTree();
 
     show();
+
+    if (showDiffItem)
+    {
+        QVariant ret = showDiffItem->data(Qt::DisplayRole);
+
+        if (!ret.isValid())
+            return;
+
+        QString path = ret.toString();
+
+        ret = showDiffItem->data(Qt::UserRole + 1);
+        if (!ret.isValid())
+            return;
+
+        QString status = ret.toString();
+
+        QString path_old = path;
+        if (status == "R")
+        {
+            ret = showDiffItem->data(Qt::UserRole + 2);
+            if (ret.isValid())
+                path_old = ret.toString();
+        }
+
+        // to open diff tool for file constraint
+        QStringList diffFileConstraint;
+        diffFileConstraint << "ACT1" << path << status << path_old;
+
+
+        compareFileVersionsAction(diffFileConstraint);
+    }
 }
 
 void CompareTree::expandTree()
@@ -239,24 +277,29 @@ void CompareTree::compareFileVersionsAction(QAction* _act)
 {
     QStringList tmp = _act->data().toStringList();
 
-    if (tmp.isEmpty() || tmp.front() != "ACT1")
+    compareFileVersionsAction(tmp);
+}
+
+void CompareTree::compareFileVersionsAction(QStringList& _tmp)
+{
+    if (_tmp.isEmpty() || _tmp.front() != "ACT1")
         return;
 
-    tmp.pop_front();
-    if (tmp.isEmpty())
+    _tmp.pop_front();
+    if (_tmp.isEmpty())
         return;
 
-    QString path = tmp.front();
+    QString path = _tmp.front();
 
-    tmp.pop_front();
-    if (tmp.isEmpty())
+    _tmp.pop_front();
+    if (_tmp.isEmpty())
         return;
 
-    QString status = tmp.front();
+    QString status = _tmp.front();
 
-    tmp.pop_front();
+    _tmp.pop_front();
 
-    QString path_old = (!tmp.isEmpty()) ? tmp.front() : path;
+    QString path_old = (!_tmp.isEmpty()) ? _tmp.front() : path;
 
     compareFileVersions(path, status, path_old);
 }
