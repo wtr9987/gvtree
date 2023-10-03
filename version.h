@@ -157,8 +157,6 @@ public:
     void focusNeighbourBox();
     // all elements in linear will then get Node::height = 0
     void foldAction();
-    void hideSubtree();
-    void showSubtree();
 
     void setBlockItemChanged(bool _val);
     bool getBlockItemChanged() const;

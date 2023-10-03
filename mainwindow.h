@@ -83,7 +83,7 @@ public:
     bool getAnimated() const;
     bool getDiffLocalFiles() const;
     int getConnectorStyle() const;
-    bool getXYFactor(int& _xfactor, int& _yfactor);
+    bool getXYFactor(int& _xfactor, int& _yfactor) const;
     QColor getPreferencesColor(QString _key);
     QString getTempPath() const;
     bool getPrintCmdToStdout() const;

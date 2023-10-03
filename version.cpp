@@ -123,6 +123,7 @@ QList<Version*> Version::getNeighbourBox()
         return linear.front()->getNeighbourBox();
 
     QList<Version*> result;
+
     result.push_back(this);
 
     foreach (const Edge * edge, edgeList)
@@ -212,6 +213,13 @@ void Version::paint(QPainter* _painter, const QStyleOptionGraphicsItem* _option,
     {
         _painter->setPen(QPen(isFolded() ? graph->getFoldedColor() : graph->getUnfoldedColor(), 0));
         _painter->drawRect(folderBox);
+    }
+
+    if (subtreeHidden)
+    {
+        _painter->setPen(QPen(graph->getEdgeColor(), 3, Qt::DotLine, Qt::RoundCap, Qt::RoundJoin));
+        _painter->setBrush(graph->getEdgeColor());
+        _painter->drawLine(0, 0, 0, (graph->getMainWindow()->getTopDownView() ? -1 : 1) * graph->getYFactor() / 3);
     }
 
     _painter->setPen(QPen(Qt::black, 0));
@@ -591,6 +599,11 @@ void Version::calculateLocalBoundingBox()
 {
     localBoundingBox = folderBox | QRectF(-30, -30, 60, 60);
 
+    if (subtreeHidden)
+    {
+        localBoundingBox.adjust(0, 0, 0, (graph->getMainWindow()->getTopDownView() ? -1 : 1) * graph->getYFactor() / 3);
+    }
+
     int height = 0;
 
     foreach(const QString& info, graph->getMainWindow()->getNodeInfo())
@@ -862,16 +875,8 @@ void Version::setSubtreeVisible(bool _value)
             }
         }
     }
-}
-
-void Version::hideSubtree()
-{
-    setSubtreeVisible(false);
-}
-
-void Version::showSubtree()
-{
-    setSubtreeVisible(true);
+    calculateLocalBoundingBox();
+    QGraphicsItem::update();
 }
 
 void Version::setUpdateBoundingRect(bool _val)

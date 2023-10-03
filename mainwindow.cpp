@@ -1296,7 +1296,7 @@ void MainWindow::getCommentProperties(int& _columns, int& _limit) const
     _limit = settings.value("comment_maxlen").toInt();
 }
 
-bool MainWindow::getXYFactor(int& _xfactor, int& _yfactor)
+bool MainWindow::getXYFactor(int& _xfactor, int& _yfactor) const
 {
     QSettings settings;
     int xval = settings.value("xfactor").toInt();
