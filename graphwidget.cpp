@@ -412,6 +412,9 @@ Version* GraphWidget::gitlogSingle(QString _hash, bool _create)
         + (shortHashes ? "%h" : "%H")
         + "#%at#%an#%d#%s#\"";
 
+    if (remotes)
+        cmd += " --remotes";
+
     if (_hash.isEmpty() == false)
         cmd += " " + _hash;
     else if (mwin->getSelectedBranch().size())
@@ -1917,7 +1920,7 @@ void GraphWidget::resetDiff()
 
 bool GraphWidget::isFromToVersion(Version* _v) const
 {
-  return (toVersion == _v || fromVersions.contains(_v));
+    return (toVersion == _v || fromVersions.contains(_v));
 }
 
 float GraphWidget::getXFactor() const
