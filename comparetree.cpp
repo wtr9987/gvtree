@@ -64,6 +64,13 @@ void CompareTree::compareHashes(const QStringList& _hash1, const QString& _hash2
         execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
     }
 
+    // copy diff output to clipboard
+    {
+        QStringList clipboard(cache);
+        QApplication::clipboard()->setText(clipboard.join(""), QClipboard::Clipboard);
+        QApplication::clipboard()->setText(clipboard.join(""), QClipboard::Selection);
+    }
+
     // now copy the path information into a nice tree widget, duplicates are removed
     for (QStringList::iterator jt = cache.begin();
          jt != cache.end();

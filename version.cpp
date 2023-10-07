@@ -157,6 +157,7 @@ bool Version::getBlockItemChanged() const
 void Version::setSelected(bool _val)
 {
     QApplication::clipboard()->setText(_val ? hash : QString(), QClipboard::Selection);
+    QApplication::clipboard()->setText(_val ? hash : QString(), QClipboard::Clipboard);
     selected = _val;
 
     QTextEdit* t = graph->getMainWindow()->getCompareTreeSelectedLog();
@@ -873,11 +874,11 @@ void Version::setSubtreeVisible(bool _value)
                 v->setSubtreeVisible(_value);
                 if (graph->isFromToVersion(v))
                 {
-                  graph->resetDiff();
+                    graph->resetDiff();
                 }
                 if (_value == false && v->isSelected())
                 {
-                  graph->resetSelection();
+                    graph->resetSelection();
                 }
             }
         }
