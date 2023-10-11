@@ -181,7 +181,7 @@ protected:
     virtual void mouseMoveEvent(QGraphicsSceneMouseEvent* _event);
 
     bool getTextBoundingBox(const QString& _key, const QStringList& _values, int& _height, QRectF& _updatedBox) const;
-    bool drawTextBox(const QString& _key, const QStringList& _values, int& _height, const qreal& _lod, QPainter* _painter);
+    bool drawTextBox(const QString& _key, const QStringList& _values, int& _height, const qreal& _lod, QPainter* _painter, bool _frame = true);
 
     QVariant itemChange(GraphicsItemChange change, const QVariant& value);
     void adjustEdges();

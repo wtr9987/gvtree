@@ -164,6 +164,7 @@ QPainterPath Edge::shape() const
     }
 
     QPainterPath result(border[0]);
+
     for (int i = 1; i < border.size(); i++)
     {
         result.lineTo(border[i]);
@@ -197,75 +198,89 @@ bool Edge::getInfo() const
 void Edge::paint(QPainter* _painter,
                  const QStyleOptionGraphicsItem* _option, QWidget*)
 {
-    if (invalid)
+    if (invalid || !source->isVisible() || !dest->isVisible())
         return;
 
-    if (!source->isVisible() || !dest->isVisible())
-      return;
-
+    // basic line for edge
     QLineF line(sourcePoint, destPoint);
+
     if (qFuzzyCompare(line.length(), 0.0))
         return;
 
+    // level of detail
     const qreal lod = _option->levelOfDetailFromTransform(_painter->worldTransform());
 
+    // angle of the edge, only relevant for lod > 0.33
+    double angle = ((!fileConstraint && !merge && graph->getConnectorStyle() == 1) || lod <= 0.33) ?
+        M_PI / 2.0 :
+        (::atan2(line.p2().y() - line.p1().y(), line.p2().x() - line.p1().x()));
+    angle += M_PI;
+
+    // double sign = graph->getTopDownView() ? -1.0:1.0;
+
+    // color
     QColor col = info ? graph->getEdgeColor() : merge ? graph->getMergeColor() :
         graph->getEdgeColor();
 
-    int pw = (lod > 0.33 && source->isMain() && dest->isMain()) ? 3 : 0;
+    // line width
+    int pw = (lod <= 0.33) ? 0 : (source->isMain() && dest->isMain()) ? 4 : 2;
 
     if (fileConstraint)
     {
+        // file constraint lines
         pw = (lod > 0.2) ? 5 : 0;
         col = graph->getFileConstraintColor();
     }
 
+    // dim if small
     if (lod < 0.4)
-      col.setAlpha(128);
+        col.setAlpha(128);
 
+    // line properties
     _painter->setPen(
         QPen(col, pw,
-                (lod>0.2) ? info ? Qt::DotLine : merge ? Qt::DashLine : Qt::SolidLine : Qt::SolidLine,
-             Qt::RoundCap,
+             (lod > 0.2) ? info ? Qt::DotLine : merge ? Qt::DashLine : Qt::SolidLine : Qt::SolidLine,
+             Qt::FlatCap,
              Qt::RoundJoin));
 
-    QPainterPath path;
-    path.moveTo(sourcePoint);
+    // path
+    QPainterPath path(sourcePoint);
+
+    // 90 degree edges?
     if (!fileConstraint && !merge && graph->getConnectorStyle() == 1)
     {
-        QPointF p1(sourcePoint.x(), sourcePoint.y() + 0.5*(destPoint.y()-sourcePoint.y()));
+        QPointF p1(sourcePoint.x(), sourcePoint.y() + 0.5 * (destPoint.y() - sourcePoint.y()));
         QPointF p2(destPoint.x(), p1.y());
 
         path.lineTo(p1);
         path.lineTo(p2);
     }
-    path.lineTo(destPoint);
 
+    // startposition of arrow or destination point
+    QPointF p3 = destPoint + ((lod > 0.33) ? arrowSize * 0.707 * QPointF(cos(angle), sin(angle)) : QPointF());
+
+    path.lineTo(p3);
+
+    // paint line
     _painter->drawPath(path);
 
+    // draw arrow cap if lod sufficient
     if (lod > 0.33)
     {
-        double angle = ::acos(line.dx() / line.length());
-        if (!merge && graph->getConnectorStyle() == 1)
-            angle = M_PI / 2.0;
-        if (line.dy() >= 0)
-            angle = 2.0 * M_PI - angle;
+        QPointF off = arrowSize * 0.5 * QPointF(cos(angle + M_PI / 2.0), sin(angle + M_PI / 2.0));
 
-        QPointF destArrowP1 = destPoint + QPointF(sin(angle - M_PI / 3) * arrowSize,
-                                                  cos(angle - M_PI / 3) * arrowSize);
-        QPointF destArrowP2 = destPoint + QPointF(sin(angle - M_PI + M_PI / 3) * arrowSize,
-                                                  cos(angle - M_PI + M_PI / 3) * arrowSize);
+        // solid and cosmetic
+        _painter->setPen(QPen(col, 0, Qt::SolidLine, Qt::FlatCap, Qt::RoundJoin));
 
         _painter->setBrush(col);
-        _painter->drawPolygon(QPolygonF() << line.p1());
-        _painter->drawPolygon(QPolygonF() << line.p2() << destArrowP1 << destArrowP2);
+        _painter->drawPolygon(QPolygonF() << line.p2() << p3 + off << p3 - off);
     }
 }
 
 void Edge::compareVersions()
 {
     if (invalid)
-        return;
+      return;
 
     graph->compareVersions(source, dest);
 }
@@ -273,7 +288,7 @@ void Edge::compareVersions()
 void Edge::focusSource()
 {
     if (invalid)
-        return;
+      return;
 
     graph->displayHits(source);
 }
@@ -281,7 +296,7 @@ void Edge::focusSource()
 void Edge::focusDestination()
 {
     if (invalid)
-        return;
+      return;
 
     graph->displayHits(dest);
 }
@@ -289,9 +304,10 @@ void Edge::focusDestination()
 void Edge::focusNeighbourBox()
 {
     if (invalid)
-        return;
+      return;
 
     QList<Version*> tmp;
+
     tmp.push_back(source);
     tmp.push_back(dest);
     graph->displayHits(tmp);

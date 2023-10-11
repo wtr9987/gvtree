@@ -81,6 +81,7 @@ public:
     bool getRemotes() const;
     bool getIncludeSelected() const;
     bool getAnimated() const;
+    bool getTextBorder() const;
     bool getDiffLocalFiles() const;
     int getConnectorStyle() const;
     bool getXYFactor(int& _xfactor, int& _yfactor) const;

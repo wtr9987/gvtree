@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>684</width>
-    <height>822</height>
+    <width>687</width>
+    <height>955</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -609,6 +609,19 @@
             </property>
             <property name="checked">
              <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="textborder">
+            <property name="toolTip">
+             <string>Text is rendered with a border in background color.</string>
+            </property>
+            <property name="text">
+             <string>Text border</string>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
             </property>
            </widget>
           </item>

@@ -481,6 +481,10 @@ void MainWindow::restorePreferencesSettings()
         settings.setValue("animated", false);
     gvtree_preferences.animated->setChecked(settings.value("animated").toBool());
 
+    if (!settings.contains("textborder"))
+        settings.setValue("textborder", false);
+    gvtree_preferences.textborder->setChecked(settings.value("textborder").toBool());
+
     if (settings.contains("diffLocalFile"))
         gvtree_preferences.diff_local_files->setChecked(settings.value("diffLocalFile").toBool());
 
@@ -1195,6 +1199,11 @@ bool MainWindow::getAnimated() const
     return gvtree_preferences.animated->isChecked();
 }
 
+bool MainWindow::getTextBorder() const
+{
+    return gvtree_preferences.textborder->isChecked();
+}
+
 bool MainWindow::getDiffLocalFiles() const
 {
     return gvtree_preferences.diff_local_files->isChecked();
@@ -1222,6 +1231,7 @@ void MainWindow::saveChangedSettings()
     settings.setValue("gitShortHashes", gvtree_preferences.git_short_hashes->isChecked());
     settings.setValue("includeSelected", gvtree_preferences.include_selected->isChecked());
     settings.setValue("animated", gvtree_preferences.animated->isChecked());
+    settings.setValue("textborder", gvtree_preferences.textborder->isChecked());
     settings.setValue("diffLocalFile", gvtree_preferences.diff_local_files->isChecked());
     settings.setValue("reduceTree", gvtree_preferences.reduce_tree->isChecked());
     settings.setValue("remotes", gvtree_preferences.remotes->isChecked());

@@ -228,7 +228,7 @@ void Version::paint(QPainter* _painter, const QStyleOptionGraphicsItem* _option,
     {
         _painter->setPen(QPen(graph->getSearchColor(), 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         _painter->setBrush(graph->getSearchColor().lighter());
-        _painter->drawEllipse(-15, -15, 30, 30);
+        _painter->drawEllipse(-10, -10, 20, 20);
     }
     else
     {
@@ -243,11 +243,19 @@ void Version::paint(QPainter* _painter, const QStyleOptionGraphicsItem* _option,
         _painter->setBrush(graph->getSelectedColor().lighter());
     }
 
+    if (matched)
+    {
+    _painter->drawEllipse(-6, -6, 12, 12);
+    }
+    else
+    {
     _painter->drawEllipse(-10, -10, 20, 20);
+    }
 
     if (lod > 0.3)
     {
         int height = -10;
+        bool textborder = graph->getMainWindow()->getTextBorder();
 
         foreach(const QString& info, graph->getMainWindow()->getNodeInfo())
         {
@@ -257,7 +265,7 @@ void Version::paint(QPainter* _painter, const QStyleOptionGraphicsItem* _option,
                 QMap<QString, QStringList>::const_iterator kit = keyInformation.find(info);
                 if (kit != keyInformation.end())
                 {
-                    drawTextBox(info, kit.value(), height, lod, _painter);
+                    drawTextBox(info, kit.value(), height, lod, _painter, textborder);
                 }
             }
         }
@@ -547,7 +555,7 @@ bool Version::getTextBoundingBox(const QString& _key, const QStringList& _values
     return true;
 }
 
-bool Version::drawTextBox(const QString& _key, const QStringList& _values, int& _height, const qreal& _lod, QPainter* _painter)
+bool Version::drawTextBox(const QString& _key, const QStringList& _values, int& _height, const qreal& _lod, QPainter* _painter, bool _frame)
 {
     const TagPreference* tp = graph->getMainWindow()->getTagPreference(_key);
 
@@ -561,10 +569,21 @@ bool Version::drawTextBox(const QString& _key, const QStringList& _values, int& 
         int hadd = textbox.height() + 1;
         foreach(const QString& it, _values)
         {
+            _height += hadd;
+
             textbox = QFontMetricsF(tp->getFont()).boundingRect(it);
             _painter->setFont(tp->getFont());
+
+            if (_frame)
+            {
+                _painter->setPen(QPen(graph->getBackgroundColor(), 0));
+                _painter->drawText(textbox.translated(19, _height).adjusted(0, 0, 20, 0), Qt::AlignLeft, it);
+                _painter->drawText(textbox.translated(21, _height).adjusted(0, 0, 20, 0), Qt::AlignLeft, it);
+                _painter->drawText(textbox.translated(20, _height - 1).adjusted(0, 0, 20, 0), Qt::AlignLeft, it);
+                _painter->drawText(textbox.translated(20, _height + 1).adjusted(0, 0, 20, 0), Qt::AlignLeft, it);
+            }
+
             _painter->setPen(QPen(tp->getColor(), 0));
-            _height += hadd;
             _painter->drawText(textbox.translated(20, _height).adjusted(0, 0, 20, 0), Qt::AlignLeft, it);
         }
     }

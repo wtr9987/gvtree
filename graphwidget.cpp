@@ -28,6 +28,8 @@
 #include <QMenu>
 #include <QScrollBar>
 
+#include <QImage>
+
 #include <math.h>
 
 #include <iostream>
@@ -107,6 +109,9 @@ GraphWidget::GraphWidget(MainWindow* _parent)
 
     // create root node
     clear();
+
+    // imageDB["dot1"]= new QImage("dot4.png");
+
 }
 
 void GraphWidget::updateFromToInfo()
@@ -2022,4 +2027,13 @@ bool GraphWidget::restoreImportantVersions()
     }
 
     return success;
+}
+
+const QImage* GraphWidget::getImage(const QString& _name) const
+{
+  if (imageDB.contains(_name))
+  {
+    return imageDB[_name];
+  }
+  return NULL;
 }

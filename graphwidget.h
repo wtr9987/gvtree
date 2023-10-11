@@ -163,6 +163,8 @@ public:
 
     bool isFromToVersion(Version* _v) const;
 
+    const QImage* getImage(const QString& _name) const;
+
 public slots:
     void diffStagedChanges();
     void diffLocalChanges();
@@ -274,6 +276,8 @@ private:
 
     //
     QMap<QString, QMap<QString, QStringList> > keyInformationCache;
+
+    QMap<QString,const QImage*> imageDB;
 };
 
 #endif
