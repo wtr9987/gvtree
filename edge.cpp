@@ -94,15 +94,18 @@ void Edge::adjust()
 
     if (length > 1)
     {
+        int rad = dest->getDotRadius();
         if (merge || graph->getConnectorStyle() != 1)
         {
-            QPointF edgeOffset((line.dx() * 10) / length, (line.dy() * 10) / length);
-            sourcePoint = line.p1() + edgeOffset;
-            destPoint = line.p2() - edgeOffset;
+            int rads = source->getDotRadius();
+            sourcePoint = line.p1() +
+                QPointF((line.dx() * rads) / length, (line.dy() * rads) / length);
+            destPoint = line.p2() -
+                QPointF((line.dx() * rad) / length, (line.dy() * rad) / length);
         }
         else
         {
-            destPoint = line.p2() - QPointF(0, 10);
+            destPoint = line.p2() - QPointF(0, rad);
         }
     }
 }
@@ -214,6 +217,7 @@ void Edge::paint(QPainter* _painter,
     double angle = ((!fileConstraint && !merge && graph->getConnectorStyle() == 1) || lod <= 0.33) ?
         M_PI / 2.0 :
         (::atan2(line.p2().y() - line.p1().y(), line.p2().x() - line.p1().x()));
+
     angle += M_PI;
 
     // double sign = graph->getTopDownView() ? -1.0:1.0;

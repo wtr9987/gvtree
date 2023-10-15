@@ -158,17 +158,23 @@ void Version::setSelected(bool _val)
 {
     QApplication::clipboard()->setText(_val ? hash : QString(), QClipboard::Selection);
     QApplication::clipboard()->setText(_val ? hash : QString(), QClipboard::Clipboard);
-    selected = _val;
 
-    QTextEdit* t = graph->getMainWindow()->getCompareTreeSelectedLog();
+    if (selected != _val)
+    {
+        selected = _val;
 
-    if (_val == false)
-    {
-        t->clear();
-    }
-    else
-    {
-        graph->commitInfo(this, t);
+        adjustEdges();
+
+        QTextEdit* t = graph->getMainWindow()->getCompareTreeSelectedLog();
+
+        if (_val == false)
+        {
+            t->clear();
+        }
+        else
+        {
+            graph->commitInfo(this, t);
+        }
     }
 }
 
@@ -198,7 +204,10 @@ QPainterPath Version::shape() const
     if (isFolder())
         path.addRect(folderBox);
     else
-        path.addEllipse(-15, -15, 30, 30);
+    {
+        int rad = getDotRadius();
+        path.addEllipse(-rad, -rad, 2 * rad, 2 * rad);
+    }
     return path;
 }
 
@@ -224,11 +233,13 @@ void Version::paint(QPainter* _painter, const QStyleOptionGraphicsItem* _option,
 
     _painter->setPen(QPen(Qt::black, 0));
 
+    int rad = getDotRadius();
+
     if (matched)
     {
         _painter->setPen(QPen(graph->getSearchColor(), 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         _painter->setBrush(graph->getSearchColor().lighter());
-        _painter->drawEllipse(-10, -10, 20, 20);
+        _painter->drawEllipse(-rad + 4, -rad + 4, 2 * rad - 8, 2 * rad - 8);
     }
     else
     {
@@ -243,14 +254,7 @@ void Version::paint(QPainter* _painter, const QStyleOptionGraphicsItem* _option,
         _painter->setBrush(graph->getSelectedColor().lighter());
     }
 
-    if (matched)
-    {
-    _painter->drawEllipse(-6, -6, 12, 12);
-    }
-    else
-    {
-    _painter->drawEllipse(-10, -10, 20, 20);
-    }
+    _painter->drawEllipse(-rad, -rad, 2 * rad, 2 * rad);
 
     if (lod > 0.3)
     {
@@ -277,6 +281,20 @@ void Version::paint(QPainter* _painter, const QStyleOptionGraphicsItem* _option,
     }
 }
 
+int Version::getDotRadius() const
+{
+    // if foldd, the relevant geometry is contained in the folder node
+    // it is needed for the adjustment of the in edges of the folded folder
+    const Version* v = lookupFoldedFolderVersion();
+
+    if (v->getMatched() || v->isSelected())
+    {
+        return 20;
+    }
+    else
+        return 10;
+}
+
 QVariant Version::itemChange(GraphicsItemChange _change, const QVariant& _value)
 {
     if (_change == ItemPositionHasChanged && blockItemChanged == false)
@@ -287,12 +305,26 @@ QVariant Version::itemChange(GraphicsItemChange _change, const QVariant& _value)
 
 void Version::adjustEdges()
 {
+    if (isFolder() && isFolded())
+    {
+        // in case of a folded folder the version to start adjustment
+        // is the first folder version
+        getFolderVersions().front()->adjustEdgesRecurse();
+    }
+    else
+    {
+        adjustEdgesRecurse();
+    }
+}
+
+void Version::adjustEdgesRecurse()
+{
     foreach(QGraphicsItem * it, childItems())
     {
         Version* v = dynamic_cast<Version*>(it);
 
         if (v)
-            v->adjustEdges();
+            v->adjustEdgesRecurse();
     }
     foreach (Edge * edge, edgeList)
     {
@@ -515,6 +547,7 @@ bool Version::findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatc
         }
         setMatched(newmatched);
     }
+
     return matched;
 }
 
@@ -599,6 +632,7 @@ void Version::setMatched(bool _val)
             localVersionInfo.clear();
         }
         matched = _val;
+        adjustEdges();
         calculateLocalBoundingBox();
         QGraphicsItem::update();
     }
@@ -720,6 +754,13 @@ void Version::collectFolderVersions(Version* _rootNode, Version* _parent)
     {
         addToFolder(_parent);
     }
+    else
+    {
+        if (_parent && !_parent->isFolder())
+        {
+            _parent->setFolded(false);
+        }
+    }
 
     foreach (const Edge * edge, outEdges)
     {
@@ -740,7 +781,7 @@ void Version::addToFolder(Version* _v)
         updateFolderBox();
 }
 
-QList<Version*> Version::getFolderVersions() const
+const QList<Version*>& Version::getFolderVersions() const
 {
     return linear;
 }
@@ -748,6 +789,19 @@ QList<Version*> Version::getFolderVersions() const
 void Version::clearFolderVersions()
 {
     linear.clear();
+}
+
+const Version* Version::lookupFoldedFolderVersion() const
+{
+    if (folded && linear.size() == 0 && outEdges.size() == 1)
+    {
+        const Version* v = dynamic_cast<Version*>(outEdges.front()->destVersion());
+        if (v && v->isFolded())
+        {
+            return v->lookupFoldedFolderVersion();
+        }
+    }
+    return this;
 }
 
 Version* Version::lookupFolderVersion()
@@ -776,6 +830,7 @@ void Version::foldAction()
 
     foreach(Version * v, linear)
     {
+        v->setFolded(folded);
         v->setH(folded ? 0 : 1);
         v->update();
         foreach(Edge * edge, v->getOutEdges())
@@ -1021,6 +1076,11 @@ bool Version::isFoldable() const
 void Version::setIsFoldable(bool _val)
 {
     foldable = _val;
+}
+
+void Version::setFolded(bool _val)
+{
+    folded = _val;
 }
 
 void Version::applyHorizontalSort(int _sort)

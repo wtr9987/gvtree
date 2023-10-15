@@ -73,6 +73,8 @@ public:
 
     void setIsMain(bool _val);
 
+    const Version* lookupFoldedFolderVersion() const;
+
     Version* lookupFolderVersion();
     Version* lookupBranchBaseline();
 
@@ -135,7 +137,7 @@ public:
     void collectFolderVersions(Version* _rootNode, Version* _parent);
     void foldRecurse(bool _val);
     int numEdges() const;
-    QList<Version*> getFolderVersions() const;
+    const QList<Version*>& getFolderVersions() const;
     void clearFolderVersions();
 
     void updateFolderBox();
@@ -176,6 +178,8 @@ public:
      */
     bool ensureUnfolded();
 
+    int getDotRadius() const;
+
 protected:
     bool hasBranch() const;
     virtual void mouseMoveEvent(QGraphicsSceneMouseEvent* _event);
@@ -185,6 +189,8 @@ protected:
 
     QVariant itemChange(GraphicsItemChange change, const QVariant& value);
     void adjustEdges();
+    void adjustEdgesRecurse();
+void setFolded(bool _val);
 
 private:
     QList<Edge*> edgeList;
