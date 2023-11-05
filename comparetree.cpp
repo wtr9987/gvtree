@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.6-0                */
+/*                  gvtree V1.7-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -62,6 +62,13 @@ void CompareTree::compareHashes(const QStringList& _hash1, const QString& _hash2
         QString cmd = "git -C " + graph->getLocalRepositoryPath() + " diff " + it + ".." + _hash2 + " --name-status";
 
         execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
+    }
+
+    // copy diff output to clipboard
+    {
+        QStringList clipboard(cache);
+        QApplication::clipboard()->setText(clipboard.join(""), QClipboard::Clipboard);
+        QApplication::clipboard()->setText(clipboard.join(""), QClipboard::Selection);
     }
 
     // now copy the path information into a nice tree widget, duplicates are removed

@@ -82,7 +82,7 @@
       <attribute name="title">
        <string>Commit</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout">
+      <layout class="QVBoxLayout" name="verticalLayout1">
        <property name="spacing">
         <number>0</number>
        </property>
@@ -226,7 +226,7 @@
       <attribute name="title">
        <string>Selected</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout">
+      <layout class="QVBoxLayout" name="verticalLayout2">
        <property name="spacing">
         <number>0</number>
        </property>

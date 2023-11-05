@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.6-0                */
+/*                  gvtree V1.7-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -73,6 +73,8 @@ public:
 
     void setIsMain(bool _val);
 
+    const Version* lookupFoldedFolderVersion() const;
+
     Version* lookupFolderVersion();
     Version* lookupBranchBaseline();
 
@@ -135,7 +137,7 @@ public:
     void collectFolderVersions(Version* _rootNode, Version* _parent);
     void foldRecurse(bool _val);
     int numEdges() const;
-    QList<Version*> getFolderVersions() const;
+    const QList<Version*>& getFolderVersions() const;
     void clearFolderVersions();
 
     void updateFolderBox();
@@ -176,15 +178,19 @@ public:
      */
     bool ensureUnfolded();
 
+    int getDotRadius() const;
+
 protected:
     bool hasBranch() const;
     virtual void mouseMoveEvent(QGraphicsSceneMouseEvent* _event);
 
     bool getTextBoundingBox(const QString& _key, const QStringList& _values, int& _height, QRectF& _updatedBox) const;
-    bool drawTextBox(const QString& _key, const QStringList& _values, int& _height, const qreal& _lod, QPainter* _painter);
+    bool drawTextBox(const QString& _key, const QStringList& _values, int& _height, const qreal& _lod, QPainter* _painter, bool _frame = true);
 
     QVariant itemChange(GraphicsItemChange change, const QVariant& value);
     void adjustEdges();
+    void adjustEdgesRecurse();
+void setFolded(bool _val);
 
 private:
     QList<Edge*> edgeList;

@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 3.0)
 
 project(gvtree
-        VERSION 1.6.0
+        VERSION 1.7.0
         LANGUAGES CXX)
 
 include(FeatureSummary)
@@ -17,8 +17,8 @@ if(NOT CMAKE_BUILD_TYPE)
             "Default build type: Debug" FORCE)
 endif()
 
-if(NOT PREFIX) 
-    set(PREFIX ".")
+if(NOT CMAKE_INSTALL_PREFIX) 
+    set(CMAKE_INSTALL_PREFIX ".")
 endif()
 
 find_package(Qt5Core ${QT_MIN_VERSION} REQUIRED)
@@ -34,7 +34,7 @@ add_compile_options(-Wall
                     $<$<CONFIG:DEBUG>:-fsanitize=address>
                     $<$<CONFIG:DEBUG>:-fno-omit-frame-pointer>)
                     
-add_compile_definitions (VERSION="${PROJECT_VERSION}"
+add_compile_definitions (VERSION="${VERSION}"
                          $<$<CONFIG:RELEASE>:QT_NO_DEBUG_OUTPUT>)
 
 add_link_options ("$<$<CONFIG:DEBUG>:-fsanitize=address>"
@@ -91,11 +91,11 @@ set(UIS
     gvtree_branchlist.ui
 )
 
-set ( RCS
+set(RCS
    gvtree.qrc
 )
 
-set ( QTMODULES
+set(QTMODULES
   Qt5::Core 
   Qt5::Widgets 
   Qt5::Network
@@ -107,9 +107,9 @@ qt5_add_resources(RC_SRCS ${RCS})
 add_executable(gvtree ${SRCS} ${HDRS} ${UI_HDRS} ${RC_SRCS})
 
 target_compile_definitions(gvtree PUBLIC
-    -DINSTALLATION_PATH=\"\\\"$${PREFIX}\\\"\" 
-    -DVERSION_NAME=\"\\\"$${TARGET}$${VERSION}\\\"\"
-    -DAPPLICATION_NAME=${PROJECT_NAME}
+        -DINSTALLATION_PATH=\"${CMAKE_INSTALL_PREFIX}\" 
+        -DVERSION_NAME=\"${PROJECT_NAME}-${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}-${PROJECT_VERSION_PATCH}\"
+        -DAPPLICATION_NAME=\"${PROJECT_NAME}\"
 )
 
 target_link_libraries(gvtree ${QTMODULES})
@@ -117,3 +117,5 @@ target_link_libraries(gvtree ${QTMODULES})
 install(TARGETS gvtree
         EXPORT gvtree
         RUNTIME DESTINATION bin)
+
+install(FILES doc/${PROJECT_NAME}-${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}-${PROJECT_VERSION_PATCH}.pdf DESTINATION share/doc/${PROJECT_NAME})

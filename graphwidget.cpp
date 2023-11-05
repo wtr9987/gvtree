@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.6-0                */
+/*                  gvtree V1.7-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -27,6 +27,8 @@
 #include <QAction>
 #include <QMenu>
 #include <QScrollBar>
+
+#include <QImage>
 
 #include <math.h>
 
@@ -107,6 +109,9 @@ GraphWidget::GraphWidget(MainWindow* _parent)
 
     // create root node
     clear();
+
+    // imageDB["dot1"]= new QImage("dot4.png");
+
 }
 
 void GraphWidget::updateFromToInfo()
@@ -411,6 +416,9 @@ Version* GraphWidget::gitlogSingle(QString _hash, bool _create)
         + " log --graph -1 --pretty=\"#"
         + (shortHashes ? "%h" : "%H")
         + "#%at#%an#%d#%s#\"";
+
+    if (remotes)
+        cmd += " --remotes";
 
     if (_hash.isEmpty() == false)
         cmd += " " + _hash;
@@ -1915,6 +1923,11 @@ void GraphWidget::resetDiff()
     toHashSave = QString();
 }
 
+bool GraphWidget::isFromToVersion(Version* _v) const
+{
+    return (toVersion == _v || fromVersions.contains(_v));
+}
+
 float GraphWidget::getXFactor() const
 {
     return 16.0 * xfactor;
@@ -2014,4 +2027,13 @@ bool GraphWidget::restoreImportantVersions()
     }
 
     return success;
+}
+
+const QImage* GraphWidget::getImage(const QString& _name) const
+{
+  if (imageDB.contains(_name))
+  {
+    return imageDB[_name];
+  }
+  return NULL;
 }

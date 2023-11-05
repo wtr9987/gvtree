@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.6-0                */
+/*                  gvtree V1.7-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -81,9 +81,13 @@ void VersionAdapter::foldAction()
 void VersionAdapter::hideSubtree()
 {
     v->setSubtreeVisible(false);
+    v->calculateLocalBoundingBox();
+    v->update();
 }
 
 void VersionAdapter::showSubtree()
 {
     v->setSubtreeVisible(true);
+    v->calculateLocalBoundingBox();
+    v->update();
 }

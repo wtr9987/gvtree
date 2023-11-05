@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.6-0                */
+/*                  gvtree V1.7-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -161,6 +161,10 @@ public:
         return connectorStyle;
     }
 
+    bool isFromToVersion(Version* _v) const;
+
+    const QImage* getImage(const QString& _name) const;
+
 public slots:
     void diffStagedChanges();
     void diffLocalChanges();
@@ -272,6 +276,8 @@ private:
 
     //
     QMap<QString, QMap<QString, QStringList> > keyInformationCache;
+
+    QMap<QString,const QImage*> imageDB;
 };
 
 #endif

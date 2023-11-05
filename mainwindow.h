@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.6-0                */
+/*                  gvtree V1.7-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -81,6 +81,7 @@ public:
     bool getRemotes() const;
     bool getIncludeSelected() const;
     bool getAnimated() const;
+    bool getTextBorder() const;
     bool getDiffLocalFiles() const;
     int getConnectorStyle() const;
     bool getXYFactor(int& _xfactor, int& _yfactor) const;
