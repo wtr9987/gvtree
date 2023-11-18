@@ -111,7 +111,6 @@ GraphWidget::GraphWidget(MainWindow* _parent)
     clear();
 
     // imageDB["dot1"]= new QImage("dot4.png");
-
 }
 
 void GraphWidget::updateFromToInfo()
@@ -355,7 +354,10 @@ void GraphWidget::setGitLogFileConstraint(const QString& _fileConstraint)
         if (remotes)
             cmd += " --remotes";
 
-        if (mwin->getSelectedBranch().size())
+        if (all)
+            cmd += " --all";
+
+        if (!all && mwin->getSelectedBranch().size())
             cmd += " " + mwin->getSelectedBranch();
 
         if (fileConstraint.size())
@@ -416,9 +418,6 @@ Version* GraphWidget::gitlogSingle(QString _hash, bool _create)
         + " log --graph -1 --pretty=\"#"
         + (shortHashes ? "%h" : "%H")
         + "#%at#%an#%d#%s#\"";
-
-    if (remotes)
-        cmd += " --remotes";
 
     if (_hash.isEmpty() == false)
         cmd += " " + _hash;
@@ -494,7 +493,10 @@ void GraphWidget::gitlog(bool _changed)
     if (remotes)
         cmd += " --remotes";
 
-    if (mwin->getSelectedBranch().size())
+    if (all)
+        cmd += " --all";
+
+    if (!all && mwin->getSelectedBranch().size())
         cmd += " " + mwin->getSelectedBranch();
 
     if (reduceTree == true && fileConstraint.size())
@@ -1574,6 +1576,12 @@ void GraphWidget::preferencesUpdated(bool _forceUpdate)
         updateAll = true;
     }
 
+    if (all != mwin->getAll())
+    {
+        all = mwin->getAll();
+        updateAll = true;
+    }
+
     int columns, maxlen;
 
     mwin->getCommentProperties(columns, maxlen);
@@ -2031,9 +2039,9 @@ bool GraphWidget::restoreImportantVersions()
 
 const QImage* GraphWidget::getImage(const QString& _name) const
 {
-  if (imageDB.contains(_name))
-  {
-    return imageDB[_name];
-  }
-  return NULL;
+    if (imageDB.contains(_name))
+    {
+        return imageDB[_name];
+    }
+    return NULL;
 }

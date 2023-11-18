@@ -79,6 +79,7 @@ public:
     bool getTopDownView() const;
     int getHorizontalSort() const;
     bool getRemotes() const;
+    bool getAll() const;
     bool getIncludeSelected() const;
     bool getAnimated() const;
     bool getTextBorder() const;
@@ -142,6 +143,16 @@ public slots:
     //
     void updatePbFileConstraint(const QString& _fileConstraint);
 
+    // --remotes changed
+    void remotesChanged(int _val);
+
+    // --all changed
+    void allChanged(int _val);
+
+    // selected branch has changed update view and focus
+    void branchSelectionChanged();
+
+public:
     //
     const QStringList& getNodeInfo() const;
 
@@ -225,9 +236,13 @@ private:
     Ui_LicenseDialog gvtree_license;
     Ui_CompareTreeForm gvtree_comparetree;
     Ui_BranchListForm gvtree_branchlist;
+    // bottom status bar
     QLabel* lbRepositoryPath;
     QPushButton* pbRepositoryName;
     QPushButton* pbFileConstraint;
+    QCheckBox* cbAll;
+    QCheckBox* cbRemotes;
+
     QString repositoryPath;
     QString fileConstraintPath;
     QFileSystemWatcher* watcher;

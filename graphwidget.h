@@ -266,6 +266,7 @@ private:
     bool topDownView;
     int horizontalSort;
     bool remotes;
+    bool all;
     int xfactor;
     int yfactor;
     int commentColumns;

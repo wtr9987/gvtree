@@ -66,6 +66,22 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
     connect(watcher, SIGNAL(directoryChanged(const QString&)), this, SLOT(showRefreshButton(const QString&)));
     connect(watcher, SIGNAL(fileChanged(const QString&)), this, SLOT(showRefreshButton(const QString&)));
 
+    cbRemotes = new QCheckBox("--remotes");
+    cbAll = new QCheckBox("--all");
+    {
+        QSettings settings;
+        if (settings.contains("remotes") && settings.value("remotes").toBool())
+            cbRemotes->setChecked(true);
+        else
+            cbRemotes->setChecked(false);
+        if (settings.contains("all") && settings.value("all").toBool())
+            cbAll->setChecked(true);
+        else
+            cbAll->setChecked(false);
+    }
+    connect(cbRemotes, SIGNAL(stateChanged(int)), this, SLOT(remotesChanged(int)));
+    connect(cbAll, SIGNAL(stateChanged(int)), this, SLOT(allChanged(int)));
+
     // current repository path
     lbRepositoryPath = new QLabel("");
     lbRepositoryPath->setStyleSheet("font-size: 10pt; color: black;");
@@ -90,6 +106,8 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
 
     // status bar
     statusBar()->show();
+    statusBar()->addPermanentWidget(cbRemotes);
+    statusBar()->addPermanentWidget(cbAll);
     statusBar()->addPermanentWidget(lbRepositoryPath);
     statusBar()->addPermanentWidget(pbRepositoryName);
     statusBar()->addPermanentWidget(pbFileConstraint);
@@ -177,8 +195,7 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
     branchDock = dock;
     dock->hide();
 
-    connect(gvtree_branchlist.branchList, SIGNAL(itemSelectionChanged()), this, SLOT(reloadCurrentRepository()));
-    connect(gvtree_branchlist.branchList, SIGNAL(itemSelectionChanged()), graphwidget, SLOT(focusCurrent()));
+    connect(gvtree_branchlist.branchList, SIGNAL(itemSelectionChanged()), this, SLOT(branchSelectionChanged()));
     connect(gvtree_branchlist.cbSort, SIGNAL(currentIndexChanged(int)),
             gvtree_branchlist.branchList, SLOT(setSort(int)));
     connect(gvtree_branchlist.pbReset, SIGNAL(pressed()),
@@ -504,11 +521,6 @@ void MainWindow::restorePreferencesSettings()
     else
         gvtree_preferences.rbConnectorStyle0->setChecked(true);
 
-    if (settings.contains("remotes") && settings.value("remotes").toBool())
-        gvtree_preferences.remotes->setChecked(true);
-    else
-        gvtree_preferences.remotes->setChecked(false);
-
     // switches for version folding
     if (settings.contains("fold_no_head") && settings.value("fold_no_head").toBool())
         gvtree_preferences.fold_no_head->setChecked(true);
@@ -810,6 +822,12 @@ void MainWindow::removeFilter()
     graphwidget->removeFilter();
     pbFileConstraint->setText("");
     pbFileConstraint->hide();
+}
+
+void MainWindow::branchSelectionChanged()
+{
+  reloadCurrentRepository();
+  graphwidget->focusElements(getSelectedBranch(), true);
 }
 
 void MainWindow::reloadCurrentRepository()
@@ -1176,7 +1194,7 @@ bool MainWindow::getReduceTree() const
 
 bool MainWindow::getTopDownView() const
 {
-    return gvtree_preferences.top_down_sort->currentIndex()>0;
+    return gvtree_preferences.top_down_sort->currentIndex() > 0;
 }
 
 int MainWindow::getHorizontalSort() const
@@ -1186,7 +1204,12 @@ int MainWindow::getHorizontalSort() const
 
 bool MainWindow::getRemotes() const
 {
-    return gvtree_preferences.remotes->isChecked();
+    return cbRemotes->isChecked();
+}
+
+bool MainWindow::getAll() const
+{
+    return cbAll->isChecked();
 }
 
 bool MainWindow::getIncludeSelected() const
@@ -1207,6 +1230,22 @@ bool MainWindow::getTextBorder() const
 bool MainWindow::getDiffLocalFiles() const
 {
     return gvtree_preferences.diff_local_files->isChecked();
+}
+
+void MainWindow::remotesChanged(int _val)
+{
+    QSettings settings;
+
+    settings.setValue("remotes", _val);
+    graphwidget->preferencesUpdated(true);
+}
+
+void MainWindow::allChanged(int _val)
+{
+    QSettings settings;
+
+    settings.setValue("all", _val);
+    graphwidget->preferencesUpdated(true);
 }
 
 void MainWindow::saveChangedSettings()
@@ -1234,7 +1273,6 @@ void MainWindow::saveChangedSettings()
     settings.setValue("textborder", gvtree_preferences.textborder->isChecked());
     settings.setValue("diffLocalFile", gvtree_preferences.diff_local_files->isChecked());
     settings.setValue("reduceTree", gvtree_preferences.reduce_tree->isChecked());
-    settings.setValue("remotes", gvtree_preferences.remotes->isChecked());
 
     forceUpdate = forceUpdate || !settings.contains("fold_no_tag")
         || settings.value("fold_no_tag").toBool() != gvtree_preferences.fold_no_tag->isChecked()

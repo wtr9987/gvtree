@@ -46,7 +46,7 @@ void BranchList::refresh(const QString& _localRepositoryPath)
     blModel->clear();
 
     // default sort is latest committed branch on top
-    QString cmd = "git -C " + _localRepositoryPath + " branch -a --sort=committerdate";
+    QString cmd = "git -C " + _localRepositoryPath + " branch -l --format=\"%(HEAD) %(refname:short)\" --all --sort=committerdate";
 
     QList<QString> cache;
 
