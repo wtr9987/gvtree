@@ -15,8 +15,8 @@
 /*                                               */
 /* --------------------------------------------- */
 
-#ifndef __BRANCHLIST_H__
-#define __BRANCHLIST_H__
+#ifndef __BRANCHTABLE_H__
+#define __BRANCHTABLE_H__
 
 #include <QStandardItem>
 #include <QItemSelectionModel>
@@ -25,12 +25,12 @@
 #include <QWidget>
 #include <QString>
 
-class BranchList : public QTableWidget
+class BranchTable : public QTableWidget
 {
     Q_OBJECT
 
 public:
-    BranchList(class QWidget* _parent = NULL);
+    BranchTable(class QWidget* _parent = NULL);
 
     /**
      * \brief Get branch information of current local repository

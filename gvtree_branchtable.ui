@@ -1,14 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>BranchListForm</class>
- <widget class="QWidget" name="BranchListForm">
+ <class>BranchTableForm</class>
+ <widget class="QWidget" name="BranchTableForm">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>891</width>
-    <height>700</height>
+    <width>256</width>
+    <height>256</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>Branch List</string>
@@ -30,15 +36,15 @@
     <number>2</number>
    </property>
    <item row="0" column="0" rowspan="2" colspan="2">
-    <widget class="BranchList" name="branchList"/>
+    <widget class="BranchTable" name="branchTable"/>
    </item>
   </layout>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>BranchList</class>
+   <class>BranchTable</class>
    <extends>QListView</extends>
-   <header location="global">branchlist.h</header>
+   <header location="global">branchtable.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

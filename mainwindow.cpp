@@ -184,8 +184,8 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
 
     // -- list of all branches
     blwin = new QWidget;
-    gvtree_branchlist.setupUi(blwin);
-    gvtree_branchlist.branchList->setMainWindow(this);
+    gvtree_branchtable.setupUi(blwin);
+    gvtree_branchtable.branchTable->setMainWindow(this);
 
     dock = new QDockWidget(tr("Branch List"), this);
     dock->setObjectName("Branch List");
@@ -195,7 +195,7 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
     branchDock = dock;
     dock->hide();
 
-    connect(gvtree_branchlist.branchList, SIGNAL(itemSelectionChanged()), this, SLOT(branchSelectionChanged()));
+    connect(gvtree_branchtable.branchTable, SIGNAL(itemSelectionChanged()), this, SLOT(branchSelectionChanged()));
 
     // parse arguments
     QString fileConstraint;
@@ -223,7 +223,7 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
                 QSettings settings;
                 settings.setValue("localRepositoryPath", repositoryPath);
                 graphwidget->setLocalRepositoryPath(repositoryPath);
-                gvtree_branchlist.branchList->refresh(repositoryPath);
+                gvtree_branchtable.branchTable->refresh(repositoryPath);
 
                 QString path, fname;
                 splitRepositoryPath(repositoryPath, path, fname);
@@ -671,7 +671,7 @@ void MainWindow::restoreLocalRepository()
             gvtree_preferences.pbLocalRepositoryPath->setText(repositoryPath);
 
             graphwidget->setLocalRepositoryPath(repositoryPath);
-            gvtree_branchlist.branchList->refresh(repositoryPath);
+            gvtree_branchtable.branchTable->refresh(repositoryPath);
             graphwidget->gitlog();
             refreshRepo->setEnabled(true);
         }
@@ -814,8 +814,9 @@ void MainWindow::removeFilter()
 
 void MainWindow::branchSelectionChanged()
 {
-  reloadCurrentRepository();
-  graphwidget->focusElements(getSelectedBranch(), true);
+    reloadCurrentRepository();
+    if (!graphwidget->focusElements(getSelectedBranch(), true, QString("Branch")))
+        graphwidget->focusElements(getSelectedBranch(), false, QString("Branch"));
 }
 
 void MainWindow::reloadCurrentRepository()
@@ -928,7 +929,7 @@ void MainWindow::setGitLocalRepository()
             QSettings settings;
             settings.setValue("localRepositoryPath", repositoryPath);
             graphwidget->setLocalRepositoryPath(repositoryPath);
-            gvtree_branchlist.branchList->refresh(repositoryPath);
+            gvtree_branchtable.branchTable->refresh(repositoryPath);
             gvtree_comparetree.compareTree->resetCompareTree();
 
             QString path, fname;
@@ -1544,7 +1545,7 @@ bool MainWindow::initCbCodecForCStrings(QString _default)
 
 QString MainWindow::getSelectedBranch()
 {
-    return gvtree_branchlist.branchList->getSelectedBranch();
+    return gvtree_branchtable.branchTable->getSelectedBranch();
 }
 
 const QStringList& MainWindow::getNodeInfo() const

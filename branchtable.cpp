@@ -17,12 +17,12 @@
 
 #include <QSettings>
 #include "execute_cmd.h"
-#include "branchlist.h"
+#include "branchtable.h"
 #include "mainwindow.h"
 
 #include <iostream>
 
-BranchList::BranchList(QWidget* _parent) : QTableWidget(_parent),
+BranchTable::BranchTable(QWidget* _parent) : QTableWidget(_parent),
     mwin(NULL), currentBranch(NULL), selectedBranch(NULL)
 {
     verticalHeader()->hide();
@@ -35,24 +35,21 @@ BranchList::BranchList(QWidget* _parent) : QTableWidget(_parent),
     horizontalHeader()->setResizeMode(QHeaderView::Stretch);
 #endif
 
-    //setSelectionBehavior(QAbstractItemView::SelectRows);
+    setSizeAdjustPolicy(QTableWidget::AdjustToContents);
+
     setSelectionMode(QAbstractItemView::SingleSelection);
 
-   setContextMenuPolicy(Qt::CustomContextMenu);
-
+    setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
             this, SLOT(onCustomContextMenu(const QPoint&)));
-
-    
-  
 }
 
-void BranchList::setMainWindow(MainWindow* _mwin)
+void BranchTable::setMainWindow(MainWindow* _mwin)
 {
     mwin = _mwin;
 }
 
-void BranchList::refresh(const QString& _localRepositoryPath)
+void BranchTable::refresh(const QString& _localRepositoryPath)
 {
     bool sigstat = blockSignals(true);
 
@@ -87,12 +84,13 @@ void BranchList::refresh(const QString& _localRepositoryPath)
 
         line.pop_front();
         if (line.isEmpty())
-          continue;
+            continue;
 
         QString branchName = line.front();
+
         line.pop_front();
         if (line.isEmpty())
-          continue;
+            continue;
 
         QString branchDate = line.front();
 
@@ -101,60 +99,62 @@ void BranchList::refresh(const QString& _localRepositoryPath)
 
         if (current)
         {
-          item->setBackground(QBrush(QColor(255,192,192)));
-          currentBranch=item;
+            QFont font = item->font();
+            font.setBold(true);
+            item->setFont(font);
+            currentBranch = item;
         }
 
-        item->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+        item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
         setItem(rowCount() - 1, 0, item);
         item = new QTableWidgetItem(branchDate);
-        item->setFlags(Qt::NoItemFlags); 
+        item->setFlags(Qt::NoItemFlags);
         setItem(rowCount() - 1, 1, item);
-
     }
     selectCurrentBranch();
     setSortingEnabled(true);
 
     QSettings settings;
 
-    if (!settings.contains("branchList/sortColumn"))
-        settings.setValue("branchList/sortColumn", 1);
-    if (!settings.contains("branchList/sortOrder"))
-        settings.setValue("branchList/sortOrder", 1);
+    if (!settings.contains("BranchTable/sortColumn"))
+        settings.setValue("BranchTable/sortColumn", 1);
+    if (!settings.contains("BranchTable/sortOrder"))
+        settings.setValue("BranchTable/sortOrder", 1);
 
-    sortByColumn(settings.value("branchList/sortColumn").toInt(),
-                    settings.value("branchList/sortOrder").toInt()==0?Qt::AscendingOrder:Qt::DescendingOrder);
+    sortByColumn(settings.value("BranchTable/sortColumn").toInt(),
+                 settings.value("BranchTable/sortOrder").toInt() == 0 ? Qt::AscendingOrder : Qt::DescendingOrder);
 
     connect(horizontalHeader(), SIGNAL(sectionClicked(int)), this, SLOT(sortChanged(int)));
 
     blockSignals(sigstat);
 }
 
-void BranchList::sortChanged(int _col)
+void BranchTable::sortChanged(int _col)
 {
-  QSettings settings;
-  settings.setValue("branchList/sortColumn", _col);
-  settings.setValue("branchList/sortOrder", horizontalHeader()->sortIndicatorOrder() == Qt::AscendingOrder?0:1);
+    QSettings settings;
+
+    settings.setValue("BranchTable/sortColumn", _col);
+    settings.setValue("BranchTable/sortOrder", horizontalHeader()->sortIndicatorOrder() == Qt::AscendingOrder ? 0 : 1);
 }
 
-void BranchList::selectionChanged(const QItemSelection& , const QItemSelection& )
+void BranchTable::selectionChanged(const QItemSelection&, const QItemSelection&)
 {
     emit itemSelectionChanged();
 }
 
-QString BranchList::getSelectedBranch() const
+QString BranchTable::getSelectedBranch() const
 {
-  foreach(QTableWidgetItem* it, selectedItems())
-  {
-    if (it->column() == 0)
+    foreach(QTableWidgetItem * it, selectedItems())
     {
-      return it->text();
+        if (it->column() == 0)
+        {
+            return it->text();
+        }
     }
-  }
     return QString();
 }
 
-void BranchList::onCustomContextMenu(const QPoint& point)
+void BranchTable::onCustomContextMenu(const QPoint& point)
 {
     QMenu* menu = new QMenu(this);
     QAction* act = new QAction("Current branch", this);
@@ -164,7 +164,7 @@ void BranchList::onCustomContextMenu(const QPoint& point)
     menu->exec(viewport()->mapToGlobal(point));
 }
 
-void BranchList::mousePressEvent (QMouseEvent* event)
+void BranchTable::mousePressEvent (QMouseEvent* event)
 {
     if (event->button() == Qt::RightButton)
     {
@@ -174,13 +174,13 @@ void BranchList::mousePressEvent (QMouseEvent* event)
         QTableWidget::mousePressEvent(event);
 }
 
-void BranchList::selectCurrentBranch()
+void BranchTable::selectCurrentBranch()
 {
-  if (currentBranch)
-  {
-    clearSelection();
-    selectionModel()->select(indexFromItem(currentBranch),QItemSelectionModel::Current);
-    selectionModel()->setCurrentIndex(indexFromItem(currentBranch),QItemSelectionModel::Current);
-    selectedBranch = currentBranch;
-  }
+    if (currentBranch)
+    {
+        clearSelection();
+        selectionModel()->select(indexFromItem(currentBranch), QItemSelectionModel::Current);
+        selectionModel()->setCurrentIndex(indexFromItem(currentBranch), QItemSelectionModel::Current);
+        selectedBranch = currentBranch;
+    }
 }

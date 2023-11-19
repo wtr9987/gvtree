@@ -34,13 +34,13 @@
 #include "graphwidget.h"
 #include "tagprefgridlayout.h"
 #include "tagtree.h"
-#include "branchlist.h"
+#include "branchtable.h"
 #include "ui_gvtree_comparetree.h"
 #include "ui_gvtree_difftool.h"
 #include "ui_gvtree_help.h"
 #include "ui_gvtree_license.h"
 #include "ui_gvtree_preferences.h"
-#include "ui_gvtree_branchlist.h"
+#include "ui_gvtree_branchtable.h"
 
 class MainWindow : public QMainWindow
 {
@@ -220,7 +220,7 @@ protected:
     QWidget* blwin;
     QTreeView* compareTree;
     TagPrefGridLayout* gridLayout;
-    BranchList* branchList;
+    BranchTable* branchList;
 
     // preferences dialog
     QDialog* pwin;
@@ -234,7 +234,7 @@ private:
     Ui_HelpDialog gvtree_help;
     Ui_LicenseDialog gvtree_license;
     Ui_CompareTreeForm gvtree_comparetree;
-    Ui_BranchListForm gvtree_branchlist;
+    Ui_BranchTableForm gvtree_branchtable;
     // bottom status bar
     QLabel* lbRepositoryPath;
     QPushButton* pbRepositoryName;

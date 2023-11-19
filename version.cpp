@@ -481,7 +481,7 @@ void Version::processGitLogTagInformation(const QString& _tagInfo)
     }
 }
 
-bool Version::findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatch)
+bool Version::findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatch, QString _keyConstraint)
 {
     bool oldmatched = matched;
     bool newmatched = false;
@@ -509,7 +509,12 @@ bool Version::findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatc
             {
                 foreach (const QString& str, kit.value())
                 {
-                    if (str == _text)
+                    if (_keyConstraint.size() && kit.key() != _keyConstraint)
+                    {
+                        continue;
+                    }
+
+                    if (_keyConstraint.size() && str == _text)
                     {
                         newmatched = true;
                         if (kit.key() == "CommentRaw")

@@ -1285,7 +1285,7 @@ void GraphWidget::resetMatches()
     }
 }
 
-int GraphWidget::matchVersions(const QString& _text, QList<Version*>& _matches, bool _exactMatch)
+int GraphWidget::matchVersions(const QString& _text, QList<Version*>& _matches, bool _exactMatch, QString _keyConstraint)
 {
     _matches.clear();
 
@@ -1300,7 +1300,7 @@ int GraphWidget::matchVersions(const QString& _text, QList<Version*>& _matches, 
 
             Version* n = dynamic_cast<Version*>(it);
 
-            if (n && n->findMatch(pattern, _text, _exactMatch))
+            if (n && n->findMatch(pattern, _text, _exactMatch, _keyConstraint))
             {
                 _matches.push_back(n);
             }
@@ -1310,18 +1310,20 @@ int GraphWidget::matchVersions(const QString& _text, QList<Version*>& _matches, 
     return _matches.size();
 }
 
-bool GraphWidget::focusElements(const QString& _text, bool _exactMatch)
+bool GraphWidget::focusElements(const QString& _text, bool _exactMatch, QString _keyConstraint)
 {
     pan = false;
     resetMatches();
 
     QList<Version*> matches;
 
-    matchVersions(_text, matches, _exactMatch);
+    if (matchVersions(_text, matches, _exactMatch, _keyConstraint) > 0)
+    {
+        displayHits(matches);
+        return true;
+    }
 
-    displayHits(matches);
-
-    return matches.size() > 0;
+    return false;
 }
 
 void GraphWidget::getMarkedupVersions(QList<Version*>& _markup, bool _selected)

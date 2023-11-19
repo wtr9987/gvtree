@@ -133,7 +133,7 @@ public:
     void addLocalVersionInfo(const QString& _val);
 
     void setUpdateBoundingRect(bool _val);
-    bool findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatch = false);
+    bool findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatch = false, QString _keyConstraint = QString());
     void collectFolderVersions(Version* _rootNode, Version* _parent);
     void foldRecurse(bool _val);
     int numEdges() const;
@@ -190,7 +190,7 @@ protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant& value);
     void adjustEdges();
     void adjustEdgesRecurse();
-void setFolded(bool _val);
+    void setFolded(bool _val);
 
 private:
     QList<Edge*> edgeList;

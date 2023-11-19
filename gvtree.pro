@@ -30,7 +30,7 @@ HEADERS += \
         tagpreference.h \
         tagprefgridlayout.h \
         tagtree.h \
-        branchlist.h \
+        branchtable.h \
         mimetable.h \
         fromtoinfo.h 
 
@@ -39,7 +39,7 @@ FORMS += gvtree_preferences.ui \
         gvtree_help.ui \
         gvtree_license.ui \
         gvtree_comparetree.ui \
-        gvtree_branchlist.ui
+        gvtree_branchtable.ui
 
 SOURCES += \
         edge.cpp \
@@ -55,7 +55,7 @@ SOURCES += \
         tagpreference.cpp \
         tagprefgridlayout.cpp \
         tagtree.cpp \
-        branchlist.cpp \
+        branchtable.cpp \
         mimetable.cpp \
         fromtoinfo.cpp
 
