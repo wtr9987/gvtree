@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 3.0)
 
 project(gvtree
-        VERSION 1.7.0
+        VERSION 1.8.0
         LANGUAGES CXX)
 
 include(FeatureSummary)

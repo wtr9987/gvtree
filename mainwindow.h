@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.7-0                */
+/*                  gvtree V1.8-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -92,8 +92,13 @@ public:
     void getCommentProperties(int& _columns, int& _limit) const;
     bool getVersionIsFoldable(const QMap<QString, QStringList>& _keyinformation) const;
 
+    GraphWidget* getGraphWidget();
+
     //
     Ui_Dialog& getPreferences();
+
+    //
+    const QStringList& getNodeInfo() const;
 
 public slots:
 
@@ -148,13 +153,6 @@ public slots:
 
     // --all changed
     void allChanged(int _val);
-
-    // selected branch has changed update view and focus
-    void branchSelectionChanged();
-
-public:
-    //
-    const QStringList& getNodeInfo() const;
 
 protected:
 

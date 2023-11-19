@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.7-0                */
+/*                  gvtree V1.8-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -187,15 +187,13 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
     gvtree_branchtable.setupUi(blwin);
     gvtree_branchtable.branchTable->setMainWindow(this);
 
-    dock = new QDockWidget(tr("Branch List"), this);
-    dock->setObjectName("Branch List");
+    dock = new QDockWidget(tr("Branch Table"), this);
+    dock->setObjectName("Branch Table");
     dock->setWidget(blwin);
     addDockWidget(Qt::RightDockWidgetArea, dock);
     windowmenu->addAction(dock->toggleViewAction());
     branchDock = dock;
     dock->hide();
-
-    connect(gvtree_branchtable.branchTable, SIGNAL(itemSelectionChanged()), this, SLOT(branchSelectionChanged()));
 
     // parse arguments
     QString fileConstraint;
@@ -810,13 +808,6 @@ void MainWindow::removeFilter()
     graphwidget->removeFilter();
     pbFileConstraint->setText("");
     pbFileConstraint->hide();
-}
-
-void MainWindow::branchSelectionChanged()
-{
-    reloadCurrentRepository();
-    if (!graphwidget->focusElements(getSelectedBranch(), true, QString("Branch")))
-        graphwidget->focusElements(getSelectedBranch(), false, QString("Branch"));
 }
 
 void MainWindow::reloadCurrentRepository()
@@ -1603,4 +1594,9 @@ bool MainWindow::getVersionIsFoldable(const QMap<QString, QStringList>& _keyinfo
         }
     }
     return true;
+}
+
+GraphWidget* MainWindow::getGraphWidget()
+{
+  return graphwidget;
 }

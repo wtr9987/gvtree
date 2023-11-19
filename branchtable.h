@@ -1,13 +1,13 @@
 /* --------------------------------------------- */
 /*                                               */
-/*   Copyright (C) 2022 Wolfgang Trummer         */
+/*   Copyright (C) 2023 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.7-0                */
+/*                  gvtree V1.8-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
-/*   13. February 2022                           */
+/*   19. November 2023                           */
 /*                                               */
 /*         This program is licensed under        */
 /*           GNU GENERAL PUBLIC LICENSE          */
@@ -30,7 +30,7 @@ class BranchTable : public QTableWidget
     Q_OBJECT
 
 public:
-    BranchTable(class QWidget* _parent = NULL);
+    BranchTable(QWidget* _parent = NULL);
 
     /**
      * \brief Get branch information of current local repository
@@ -41,23 +41,18 @@ public:
 
 public slots:
     void sortChanged(int _col);
-
-    void selectionChanged(const QItemSelection& _selected, const QItemSelection& _deselected);
+    void lookupCurrent();
+    void lookupBranch(int _row, int _column);
     void onCustomContextMenu(const QPoint& point);
-    void selectCurrentBranch();
 
 protected:
     // block right button to allow context menu
     virtual void mousePressEvent (QMouseEvent* event);
+    void branchSelectionChanged();
+
     class MainWindow* mwin;
     QTableWidgetItem* currentBranch;
     QTableWidgetItem* selectedBranch;
-
-    int sortRole;
-    Qt::SortOrder sortOrder;
-
-signals:
-    void itemSelectionChanged();
 };
 
 #endif
