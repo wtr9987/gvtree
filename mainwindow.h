@@ -181,7 +181,6 @@ protected:
 
     // restore information from QSettings
     void restorePreferencesSettings();
-    void restoreBranchListSettings();
     void restoreWindowSettings();
     void restoreLocalRepository();
     void restoreColorSettings();

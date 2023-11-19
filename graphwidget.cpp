@@ -419,9 +419,15 @@ Version* GraphWidget::gitlogSingle(QString _hash, bool _create)
         + (shortHashes ? "%h" : "%H")
         + "#%at#%an#%d#%s#\"";
 
+    if (remotes)
+        cmd += " --remotes";
+
+    if (all)
+        cmd += " --all";
+
     if (_hash.isEmpty() == false)
         cmd += " " + _hash;
-    else if (mwin->getSelectedBranch().size())
+    else if (!all && mwin->getSelectedBranch().size())
         cmd += " " + mwin->getSelectedBranch();
 
     if (reduceTree == true && fileConstraint.size())

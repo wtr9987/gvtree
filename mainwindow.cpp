@@ -196,11 +196,6 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
     dock->hide();
 
     connect(gvtree_branchlist.branchList, SIGNAL(itemSelectionChanged()), this, SLOT(branchSelectionChanged()));
-    connect(gvtree_branchlist.cbSort, SIGNAL(currentIndexChanged(int)),
-            gvtree_branchlist.branchList, SLOT(setSort(int)));
-    connect(gvtree_branchlist.pbReset, SIGNAL(pressed()),
-            gvtree_branchlist.branchList, SLOT(resetSelection()));
-    restoreBranchListSettings();
 
     // parse arguments
     QString fileConstraint;
@@ -580,13 +575,6 @@ void MainWindow::restorePreferencesSettings()
         gvtree_preferences.rbLastRepo->setChecked(false);
         gvtree_preferences.rbCurrentPathRepo->setChecked(true);
     }
-}
-
-void MainWindow::restoreBranchListSettings()
-{
-    QSettings settings;
-
-    gvtree_branchlist.cbSort->setCurrentIndex(settings.value("branchList/sort").toInt());
 }
 
 void MainWindow::restoreWindowSettings()

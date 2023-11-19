@@ -21,11 +21,11 @@
 #include <QStandardItem>
 #include <QItemSelectionModel>
 #include <QItemSelection>
-#include <QListView>
+#include <QTableWidget>
 #include <QWidget>
 #include <QString>
 
-class BranchList : public QListView
+class BranchList : public QTableWidget
 {
     Q_OBJECT
 
@@ -40,18 +40,21 @@ public:
     void setMainWindow(class MainWindow* _mwin);
 
 public slots:
-    void setSort(int _val);
-    void resetSelection();
+    void sortChanged(int _col);
 
     void selectionChanged(const QItemSelection& _selected, const QItemSelection& _deselected);
+    void onCustomContextMenu(const QPoint& point);
+    void selectCurrentBranch();
 
 protected:
+    // block right button to allow context menu
+    virtual void mousePressEvent (QMouseEvent* event);
     class MainWindow* mwin;
-    QStandardItem* currentBranch;
+    QTableWidgetItem* currentBranch;
+    QTableWidgetItem* selectedBranch;
 
     int sortRole;
     Qt::SortOrder sortOrder;
-    QStandardItemModel* blModel;
 
 signals:
     void itemSelectionChanged();
