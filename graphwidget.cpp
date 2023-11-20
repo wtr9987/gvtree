@@ -299,7 +299,7 @@ void GraphWidget::keyPressEvent(QKeyEvent* _event)
             fitInView();
             break;
         case Qt::Key_O:
-            focusElements("HEAD", true);
+            focusElements("[A-Z]+", false, "HEAD");
             break;
         case Qt::Key_H:
             focusCurrent();

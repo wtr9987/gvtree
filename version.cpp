@@ -505,15 +505,13 @@ bool Version::findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatc
             if (kit.key() == QString("_input"))
                 continue;
 
+            if (_keyConstraint.size() && kit.key() != _keyConstraint)
+                continue;
+
             if (_exactMatch == true)
             {
                 foreach (const QString& str, kit.value())
                 {
-                    if (_keyConstraint.size() && kit.key() != _keyConstraint)
-                    {
-                        continue;
-                    }
-
                     if (_keyConstraint.size() && str == _text)
                     {
                         newmatched = true;
@@ -1061,7 +1059,7 @@ bool Version::ensureUnfolded()
 {
     bool changed = false;
 
-    if (!isFolder())
+    if (!isFolder() && isFolded())
     {
         Version* folder = lookupFolderVersion();
         if (folder && folder->isFolded())

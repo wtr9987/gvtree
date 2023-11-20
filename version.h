@@ -62,16 +62,14 @@ public:
         return Type;
     }
 
-
     bool isMain() const;
     bool isRoot() const;
     bool isFolder() const;
     bool isFolded() const;
-
     bool isFoldable() const;
-    void setIsFoldable(bool _val);
 
     void setIsMain(bool _val);
+    void setIsFoldable(bool _val);
 
     const Version* lookupFoldedFolderVersion() const;
 
