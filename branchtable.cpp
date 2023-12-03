@@ -3,7 +3,7 @@
 /*   Copyright (C) 2023 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.8-0                */
+/*                  gvtree V1.9-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
