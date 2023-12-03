@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.7-0                */
+/*                  gvtree V1.8-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -67,8 +67,8 @@ public:
     void compareVersions(Version* _v1, Version* _v2, bool _showDiff = false);
 
     // focus
-    int matchVersions(const QString& _text, QList<Version*>& _matches, bool _exactMatch);
-    bool focusElements(const QString& _text, bool _exactMatch = false);
+    int matchVersions(const QString& _text, QList<Version*>& _matches, bool _exactMatch = false, QString _keyConstraint = QString());
+    bool focusElements(const QString& _text, bool _exactMatch = false, QString _keyConstraint = QString());
     bool focusElements(const QList<Version*>& _markup);
     void displayHits(Version* _v);
     void displayHits(const QList<Version*>& _hits, bool _unfold = true);
@@ -266,6 +266,7 @@ private:
     bool topDownView;
     int horizontalSort;
     bool remotes;
+    bool all;
     int xfactor;
     int yfactor;
     int commentColumns;
@@ -277,7 +278,7 @@ private:
     //
     QMap<QString, QMap<QString, QStringList> > keyInformationCache;
 
-    QMap<QString,const QImage*> imageDB;
+    QMap<QString, const QImage*> imageDB;
 };
 
 #endif

@@ -2,7 +2,7 @@ TEMPLATE = app
 TARGET = gvtree
 DEPENDPATH += . 
 INCLUDEPATH += . 
-VERSION = -1.7-0
+VERSION = -1.8-0
 RC_ICONS = gvtree.ico
 CPPFLAGS += -O3
 QT += widgets
@@ -30,7 +30,7 @@ HEADERS += \
         tagpreference.h \
         tagprefgridlayout.h \
         tagtree.h \
-        branchlist.h \
+        branchtable.h \
         mimetable.h \
         fromtoinfo.h 
 
@@ -39,7 +39,7 @@ FORMS += gvtree_preferences.ui \
         gvtree_help.ui \
         gvtree_license.ui \
         gvtree_comparetree.ui \
-        gvtree_branchlist.ui
+        gvtree_branchtable.ui
 
 SOURCES += \
         edge.cpp \
@@ -55,7 +55,7 @@ SOURCES += \
         tagpreference.cpp \
         tagprefgridlayout.cpp \
         tagtree.cpp \
-        branchlist.cpp \
+        branchtable.cpp \
         mimetable.cpp \
         fromtoinfo.cpp
 
@@ -65,8 +65,8 @@ DISTFILES += $$SOURCEFILES \
   ChangeLog \
   css/gvtree.css \
   doc/GNU_GPL_v3.0.html \
-  doc/gvtree-1.7-0.odt \
-  doc/gvtree-1.7-0.pdf \
+  doc/gvtree-1.8-0.odt \
+  doc/gvtree-1.8-0.pdf \
   doc/doc_test_repository.sh \
   doc/images/f1.png \
   doc/images/f2.png \
@@ -138,4 +138,4 @@ target.path = $$PREFIX/bin
 source.files = $$SOURCES $$HEADERS $$RESOURCES *.pro
 
 documentation.path = $$PREFIX/share/doc/gvtree
-documentation.files = doc/gvtree-1.7-0.pdf
+documentation.files = doc/gvtree-1.8-0.pdf

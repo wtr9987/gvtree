@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.7-0                */
+/*                  gvtree V1.8-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -481,7 +481,7 @@ void Version::processGitLogTagInformation(const QString& _tagInfo)
     }
 }
 
-bool Version::findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatch)
+bool Version::findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatch, QString _keyConstraint)
 {
     bool oldmatched = matched;
     bool newmatched = false;
@@ -505,11 +505,14 @@ bool Version::findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatc
             if (kit.key() == QString("_input"))
                 continue;
 
+            if (_keyConstraint.size() && kit.key() != _keyConstraint)
+                continue;
+
             if (_exactMatch == true)
             {
                 foreach (const QString& str, kit.value())
                 {
-                    if (str == _text)
+                    if (_keyConstraint.size() && str == _text)
                     {
                         newmatched = true;
                         if (kit.key() == "CommentRaw")
@@ -1056,7 +1059,7 @@ bool Version::ensureUnfolded()
 {
     bool changed = false;
 
-    if (!isFolder())
+    if (!isFolder() && isFolded())
     {
         Version* folder = lookupFolderVersion();
         if (folder && folder->isFolded())

@@ -1,13 +1,13 @@
 /* --------------------------------------------- */
 /*                                               */
-/*   Copyright (C) 2022 Wolfgang Trummer         */
+/*   Copyright (C) 2023 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.7-0                */
+/*                  gvtree V1.8-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
-/*   13. February 2022                           */
+/*   19. November 2023                           */
 /*                                               */
 /*         This program is licensed under        */
 /*           GNU GENERAL PUBLIC LICENSE          */
@@ -15,22 +15,22 @@
 /*                                               */
 /* --------------------------------------------- */
 
-#ifndef __BRANCHLIST_H__
-#define __BRANCHLIST_H__
+#ifndef __BRANCHTABLE_H__
+#define __BRANCHTABLE_H__
 
 #include <QStandardItem>
 #include <QItemSelectionModel>
 #include <QItemSelection>
-#include <QListView>
+#include <QTableWidget>
 #include <QWidget>
 #include <QString>
 
-class BranchList : public QListView
+class BranchTable : public QTableWidget
 {
     Q_OBJECT
 
 public:
-    BranchList(class QWidget* _parent = NULL);
+    BranchTable(QWidget* _parent = NULL);
 
     /**
      * \brief Get branch information of current local repository
@@ -40,21 +40,19 @@ public:
     void setMainWindow(class MainWindow* _mwin);
 
 public slots:
-    void setSort(int _val);
-    void resetSelection();
-
-    void selectionChanged(const QItemSelection& _selected, const QItemSelection& _deselected);
+    void sortChanged(int _col);
+    void lookupCurrent();
+    void lookupBranch(int _row, int _column);
+    void onCustomContextMenu(const QPoint& point);
 
 protected:
+    // block right button to allow context menu
+    virtual void mousePressEvent (QMouseEvent* event);
+    void branchSelectionChanged();
+
     class MainWindow* mwin;
-    QStandardItem* currentBranch;
-
-    int sortRole;
-    Qt::SortOrder sortOrder;
-    QStandardItemModel* blModel;
-
-signals:
-    void itemSelectionChanged();
+    QTableWidgetItem* currentBranch;
+    QTableWidgetItem* selectedBranch;
 };
 
 #endif

@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.7-0                */
+/*                  gvtree V1.8-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -111,7 +111,6 @@ GraphWidget::GraphWidget(MainWindow* _parent)
     clear();
 
     // imageDB["dot1"]= new QImage("dot4.png");
-
 }
 
 void GraphWidget::updateFromToInfo()
@@ -300,7 +299,7 @@ void GraphWidget::keyPressEvent(QKeyEvent* _event)
             fitInView();
             break;
         case Qt::Key_O:
-            focusElements("HEAD", true);
+            focusElements("[A-Z]+", false, "HEAD");
             break;
         case Qt::Key_H:
             focusCurrent();
@@ -355,7 +354,10 @@ void GraphWidget::setGitLogFileConstraint(const QString& _fileConstraint)
         if (remotes)
             cmd += " --remotes";
 
-        if (mwin->getSelectedBranch().size())
+        if (all)
+            cmd += " --all";
+
+        if (!all && mwin->getSelectedBranch().size())
             cmd += " " + mwin->getSelectedBranch();
 
         if (fileConstraint.size())
@@ -420,9 +422,12 @@ Version* GraphWidget::gitlogSingle(QString _hash, bool _create)
     if (remotes)
         cmd += " --remotes";
 
+    if (all)
+        cmd += " --all";
+
     if (_hash.isEmpty() == false)
         cmd += " " + _hash;
-    else if (mwin->getSelectedBranch().size())
+    else if (!all && mwin->getSelectedBranch().size())
         cmd += " " + mwin->getSelectedBranch();
 
     if (reduceTree == true && fileConstraint.size())
@@ -494,7 +499,10 @@ void GraphWidget::gitlog(bool _changed)
     if (remotes)
         cmd += " --remotes";
 
-    if (mwin->getSelectedBranch().size())
+    if (all)
+        cmd += " --all";
+
+    if (!all && mwin->getSelectedBranch().size())
         cmd += " " + mwin->getSelectedBranch();
 
     if (reduceTree == true && fileConstraint.size())
@@ -1277,7 +1285,7 @@ void GraphWidget::resetMatches()
     }
 }
 
-int GraphWidget::matchVersions(const QString& _text, QList<Version*>& _matches, bool _exactMatch)
+int GraphWidget::matchVersions(const QString& _text, QList<Version*>& _matches, bool _exactMatch, QString _keyConstraint)
 {
     _matches.clear();
 
@@ -1292,7 +1300,7 @@ int GraphWidget::matchVersions(const QString& _text, QList<Version*>& _matches, 
 
             Version* n = dynamic_cast<Version*>(it);
 
-            if (n && n->findMatch(pattern, _text, _exactMatch))
+            if (n && n->findMatch(pattern, _text, _exactMatch, _keyConstraint))
             {
                 _matches.push_back(n);
             }
@@ -1302,18 +1310,20 @@ int GraphWidget::matchVersions(const QString& _text, QList<Version*>& _matches, 
     return _matches.size();
 }
 
-bool GraphWidget::focusElements(const QString& _text, bool _exactMatch)
+bool GraphWidget::focusElements(const QString& _text, bool _exactMatch, QString _keyConstraint)
 {
     pan = false;
     resetMatches();
 
     QList<Version*> matches;
 
-    matchVersions(_text, matches, _exactMatch);
+    if (matchVersions(_text, matches, _exactMatch, _keyConstraint) > 0)
+    {
+        displayHits(matches);
+        return true;
+    }
 
-    displayHits(matches);
-
-    return matches.size() > 0;
+    return false;
 }
 
 void GraphWidget::getMarkedupVersions(QList<Version*>& _markup, bool _selected)
@@ -1571,6 +1581,12 @@ void GraphWidget::preferencesUpdated(bool _forceUpdate)
     if (remotes != mwin->getRemotes())
     {
         remotes = mwin->getRemotes();
+        updateAll = true;
+    }
+
+    if (all != mwin->getAll())
+    {
+        all = mwin->getAll();
         updateAll = true;
     }
 
@@ -2031,9 +2047,9 @@ bool GraphWidget::restoreImportantVersions()
 
 const QImage* GraphWidget::getImage(const QString& _name) const
 {
-  if (imageDB.contains(_name))
-  {
-    return imageDB[_name];
-  }
-  return NULL;
+    if (imageDB.contains(_name))
+    {
+        return imageDB[_name];
+    }
+    return NULL;
 }

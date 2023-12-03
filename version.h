@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.7-0                */
+/*                  gvtree V1.8-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -62,16 +62,14 @@ public:
         return Type;
     }
 
-
     bool isMain() const;
     bool isRoot() const;
     bool isFolder() const;
     bool isFolded() const;
-
     bool isFoldable() const;
-    void setIsFoldable(bool _val);
 
     void setIsMain(bool _val);
+    void setIsFoldable(bool _val);
 
     const Version* lookupFoldedFolderVersion() const;
 
@@ -133,7 +131,7 @@ public:
     void addLocalVersionInfo(const QString& _val);
 
     void setUpdateBoundingRect(bool _val);
-    bool findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatch = false);
+    bool findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatch = false, QString _keyConstraint = QString());
     void collectFolderVersions(Version* _rootNode, Version* _parent);
     void foldRecurse(bool _val);
     int numEdges() const;
@@ -190,7 +188,7 @@ protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant& value);
     void adjustEdges();
     void adjustEdgesRecurse();
-void setFolded(bool _val);
+    void setFolded(bool _val);
 
 private:
     QList<Edge*> edgeList;

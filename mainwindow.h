@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.7-0                */
+/*                  gvtree V1.8-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -34,13 +34,13 @@
 #include "graphwidget.h"
 #include "tagprefgridlayout.h"
 #include "tagtree.h"
-#include "branchlist.h"
+#include "branchtable.h"
 #include "ui_gvtree_comparetree.h"
 #include "ui_gvtree_difftool.h"
 #include "ui_gvtree_help.h"
 #include "ui_gvtree_license.h"
 #include "ui_gvtree_preferences.h"
-#include "ui_gvtree_branchlist.h"
+#include "ui_gvtree_branchtable.h"
 
 class MainWindow : public QMainWindow
 {
@@ -79,6 +79,7 @@ public:
     bool getTopDownView() const;
     int getHorizontalSort() const;
     bool getRemotes() const;
+    bool getAll() const;
     bool getIncludeSelected() const;
     bool getAnimated() const;
     bool getTextBorder() const;
@@ -91,8 +92,13 @@ public:
     void getCommentProperties(int& _columns, int& _limit) const;
     bool getVersionIsFoldable(const QMap<QString, QStringList>& _keyinformation) const;
 
+    GraphWidget* getGraphWidget();
+
     //
     Ui_Dialog& getPreferences();
+
+    //
+    const QStringList& getNodeInfo() const;
 
 public slots:
 
@@ -142,8 +148,11 @@ public slots:
     //
     void updatePbFileConstraint(const QString& _fileConstraint);
 
-    //
-    const QStringList& getNodeInfo() const;
+    // --remotes changed
+    void remotesChanged(int _val);
+
+    // --all changed
+    void allChanged(int _val);
 
 protected:
 
@@ -170,7 +179,6 @@ protected:
 
     // restore information from QSettings
     void restorePreferencesSettings();
-    void restoreBranchListSettings();
     void restoreWindowSettings();
     void restoreLocalRepository();
     void restoreColorSettings();
@@ -210,7 +218,7 @@ protected:
     QWidget* blwin;
     QTreeView* compareTree;
     TagPrefGridLayout* gridLayout;
-    BranchList* branchList;
+    BranchTable* branchList;
 
     // preferences dialog
     QDialog* pwin;
@@ -224,10 +232,14 @@ private:
     Ui_HelpDialog gvtree_help;
     Ui_LicenseDialog gvtree_license;
     Ui_CompareTreeForm gvtree_comparetree;
-    Ui_BranchListForm gvtree_branchlist;
+    Ui_BranchTableForm gvtree_branchtable;
+    // bottom status bar
     QLabel* lbRepositoryPath;
     QPushButton* pbRepositoryName;
     QPushButton* pbFileConstraint;
+    QCheckBox* cbAll;
+    QCheckBox* cbRemotes;
+
     QString repositoryPath;
     QString fileConstraintPath;
     QFileSystemWatcher* watcher;
