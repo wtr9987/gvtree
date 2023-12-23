@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.8-0                */
+/*                  gvtree V1.9-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -421,9 +421,6 @@ Version* GraphWidget::gitlogSingle(QString _hash, bool _create)
 
     if (remotes)
         cmd += " --remotes";
-
-    if (all)
-        cmd += " --all";
 
     if (_hash.isEmpty() == false)
         cmd += " " + _hash;
@@ -943,6 +940,12 @@ void GraphWidget::diffStagedChanges()
     fromVersions.insert(localHeadVersion);
     toVersion = NULL;
 
+    // ensure visibility
+    if (localHeadVersion->ensureUnfolded())
+    {
+        updateGraphFolding();
+    }
+
     fillCompareWidgetFromToInfo();
     mwin->getToDateLabel()->setText(QString("Staged Changes"));
 
@@ -954,6 +957,9 @@ void GraphWidget::diffStagedChanges()
     // cursor
     fromToInfo->setFromToPosition(fromVersions, NULL);
     fromToInfo->show();
+
+    // focus
+    displayHits(localHeadVersion);
 }
 
 void GraphWidget::viewThisVersion(Version* _v)
@@ -983,6 +989,13 @@ void GraphWidget::diffLocalChanges()
 
     fromVersions = QSet<Version*>();
     fromVersions.insert(localHeadVersion);
+
+    // ensure visibility
+    if (localHeadVersion->ensureUnfolded())
+    {
+        updateGraphFolding();
+    }
+
     toVersion = NULL;
 
     fillCompareWidgetFromToInfo();
@@ -996,6 +1009,9 @@ void GraphWidget::diffLocalChanges()
     // cursor
     fromToInfo->setFromToPosition(fromVersions, NULL);
     fromToInfo->show();
+
+    // focus
+    displayHits(localHeadVersion);
 }
 
 void GraphWidget::compareVersions(Version* _v1, Version* _v2, bool _showDiff)
