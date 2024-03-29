@@ -227,7 +227,8 @@ void Edge::paint(QPainter* _painter,
         graph->getEdgeColor();
 
     // line width
-    int pw = (lod <= 0.33) ? 0 : (source->isMain() && dest->isMain()) ? 4 : 2;
+    int pw = (!source->isMain() || !dest->isMain()) ? 0 :
+        (lod <= 0.33) ? 2.8 / lod : 4;
 
     if (fileConstraint)
     {
