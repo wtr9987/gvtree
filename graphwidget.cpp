@@ -422,9 +422,6 @@ Version* GraphWidget::gitlogSingle(QString _hash, bool _create)
     if (remotes)
         cmd += " --remotes";
 
-    //if (all)
-    //cmd += " --all";
-
     if (_hash.isEmpty() == false)
         cmd += " " + _hash;
     else if (!all && mwin->getSelectedBranch().size())
