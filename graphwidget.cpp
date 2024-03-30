@@ -23,7 +23,13 @@
 #include <sys/time.h>
 
 #include <QtGui>
+
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+#include <QRegularExpression>
+#else
 #include <QRegExp>
+#endif
+
 #include <QAction>
 #include <QMenu>
 #include <QScrollBar>
@@ -627,13 +633,32 @@ void GraphWidget::process(QList<QString> _cache)
     currentLines = linecount;
 
     QString previousTree;
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+    QRegularExpression treePattern("^([*\\\\/\\. |\\-_]*[*\\\\/\\.|\\-_]+)");
+#else
     QRegExp treePattern("^([*\\\\/\\. |\\-_]*[*\\\\/\\.|\\-_]+)");
+#endif
 
     int linenumber = 0;
 
     foreach (const QString& line, swap_cache)
     {
         // get the tree pattern
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+        QRegularExpressionMatch m = treePattern.match(line);
+
+        if (!m.hasMatch())
+        {
+            cerr << "No --graph pattern contained in line " << linenumber << " : " << line.toUtf8().data() << endl;
+            continue;
+        }
+
+        int pos = m.capturedStart(1);
+
+        // get --graph tree pattern
+        int len = m.capturedLength(1);
+        QString tree = m.captured(1);
+#else
         int pos = treePattern.indexIn(line, 0);
 
         if (pos == -1)
@@ -642,11 +667,12 @@ void GraphWidget::process(QList<QString> _cache)
             continue;
         }
 
-        linenumber++;
-
         // get --graph tree pattern
         int len = treePattern.matchedLength();
         QString tree = treePattern.cap(1);
+#endif
+
+        linenumber++;
 
         // allocate space
         if (previousTree.isEmpty())
@@ -1307,7 +1333,11 @@ int GraphWidget::matchVersions(const QString& _text, QList<Version*>& _matches, 
 
     if (!_text.isEmpty())
     {
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+        QRegularExpression pattern(_text);
+#else
         QRegExp pattern(_text);
+#endif
 
         foreach(QGraphicsItem * it, scene()->items())
         {

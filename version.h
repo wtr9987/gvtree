@@ -20,7 +20,11 @@
 
 #include <QGraphicsItem>
 #include <QList>
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+#include <QRegularExpression>
+#else
 #include <QRegExp>
+#endif
 #include <QSet>
 #include <QRectF>
 #include <QString>
@@ -131,7 +135,11 @@ public:
     void addLocalVersionInfo(const QString& _val);
 
     void setUpdateBoundingRect(bool _val);
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+    bool findMatch(QRegularExpression& _pattern, const QString& _text, bool _exactMatch = false, QString _keyConstraint = QString());
+#else
     bool findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatch = false, QString _keyConstraint = QString());
+#endif
     void collectFolderVersions(Version* _rootNode, Version* _parent);
     void foldRecurse(bool _val);
     int numEdges() const;

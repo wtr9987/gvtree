@@ -29,7 +29,11 @@
 #include <QStringList>
 #include <QTextBrowser>
 #include <QTreeView>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include <QRegularExpression>
+#else
 #include <QRegExp>
+#endif
 
 #include "graphwidget.h"
 #include "tagprefgridlayout.h"
@@ -248,7 +252,11 @@ private:
     QDockWidget* tagTreeDock;
     QDockWidget* branchDock;
     QStringList nodeInfo;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    QRegularExpression foldNotRegExp;
+#else
     QRegExp foldNotRegExp;
+#endif
 };
 
 #endif

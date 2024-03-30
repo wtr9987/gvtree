@@ -78,10 +78,36 @@ void CompareTree::compareHashes(const QStringList& _hash1, const QString& _hash2
     {
         QString info = (*jt).trimmed();
 
-        QRegExp renameNameStatusPattern("(R)[0-9]*\\s+(.*)\\s+(.*)$");
         QString status;
         QString path_old;
         QString path;
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        QRegularExpression renameNameStatusPattern("(R)[0-9]*\\s+(.*)\\s+(.*)$");
+        QRegularExpressionMatch m = renameNameStatusPattern.match(info);
+
+        if (m.hasMatch())
+        {
+            status = m.captured(1);
+            path_old = m.captured(2);
+            path = m.captured(3);
+        }
+        else
+        {
+            QRegularExpression diffNameStatusPattern("(.)\\s+(.*)$");
+            m = diffNameStatusPattern.match(info);
+            if (m.hasMatch())
+            {
+                status = m.captured(1);
+                path = m.captured(2);
+            }
+            else
+            {
+                continue;
+            }
+        }
+#else
+        QRegExp renameNameStatusPattern("(R)[0-9]*\\s+(.*)\\s+(.*)$");
 
         if (renameNameStatusPattern.indexIn(info, 0) != -1)
         {
@@ -102,6 +128,7 @@ void CompareTree::compareHashes(const QStringList& _hash1, const QString& _hash2
                 continue;
             }
         }
+#endif
 
         // split file path into a QStringList
         QStringList path_elements = path.split(QChar('/'));
@@ -734,12 +761,23 @@ QString CompareTree::getMimeType(const QString& _path) const
 
 QString CompareTree::getFileExtension(const QString& _path) const
 {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    QRegularExpression extension("\\.([^/.]*)$");
+    QRegularExpressionMatch m = extension.match(_path);
+
+    if (m.hasMatch())
+    {
+        return m.captured(1);
+    }
+#else
     QRegExp extension("\\.([^/.]*)$");
 
     if (extension.indexIn(_path, 0))
     {
         return extension.cap(1);
     }
+#endif
+
     return QString();
 }
 

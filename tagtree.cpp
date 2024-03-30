@@ -326,7 +326,11 @@ void TagTree::collectSubitems(const QModelIndex& _p, QList<Version*>& _collect)
             QString arg = _p.parent().data(Qt::DisplayRole).toString();
             if (arg == "Search Result")
             {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+                QRegularExpression pattern(search->text());
+#else
                 QRegExp pattern(search->text());
+#endif
                 v->findMatch(pattern, search->text(), false);
             }
             else

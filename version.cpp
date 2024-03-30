@@ -360,10 +360,17 @@ bool Version::processGitLogInfo(const QString& _input, const QStringList& _parts
     // store the raw input in the key information, too
     keyInformation[QString("_input")] = QStringList(_input);
     keyInformation[QString("Hash")] = QStringList(hash);
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+    keyInformation[QString("Commit Date")] =
+        QStringList(
+            QDateTime::fromSecsSinceEpoch(_parts.at(2).toInt())
+            .toString("yyyy.MM.dd HH:mm:ss"));
+#else
     keyInformation[QString("Commit Date")] =
         QStringList(
             QDateTime::fromTime_t(_parts.at(2).toInt())
             .toString("yyyy.MM.dd HH:mm:ss"));
+#endif
     commitDate = _parts.at(2).toInt();
     keyInformation[QString("User Name")] = QStringList(_parts.at(3));
 
@@ -467,6 +474,19 @@ void Version::processGitLogTagInformation(const QString& _tagInfo)
 
             if (tp)
             {
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+                QRegularExpression r = tp->getRegExp();
+                foreach (const QString& str, tags)
+                {
+                    QRegularExpressionMatch m = r.match(str);
+
+                    if (m.hasMatch())
+                    {
+                        keyInformation[it].push_back(m.captured(1));
+                        tags.removeOne(str);
+                    }
+                }
+#else
                 QRegExp r = tp->getRegExp();
                 foreach (const QString& str, tags)
                 {
@@ -476,12 +496,17 @@ void Version::processGitLogTagInformation(const QString& _tagInfo)
                         tags.removeOne(str);
                     }
                 }
+#endif
             }
         }
     }
 }
 
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+bool Version::findMatch(QRegularExpression& _pattern, const QString& _text, bool _exactMatch, QString _keyConstraint)
+#else
 bool Version::findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatch, QString _keyConstraint)
+#endif
 {
     bool oldmatched = matched;
     bool newmatched = false;
@@ -493,8 +518,13 @@ bool Version::findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatc
     QString rawInput = keyInformation["_input"].join(" ")
         + " " + keyInformation["Commit Date"].join(" ");
 
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+    bool checkDetail = _pattern.isValid() ? (_pattern.match(rawInput).hasMatch()) :
+        (rawInput.indexOf(_text, 0) != -1);
+#else
     bool checkDetail = _pattern.isValid() ? (_pattern.indexIn(rawInput, 0) != -1) :
         (rawInput.indexOf(_text, 0) != -1);
+#endif
 
     if (checkDetail)
     {
@@ -529,8 +559,13 @@ bool Version::findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatc
             {
                 QString tmp = kit.value().join(QString(" "));
 
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+                if ((_pattern.isValid() && _pattern.match(tmp).hasMatch())
+                    || (tmp.indexOf(_text) != -1))
+#else
                 if ((_pattern.isValid() && _pattern.indexIn(tmp, 0) != -1)
                     || (tmp.indexOf(_text) != -1))
+#endif
                 {
                     newmatched = true;
                     if (kit.key() == "CommentRaw")

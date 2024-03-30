@@ -45,12 +45,20 @@ TagPreference::TagPreference(int _row,
     if (settings.contains(lookupRegexp))
     {
         regularExpression->setText(settings.value(lookupRegexp).toString());
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        regExp = QRegularExpression(settings.value(lookupRegexp).toString());
+#else
         regExp = QRegExp(settings.value(lookupRegexp).toString());
+#endif
     }
     else
     {
         regularExpression->setText(_regexDefault);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        regExp = QRegularExpression(_regexDefault);
+#else
         regExp = QRegExp(_regexDefault);
+#endif
     }
 
     connect(regularExpression, SIGNAL(textChanged(const QString&)), this, SLOT(setRegularExpression(const QString&)));
@@ -86,7 +94,11 @@ const QColor& TagPreference::getColor() const
     return color;
 }
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+const QRegularExpression& TagPreference::getRegExp() const
+#else
 const QRegExp& TagPreference::getRegExp() const
+#endif
 {
     return regExp;
 }
@@ -133,7 +145,11 @@ void TagPreference::updateColorButton()
 
 void TagPreference::setRegularExpression(const QString& _regex)
 {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    regExp = QRegularExpression(_regex);
+#else
     regExp = QRegExp(_regex);
+#endif
 
     if (regExp.isValid())
     {

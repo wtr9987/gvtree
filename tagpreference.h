@@ -22,7 +22,11 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include <QRegularExpression>
+#else
 #include <QRegExp>
+#endif
 #include <QSettings>
 #include <QString>
 #include <QGridLayout>
@@ -40,7 +44,11 @@ public:
 
     const QFont& getFont() const;
     const QColor& getColor() const;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    const QRegularExpression& getRegExp() const;
+#else
     const QRegExp& getRegExp() const;
+#endif
     void disableRegExp();
 
 protected:
@@ -49,7 +57,11 @@ protected:
 protected:
     QPushButton* tagType;
     QLineEdit* regularExpression;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    QRegularExpression regExp;
+#else
     QRegExp regExp;
+#endif
     QPushButton* fontButton;
     QFont font;
     QColor color;

@@ -21,12 +21,12 @@
 #include <QScreen>
 #else
 #include <QTextCodec>
+#include <QDesktopWidget>
 #endif
 
 
 #include <QColorDialog>
 #include <QCoreApplication>
-#include <QDesktopWidget>
 #include <QDockWidget>
 #include <QFileDialog>
 #include <QMenuBar>
@@ -558,7 +558,11 @@ void MainWindow::restorePreferencesSettings()
     if (settings.contains("fold_not_regexp"))
     {
         gvtree_preferences.fold_not_regexp->setText(settings.value("fold_not_regexp").toString());
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        foldNotRegExp = QRegularExpression(gvtree_preferences.fold_not_regexp->text());
+#else
         foldNotRegExp = QRegExp(gvtree_preferences.fold_not_regexp->text());
+#endif
     }
 
     if (settings.contains("defaultLastRepo")
@@ -1283,7 +1287,11 @@ void MainWindow::saveChangedSettings()
     settings.setValue("fold_not_pattern", gvtree_preferences.fold_not_pattern->isChecked());
     settings.setValue("fold_not_regexp", gvtree_preferences.fold_not_regexp->text());
     gvtree_preferences.fold_not_regexp->setText(settings.value("fold_not_regexp").toString());
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    foldNotRegExp = QRegularExpression(gvtree_preferences.fold_not_regexp->text());
+#else
     foldNotRegExp = QRegExp(gvtree_preferences.fold_not_regexp->text());
+#endif
 
     settings.setValue("connectorStyle", getConnectorStyle());
     settings.setValue("defaultLastRepo", gvtree_preferences.rbLastRepo->isChecked() ? 1 : 0);
@@ -1587,7 +1595,7 @@ bool MainWindow::getVersionIsFoldable(const QMap<QString, QStringList>& _keyinfo
             {
                 foreach(const QString& str, it.value())
                 {
-                    if (foldNotRegExp.indexIn(str, 0) != -1)
+                    if (!foldNotRegExp.match(str).hasMatch())
                         return false;
                 }
             }
