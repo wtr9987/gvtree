@@ -15,10 +15,8 @@
 /*                                               */
 /* --------------------------------------------- */
 
-#include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
-#include <QColor>
 #include <QStyleOption>
 #include <QClipboard>
 #include <QApplication>

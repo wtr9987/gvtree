@@ -15,7 +15,6 @@
 /*                                               */
 /* --------------------------------------------- */
 
-#include <QtGui>
 #include <QSettings>
 
 #include "mainwindow.h"

@@ -730,6 +730,8 @@ void CompareTree::compareFileVersions(
 
     difftool.replace("%1", fnameList);
 
+    std::cout << difftool.toUtf8().data() << std::endl;
+
     system(difftool.toUtf8().data());
 }
 

@@ -19,8 +19,6 @@
 #include <QColor>
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
-#include <QClipboard>
-#include <QApplication>
 
 #include <math.h>
 
