@@ -727,11 +727,7 @@ void CompareTree::compareFileVersions(
     }
 
     QString fnameList = diffFiles.join(QString(" "));
-
     difftool.replace("%1", fnameList);
-
-    std::cout << difftool.toUtf8().data() << std::endl;
-
     system(difftool.toUtf8().data());
 }
 
@@ -739,10 +735,10 @@ void CompareTree::editCurrentVersion(const QString& _path)
 {
     QString tmp = graph->getLocalRepositoryPath() + "/" + _path;
     QString mimeType = getMimeType(tmp);
-    QString difftool;
+    QString dummy;
     QString edittool;
 
-    mwin->getMimeTypeTools(mimeType, difftool, edittool);
+    mwin->getMimeTypeTools(mimeType, dummy, edittool);
     edittool.replace("%1", tmp);
     system(edittool.toUtf8().data());
 }
@@ -750,7 +746,6 @@ void CompareTree::editCurrentVersion(const QString& _path)
 QString CompareTree::getMimeType(const QString& _path) const
 {
     QString cmd = "file --mime-type -b " + _path;
-
     QList<QString> cache;
 
     execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
