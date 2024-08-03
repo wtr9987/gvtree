@@ -15,6 +15,7 @@
 /*                                               */
 /* --------------------------------------------- */
 
+#include <QFile>
 #include <QSettings>
 
 #include "mainwindow.h"

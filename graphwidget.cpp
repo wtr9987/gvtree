@@ -24,7 +24,7 @@
 
 #include <QtGui>
 
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include <QRegularExpression>
 #else
 #include <QRegExp>
@@ -309,6 +309,9 @@ void GraphWidget::keyPressEvent(QKeyEvent* _event)
             break;
         case Qt::Key_H:
             focusCurrent();
+            break;
+        case Qt::Key_F5:
+            mwin->reloadCurrentRepository();
             break;
         default:
             QGraphicsView::keyPressEvent(_event);
@@ -633,7 +636,8 @@ void GraphWidget::process(QList<QString> _cache)
     currentLines = linecount;
 
     QString previousTree;
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     QRegularExpression treePattern("^([*\\\\/\\. |\\-_]*[*\\\\/\\.|\\-_]+)");
 #else
     QRegExp treePattern("^([*\\\\/\\. |\\-_]*[*\\\\/\\.|\\-_]+)");
@@ -644,7 +648,7 @@ void GraphWidget::process(QList<QString> _cache)
     foreach (const QString& line, swap_cache)
     {
         // get the tree pattern
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
         QRegularExpressionMatch m = treePattern.match(line);
 
         if (!m.hasMatch())
@@ -1333,7 +1337,7 @@ int GraphWidget::matchVersions(const QString& _text, QList<Version*>& _matches, 
 
     if (!_text.isEmpty())
     {
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
         QRegularExpression pattern(_text);
 #else
         QRegExp pattern(_text);

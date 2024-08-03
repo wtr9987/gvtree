@@ -133,7 +133,7 @@ QPainterPath Edge::shape() const
     {
         QPointF cur = sourcePoint - QPointF(sx * 10.0, sy * 10.0);
         border.push_back(cur);
-        cur += QPointF(sx * 20.0, 0.0);
+        cur += QPointF(sx * 10.0, 0.0);
         border.push_back(cur);
         cur += QPointF(dx, dy);
         border.push_back(cur);
@@ -143,20 +143,22 @@ QPainterPath Edge::shape() const
         border.push_back(cur);
         cur -= QPointF(dx, dy);
         border.push_back(cur);
+        cur -= QPointF(0.0, sy * 10.0);
+        border.push_back(cur);
     }
     else
     {
         QPointF cur = sourcePoint - QPointF(sx * 10.0, sy * 10.0);
         border.push_back(cur);
-        cur += QPointF(sx * 20.0, 0.0);
+        cur += QPointF(sx * 10.0, 0.0);
         border.push_back(cur);
         cur += QPointF(0.0, 0.5 * dy);
         border.push_back(cur);
         cur += QPointF(dx, 0.0);
         border.push_back(cur);
-        cur += QPointF(0.0, 0.5 * dy) + QPointF(0.0, sy * 20.0);
+        cur += QPointF(0.0, 0.5 * dy) + QPointF(0.0, sy * 10.0);
         border.push_back(cur);
-        cur -= QPointF(sx * 20.0, 0.0);
+        cur -= QPointF(sx * 10.0, 0.0);
         border.push_back(cur);
         cur -= QPointF(0.0, 0.5 * dy);
         border.push_back(cur);
