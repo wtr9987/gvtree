@@ -124,6 +124,7 @@ DISTFILES += $$SOURCEFILES \
   images/gvt_pointer.png \
   images/gvtree_logo_128.png \
   images/gvtree_logo_256.png \
+  images/gvtree_icon_256.png \
   images/gvtree_logo_512.png \
   images/gvtree_title_512.png \
   images/gvt_ren.png \

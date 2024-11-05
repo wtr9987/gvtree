@@ -26,21 +26,17 @@ using namespace std;
 TagPreference::TagPreference(int _row,
                              const QString& _name,
                              const QString& _regexDefault,
+                             const QString& _colorDefault,    // default, if not defined in settings
+                             const QString& _fontDefault,      // default, if not defined in settings
                              QGridLayout* _layout) : QObject(NULL)
 {
-    tagType = new QPushButton(_name);
-    connect(tagType, SIGNAL(clicked()), this, SLOT(setColor()));
-    _layout->addWidget(tagType, _row, 0, 1, 1);
+    QSettings settings;
 
-    fontButton = new QPushButton(QApplication::font().toString());
-    connect(fontButton, SIGNAL(clicked()), this, SLOT(setFont()));
-    _layout->addWidget(fontButton, _row, 1, 1, 1);
-
+    // regular expression
     regularExpression = new QLineEdit();
     _layout->addWidget(regularExpression, _row, 2, 1, 2);
 
     QString lookupRegexp = _name + "/regExp";
-    QSettings settings;
 
     if (settings.contains(lookupRegexp))
     {
@@ -63,25 +59,25 @@ TagPreference::TagPreference(int _row,
 
     connect(regularExpression, SIGNAL(textChanged(const QString&)), this, SLOT(setRegularExpression(const QString&)));
 
-    QString lookupFont = _name + "/font";
-
-    if (settings.contains(lookupFont))
-    {
-        fontButton->setText(settings.value(lookupFont).toString());
-        font.fromString(settings.value(lookupFont).toString());
-    }
-    else
-    {
-        font.fromString(fontButton->text());
-    }
+    // tag and color
+    tagType = new QPushButton(_name);
 
     QString lookupColor = _name + "/color";
-
-    if (settings.contains(lookupColor))
-    {
-        color = settings.value(lookupColor).value<QColor>();
-    }
+    color = settings.contains(lookupColor) ? settings.value(lookupColor).value<QColor>() : QColor(_colorDefault);
     updateColorButton();
+
+    connect(tagType, SIGNAL(clicked()), this, SLOT(setColor()));
+    _layout->addWidget(tagType, _row, 0, 1, 1);
+
+    // font
+    fontButton = new QPushButton(QApplication::font().toString());
+    QString lookupFont = _name + "/font";
+    font.fromString(settings.contains(lookupFont)?settings.value(lookupFont).toString():_fontDefault);
+    updateFontButton();
+
+    connect(fontButton, SIGNAL(clicked()), this, SLOT(setFont()));
+    _layout->addWidget(fontButton, _row, 1, 1, 1);
+
 }
 
 const QFont& TagPreference::getFont() const
@@ -110,11 +106,17 @@ void TagPreference::setFont()
     if (dialog.exec())
     {
         font = dialog.selectedFont();
-        fontButton->setText(font.toString());
-        QString settingsKey = tagType->text() + "/font";
-        QSettings settings;
-        settings.setValue(settingsKey, font.toString());
+        updateFontButton();
     }
+}
+
+void TagPreference::updateFontButton()
+{
+    QSettings settings;
+    QString settingsKey = tagType->text() + "/font";
+
+    settings.setValue(settingsKey, font.toString());
+    fontButton->setText(font.toString());
 }
 
 void TagPreference::setColor()
@@ -124,20 +126,19 @@ void TagPreference::setColor()
     if (tmpColor.isValid())
     {
         color = tmpColor;
-
-        QString settingsKey = tagType->text() + "/color";
-        QSettings settings;
-        settings.setValue(settingsKey, color.name());
         updateColorButton();
     }
 }
 
 void TagPreference::updateColorButton()
 {
-    QColor fgColor = QColor(0, 0, 0);
+    QSettings settings;
+    QString settingsKey = tagType->text() + "/color";
 
-    if (color.lightness() < 128)
-        fgColor = QColor(255, 255, 255);
+    settings.setValue(settingsKey, color.name());
+
+    QColor fgColor = (color.lightness() < 128) ? QColor(255, 255, 255) : QColor(0, 0, 0);
+
     QString css = "background-color: " + color.name() + "; color: " + fgColor.name() + ";";
 
     tagType->setStyleSheet(css);

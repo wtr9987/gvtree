@@ -29,7 +29,11 @@ class TagPrefGridLayout : public QGridLayout
 public:
     TagPrefGridLayout(QWidget* _parent = NULL);
 
-    void addTagPreference(const QString& _name, const QString& _regexp, bool _regexpChangable);
+    void addTagPreference(const QString& _name,
+                          const QString& _regexp,
+                          const QString& _color = QString(),
+                          const QString& _font = QString(),
+                          bool _regexpChangable = false);
 
     const TagPreference* getTagPreference(const QString& _item) const;
 

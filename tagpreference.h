@@ -40,6 +40,8 @@ public:
     TagPreference(int _row,
                   const QString& _name,
                   const QString& _regexDefault,
+                  const QString& _colorDefault,
+                  const QString& _fontDefault,
                   QGridLayout* _parent = NULL);
 
     const QFont& getFont() const;
@@ -53,6 +55,7 @@ public:
 
 protected:
     void updateColorButton();
+    void updateFontButton();
 
 protected:
     QPushButton* tagType;

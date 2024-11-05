@@ -456,7 +456,7 @@ void MainWindow::restorePreferencesSettings()
     initCbCodecForCStrings(settings.value("codecForCStrings").toString());
 
     if (!settings.contains("comment_columns"))
-        settings.setValue("comment_columns", 0); // unlimited
+        settings.setValue("comment_columns", 20); // nice default
     gvtree_preferences.comment_columns->setValue(settings.value("comment_columns").toInt());
 
     if (!settings.contains("comment_maxlen"))
@@ -464,15 +464,15 @@ void MainWindow::restorePreferencesSettings()
     gvtree_preferences.comment_maxlen->setValue(settings.value("comment_maxlen").toInt());
 
     if (!settings.contains("xfactor"))
-        settings.setValue("xfactor", 10);
+        settings.setValue("xfactor", 30);
     gvtree_preferences.xfactor->setValue(settings.value("xfactor").toInt());
 
     if (!settings.contains("yfactor"))
-        settings.setValue("yfactor", 10);
+        settings.setValue("yfactor", 20);
     gvtree_preferences.yfactor->setValue(settings.value("yfactor").toInt());
 
     if (!settings.contains("gitShortHashes"))
-        settings.setValue("gitShortHashes", false);
+        settings.setValue("gitShortHashes", true);
     gvtree_preferences.git_short_hashes->setChecked(settings.value("gitShortHashes").toBool());
 
     if (!settings.contains("topDownView"))
@@ -492,7 +492,7 @@ void MainWindow::restorePreferencesSettings()
     gvtree_preferences.animated->setChecked(settings.value("animated").toBool());
 
     if (!settings.contains("textborder"))
-        settings.setValue("textborder", false);
+        settings.setValue("textborder", true);
     gvtree_preferences.textborder->setChecked(settings.value("textborder").toBool());
 
     if (settings.contains("diffLocalFile"))
@@ -512,7 +512,7 @@ void MainWindow::restorePreferencesSettings()
             gvtree_preferences.rbConnectorStyle0->setChecked(true);
     }
     else
-        gvtree_preferences.rbConnectorStyle0->setChecked(true);
+        gvtree_preferences.rbConnectorStyle1->setChecked(true);
 
     // switches for version folding
     if (settings.contains("fold_no_head") && settings.value("fold_no_head").toBool())
@@ -719,17 +719,17 @@ void MainWindow::createMenus()
     viewmenu = menuBar()->addMenu(tr("View"));
 
     gridLayout = new TagPrefGridLayout();
-    gridLayout->addTagPreference("HEAD", "(HEAD.*)", false);
-    gridLayout->addTagPreference("Commit Date", "", false);
-    gridLayout->addTagPreference("User Name", "", false);
-    gridLayout->addTagPreference("Hash", "", false);
-    gridLayout->addTagPreference("Branch", "^((?!.*tag: )\\b([\\/0-9a-zA-Z_]*)\\b)$", true);
-    gridLayout->addTagPreference("Release Label", "tag: \\b(R[0-9.\\-]+(_RC[0-9]+)?)$", true);
-    gridLayout->addTagPreference("Baseline Label", "tag: \\b(BASELINE_[0-9.\\-]+)$", true);
-    gridLayout->addTagPreference("FIX/PQT Label", "tag: \\b(((FIX|PQT)_STR[0-9]+(DEV|DOC)?(_RR[0-9]+)?))$", true);
-    gridLayout->addTagPreference("HO Label", "tag: \\b(STR[0-9]+(DEV|DOC)?_HO[0-9]*)$", true);
-    gridLayout->addTagPreference("Other Tags", "tag: \\b(.*)$", false);
-    gridLayout->addTagPreference("Comment", "", false);
+    gridLayout->addTagPreference("HEAD", "(HEAD.*)", QString("#ffff0004"));
+    gridLayout->addTagPreference("Commit Date", "", QString("#ff3584e4"));
+    gridLayout->addTagPreference("User Name", "", QString("#ff1c71d8"));
+    gridLayout->addTagPreference("Hash", "", QString("#ff26a269"));
+    gridLayout->addTagPreference("Branch", "^((?!.*tag: )\\b([\\/0-9a-zA-Z_]*)\\b)$", QString("#ff5e5c64"), QString(), true);
+    gridLayout->addTagPreference("Release Label", "tag: \\b(v[0-9.\\-]+)|(R[0-9.\\-]+(_RC[0-9]+)?)$", QString("#ffe01b24"), QString("Nimbus Sans L,18,-1,5,75,0,0,0,0,0"), true);
+    gridLayout->addTagPreference("Baseline Label", "tag: \\b(BASELINE_[0-9.\\-]+)$", QString("#ff3d3846"), QString("Nimbus Sans L,18,-1,5,75,0,0,0,0,0"), true);
+    gridLayout->addTagPreference("FIX/PQT Label", "tag: \\b(((FIX|PQT)_STR[0-9]+(DEV|DOC)?(_RR[0-9]+)?))$", QString(), QString(), true);
+    gridLayout->addTagPreference("HO Label", "tag: \\b(STR[0-9]+(DEV|DOC)?_HO[0-9]*)$", QString("#ff5e5c64"), QString(), true);
+    gridLayout->addTagPreference("Other Tags", "tag: \\b(.*)$", QString("#ff000000"));
+    gridLayout->addTagPreference("Comment", "", QString("#ff63452c"), QString("Nimbus Sans,8,-1,5,50,0,0,0,0,0"));
     gvtree_preferences.verticalLayout_3->addLayout(gridLayout);
 
     connect(gridLayout, SIGNAL(regexpChanged()), this, SLOT(resetCurrentRepository()));
@@ -1351,16 +1351,16 @@ int MainWindow::getConnectorStyle() const
 
 void MainWindow::restoreColorSettings()
 {
-    restoreColorSettingsHelper(gvtree_preferences.pbColorBackground, QString("colorBackground"), QColor(255, 240, 192));
-    restoreColorSettingsHelper(gvtree_preferences.pbColorVersion, QString("colorVersion"), QColor(255, 192, 0));
-    restoreColorSettingsHelper(gvtree_preferences.pbColorEdge, QString("colorEdge"), QColor(64, 64, 64));
-    restoreColorSettingsHelper(gvtree_preferences.pbColorMerge, QString("colorMerge"), QColor(64, 64, 192));
-    restoreColorSettingsHelper(gvtree_preferences.pbColorSearch, QString("colorSearch"), QColor(20, 100, 200));
-    restoreColorSettingsHelper(gvtree_preferences.pbColorSelected, QString("colorSelected"), QColor(255, 0, 0));
-    restoreColorSettingsHelper(gvtree_preferences.pbColorFolded, QString("colorFolded"), QColor(64, 64, 64));
-    restoreColorSettingsHelper(gvtree_preferences.pbColorUnfolded, QString("colorUnfolded"), QColor(192, 192, 192));
-    restoreColorSettingsHelper(gvtree_preferences.pbColorFromTo, QString("colorFromTo"), QColor(128, 128, 255));
-    restoreColorSettingsHelper(gvtree_preferences.pbColorFileConstraint, QString("colorFileConstraint"), QColor(255, 0, 0));
+    restoreColorSettingsHelper(gvtree_preferences.pbColorBackground, QString("colorBackground"), QColor("#ffdeddda"));
+    restoreColorSettingsHelper(gvtree_preferences.pbColorVersion, QString("colorVersion"), QColor("#ffffb000"));
+    restoreColorSettingsHelper(gvtree_preferences.pbColorEdge, QString("colorEdge"), QColor("#ff404040"));
+    restoreColorSettingsHelper(gvtree_preferences.pbColorMerge, QString("colorMerge"), QColor("#ff4040b0"));
+    restoreColorSettingsHelper(gvtree_preferences.pbColorSearch, QString("colorSearch"), QColor("#ff1080d0"));
+    restoreColorSettingsHelper(gvtree_preferences.pbColorSelected, QString("colorSelected"), QColor("#ffff0000"));
+    restoreColorSettingsHelper(gvtree_preferences.pbColorFolded, QString("colorFolded"), QColor("#ff9a9996"));
+    restoreColorSettingsHelper(gvtree_preferences.pbColorUnfolded, QString("colorUnfolded"), QColor("#ffc0c0c0"));
+    restoreColorSettingsHelper(gvtree_preferences.pbColorFromTo, QString("colorFromTo"), QColor("#ff62a0ea"));
+    restoreColorSettingsHelper(gvtree_preferences.pbColorFileConstraint, QString("colorFileConstraint"), QColor("#ffff0000"));
 }
 
 void MainWindow::restoreColorSettingsHelper(
@@ -1606,5 +1606,5 @@ bool MainWindow::getVersionIsFoldable(const QMap<QString, QStringList>& _keyinfo
 
 GraphWidget* MainWindow::getGraphWidget()
 {
-  return graphwidget;
+    return graphwidget;
 }
