@@ -40,12 +40,13 @@ void TagPrefGridLayout::addTagPreference(const QString& _name,
                                          const QString& _regexp,
                                          const QString& _color,
                                          const QString& _font,
-                                         bool _regexpChangeable)
+                                         bool _regexpChangeable,
+                                         int _fold)
 {
     if (tp.contains(_name))
         return;
 
-    TagPreference* tpw = new TagPreference(_name, _regexp, _color, _font, bgcolor, true, _regexpChangeable, this);
+    TagPreference* tpw = new TagPreference(_name, _regexp, _color, _font, bgcolor, true, _regexpChangeable, _fold , this);
 
     connect(this, SIGNAL(sigSetBackgroundColor(const QColor&)), tpw, SLOT(setBackgroundColor(const QColor&)));
 
@@ -56,6 +57,7 @@ void TagPrefGridLayout::addTagPreference(const QString& _name,
 
     connect(tpw, SIGNAL(regexpChanged()), this, SLOT(regexpChangedProxy()));
     connect(tpw, SIGNAL(visibilityChanged()), this, SLOT(visibilityChangedProxy()));
+    connect(tpw, SIGNAL(foldChanged()), this, SLOT(regexpChangedProxy()));
     tp[_name] = tpw;
 }
 

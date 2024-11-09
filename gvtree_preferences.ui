@@ -43,7 +43,7 @@
    <item row="1" column="1" colspan="2">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="tabWidgetPage1">
       <property name="statusTip">
@@ -57,7 +57,6 @@
         <widget class="QGroupBox" name="gbGitLog">
          <property name="font">
           <font>
-           <weight>75</weight>
            <bold>true</bold>
           </font>
          </property>
@@ -69,7 +68,6 @@
            <widget class="QLineEdit" name="git_log_lines">
             <property name="font">
              <font>
-              <weight>50</weight>
               <bold>false</bold>
              </font>
             </property>
@@ -88,7 +86,6 @@
            <widget class="QCheckBox" name="git_short_hashes">
             <property name="font">
              <font>
-              <weight>50</weight>
               <bold>false</bold>
              </font>
             </property>
@@ -104,7 +101,6 @@
            <widget class="QLabel" name="lbGitLogLength">
             <property name="font">
              <font>
-              <weight>50</weight>
               <bold>false</bold>
              </font>
             </property>
@@ -133,7 +129,6 @@
         <widget class="QGroupBox" name="groupBox_7">
          <property name="font">
           <font>
-           <weight>75</weight>
            <bold>true</bold>
           </font>
          </property>
@@ -145,7 +140,6 @@
            <widget class="QLabel" name="lbCurrentLocalRepositoryPath">
             <property name="font">
              <font>
-              <weight>75</weight>
               <bold>true</bold>
              </font>
             </property>
@@ -158,7 +152,6 @@
            <widget class="QPushButton" name="pbLocalRepositoryPath">
             <property name="font">
              <font>
-              <weight>75</weight>
               <bold>true</bold>
              </font>
             </property>
@@ -174,7 +167,6 @@
            <widget class="QGroupBox" name="gbRepoPath">
             <property name="font">
              <font>
-              <weight>75</weight>
               <bold>true</bold>
              </font>
             </property>
@@ -189,7 +181,6 @@
               <widget class="QRadioButton" name="rbCurrentPathRepo">
                <property name="font">
                 <font>
-                 <weight>50</weight>
                  <bold>false</bold>
                 </font>
                </property>
@@ -205,7 +196,6 @@
               <widget class="QRadioButton" name="rbLastRepo">
                <property name="font">
                 <font>
-                 <weight>50</weight>
                  <bold>false</bold>
                 </font>
                </property>
@@ -227,7 +217,6 @@
         <widget class="QGroupBox" name="gbMisc">
          <property name="font">
           <font>
-           <weight>75</weight>
            <bold>true</bold>
           </font>
          </property>
@@ -249,7 +238,6 @@
            <widget class="QLabel" name="lbCodecForCStrings">
             <property name="font">
              <font>
-              <weight>50</weight>
               <bold>false</bold>
              </font>
             </property>
@@ -275,7 +263,6 @@
            <widget class="QCheckBox" name="include_selected">
             <property name="font">
              <font>
-              <weight>50</weight>
               <bold>false</bold>
              </font>
             </property>
@@ -288,7 +275,6 @@
            <widget class="QCheckBox" name="diff_local_files">
             <property name="font">
              <font>
-              <weight>50</weight>
               <bold>false</bold>
              </font>
             </property>
@@ -307,7 +293,6 @@
            <widget class="QCheckBox" name="print_cmd_to_stdout">
             <property name="font">
              <font>
-              <weight>50</weight>
               <bold>false</bold>
              </font>
             </property>
@@ -323,7 +308,6 @@
            <widget class="QLabel" name="lbTempPath">
             <property name="font">
              <font>
-              <weight>50</weight>
               <bold>false</bold>
              </font>
             </property>
@@ -336,7 +320,6 @@
            <widget class="QLabel" name="lbCssPath">
             <property name="font">
              <font>
-              <weight>50</weight>
               <bold>false</bold>
              </font>
             </property>
@@ -349,7 +332,6 @@
            <widget class="QCheckBox" name="reduce_tree">
             <property name="font">
              <font>
-              <weight>50</weight>
               <bold>false</bold>
              </font>
             </property>
@@ -368,7 +350,6 @@
         <widget class="QGroupBox" name="gbSort">
          <property name="font">
           <font>
-           <weight>75</weight>
            <bold>true</bold>
           </font>
          </property>
@@ -380,7 +361,6 @@
            <widget class="QLabel" name="lbVerticalSort">
             <property name="font">
              <font>
-              <weight>50</weight>
               <bold>false</bold>
              </font>
             </property>
@@ -393,7 +373,6 @@
            <widget class="QLabel" name="lbHorizontalSort">
             <property name="font">
              <font>
-              <weight>50</weight>
               <bold>false</bold>
              </font>
             </property>
@@ -729,7 +708,7 @@
        <string>Tag Settings</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_5">
-       <item row="100" column="0" colspan="2">
+       <item row="99" column="0" colspan="2">
         <widget class="QGroupBox" name="groupBox_5">
          <property name="title">
           <string>Comment dimensions</string>
@@ -771,74 +750,6 @@
        </item>
        <item row="0" column="0" rowspan="98" colspan="2">
         <layout class="QVBoxLayout" name="verticalLayout_3"/>
-       </item>
-       <item row="99" column="0" colspan="2">
-        <widget class="QGroupBox" name="groupBox_6">
-         <property name="title">
-          <string>Do not hide in folder</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_9">
-          <item row="4" column="1">
-           <widget class="QCheckBox" name="fold_no_branch">
-            <property name="text">
-             <string>Branch tag</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1" colspan="3">
-           <widget class="QLineEdit" name="fold_not_regexp"/>
-          </item>
-          <item row="0" column="0">
-           <widget class="QCheckBox" name="fold_no_tag">
-            <property name="text">
-             <string>any visible tag</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
-           <widget class="QCheckBox" name="fold_no_head">
-            <property name="text">
-             <string>HEAD</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QCheckBox" name="fold_not_pattern">
-            <property name="text">
-             <string>tag with pattern</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="0">
-           <widget class="QCheckBox" name="fold_no_release">
-            <property name="text">
-             <string>Release Label</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="1">
-           <widget class="QCheckBox" name="fold_no_baseline">
-            <property name="text">
-             <string>Baseline Label</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="2">
-           <widget class="QCheckBox" name="fold_no_FIXPQT">
-            <property name="text">
-             <string>FIX/PQT Label</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="3">
-           <widget class="QCheckBox" name="fold_no_HO">
-            <property name="text">
-             <string>HO Label</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
        </item>
       </layout>
      </widget>

@@ -28,7 +28,9 @@
 using namespace std;
 
 TagPreference::TagPreference(const QString& _name,
-                             QWidget* _parent) : QLabel(_name, _parent), regexpChangeable(true)
+                             QWidget* _parent)
+    : QLabel(_name, _parent),
+    regexpChangeable(true)
 {
     setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     initDefault();
@@ -41,10 +43,14 @@ TagPreference::TagPreference(const QString& _name,
                              const QColor& _bgcolor,
                              bool _visibility,
                              bool _regexpChangeable,
-                             QWidget* _parent) : QLabel(_name, _parent), bgcolor(_bgcolor), regexpChangeable(_regexpChangeable)
+                             int _fold,
+                             QWidget* _parent)
+    : QLabel(_name, _parent),
+    bgcolor(_bgcolor),
+    regexpChangeable(_regexpChangeable)
 {
     setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-    initDefault(_regexDefault, _colorDefault, _fontDefault, _visibility);
+    initDefault(_regexDefault, _colorDefault, _fontDefault, _visibility, _fold);
 
     // tag and color
     setContextMenuPolicy(Qt::CustomContextMenu);
@@ -57,7 +63,8 @@ TagPreference::TagPreference(const QString& _name,
 void TagPreference::initDefault(const QString& _regexDefault,
                                 const QString& _colorDefault,
                                 const QString& _fontDefault,
-                                bool _visibility)
+                                bool _visibility,
+                                int _fold)
 {
     QSettings settings;
     QString lookup;
@@ -112,12 +119,27 @@ void TagPreference::initDefault(const QString& _regexDefault,
         settings.setValue(lookup, visibility);
     }
 
+    lookup = "tagpref/" + text() + "/fold";
+    if (settings.contains(lookup))
+    {
+        fold = settings.value(lookup).toInt();
+    }
+    else
+    {
+        fold = _fold;
+        settings.setValue(lookup, fold);
+    }
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     regExp = QRegularExpression(regExpText);
 #else
     regExp = QRegExp(regExpText);
 #endif
+}
+
+int TagPreference::getFold() const
+{
+    return fold;
 }
 
 bool TagPreference::getVisibility() const
@@ -206,6 +228,16 @@ void TagPreference::onCustomContextMenu(const QPoint& /*_pos*/)
     act->setChecked(visibility);
     connect(act, SIGNAL(triggered(bool)), this, SLOT(changeVisibility(bool)));
     menu->addAction(act);
+
+    if (fold != -1)
+    {
+        act = new QAction("Fold", this);
+        act->setCheckable(true);
+        act->setChecked(fold);
+        connect(act, SIGNAL(triggered(bool)), this, SLOT(changeFold(bool)));
+        menu->addAction(act);
+    }
+
     menu->addSeparator();
 
     act = new QAction("Add New", this);
@@ -287,6 +319,20 @@ void TagPreference::changeVisibility(bool _val)
     settings.setValue(lookup, _val);
 
     emit visibilityChanged();
+}
+
+void TagPreference::changeFold(bool _val)
+{
+    if (fold != -1)
+    {
+        fold = _val ? 1 : 0;
+        QSettings settings;
+        QString lookup = "tagpref/" + text() + "/fold";
+
+        settings.setValue(lookup, _val);
+
+        emit foldChanged();
+    }
 }
 
 void TagPreference::addTagPreference()

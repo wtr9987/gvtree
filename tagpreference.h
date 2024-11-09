@@ -43,14 +43,17 @@ public:
                   const QColor& _bgcolor,
                   bool _visibility,
                   bool _regexpChangeable,
+                  int _fold,
                   QWidget* _parent = NULL);
 
     void initDefault(const QString& _regexDefault = QString(),
                      const QString& _colorDefault = QString(),
                      const QString& _fontDefault = QString(),
-                     bool _visibility = false);
+                     bool _visibility = false,
+                     int _fold = -1);
 
     bool getVisibility() const;
+    int getFold() const;
     const QFont& getFont() const;
     const QColor& getColor() const;
     bool getChangeable() const;
@@ -75,6 +78,7 @@ protected:
     QColor bgcolor;
     bool regexpChangeable;
     bool visibility;
+    int fold;
 
 public slots:
     void setBackgroundColor(const QColor& _bgcolor);
@@ -82,6 +86,7 @@ public slots:
 
 protected slots:
     void changeVisibility(bool _val);
+    void changeFold(bool _val);
     void changeFont();
     void changeColor();
     void changeRegularExpression();
@@ -92,6 +97,7 @@ protected slots:
 signals:
     void regexpChanged();
     void visibilityChanged();
+    void foldChanged();
     void deleteTagPreference(const QString&);
     void addTagPreference(const QString&);
 };

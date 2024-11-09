@@ -514,57 +514,6 @@ void MainWindow::restorePreferencesSettings()
     else
         gvtree_preferences.rbConnectorStyle1->setChecked(true);
 
-    // switches for version folding
-    if (settings.contains("fold_no_head") && settings.value("fold_no_head").toBool())
-        gvtree_preferences.fold_no_head->setChecked(true);
-    else
-        gvtree_preferences.fold_no_head->setChecked(false);
-
-    if (settings.contains("fold_no_branch") && settings.value("fold_no_branch").toBool())
-        gvtree_preferences.fold_no_branch->setChecked(true);
-    else
-        gvtree_preferences.fold_no_branch->setChecked(false);
-
-    if (settings.contains("fold_no_release") && settings.value("fold_no_release").toBool())
-        gvtree_preferences.fold_no_release->setChecked(true);
-    else
-        gvtree_preferences.fold_no_release->setChecked(false);
-
-    if (settings.contains("fold_no_baseline") && settings.value("fold_no_baseline").toBool())
-        gvtree_preferences.fold_no_baseline->setChecked(true);
-    else
-        gvtree_preferences.fold_no_baseline->setChecked(false);
-
-    if (settings.contains("fold_no_HO") && settings.value("fold_no_HO").toBool())
-        gvtree_preferences.fold_no_HO->setChecked(true);
-    else
-        gvtree_preferences.fold_no_HO->setChecked(false);
-
-    if (settings.contains("fold_no_FIXPQT") && settings.value("fold_no_FIXPQT").toBool())
-        gvtree_preferences.fold_no_FIXPQT->setChecked(true);
-    else
-        gvtree_preferences.fold_no_FIXPQT->setChecked(false);
-
-    if (settings.contains("fold_no_tag") && settings.value("fold_no_tag").toBool())
-        gvtree_preferences.fold_no_tag->setChecked(true);
-    else
-        gvtree_preferences.fold_no_tag->setChecked(false);
-
-    if (settings.contains("fold_not_pattern") && settings.value("fold_not_pattern").toBool())
-        gvtree_preferences.fold_not_pattern->setChecked(true);
-    else
-        gvtree_preferences.fold_not_pattern->setChecked(false);
-
-    if (settings.contains("fold_not_regexp"))
-    {
-        gvtree_preferences.fold_not_regexp->setText(settings.value("fold_not_regexp").toString());
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-        foldNotRegExp = QRegularExpression(gvtree_preferences.fold_not_regexp->text());
-#else
-        foldNotRegExp = QRegExp(gvtree_preferences.fold_not_regexp->text());
-#endif
-    }
-
     if (settings.contains("defaultLastRepo")
         && settings.value("defaultLastRepo").toInt())
     {
@@ -724,11 +673,11 @@ void MainWindow::createMenus()
     connect(this, SIGNAL(sigBackgroundColorChange(const QColor&)), gridLayout, SLOT(setBackgroundColor(const QColor&)));
 
     // Fixed entries for version information
-    gridLayout->addTagPreference("HEAD", "(HEAD.*)", QString("#ffff0004"));
-    gridLayout->addTagPreference("Commit Date", "", QString("#ff3584e4"));
-    gridLayout->addTagPreference("User Name", "", QString("#ff1c71d8"));
-    gridLayout->addTagPreference("Hash", "", QString("#ff26a269"));
-    gridLayout->addTagPreference("Comment", "", QString("#ff63452c"), QString("Nimbus Sans,8,-1,5,50,0,0,0,0,0"));
+    gridLayout->addTagPreference("HEAD", "(HEAD.*)", QString("#ffff0004"), QString(), false, 0);
+    gridLayout->addTagPreference("Commit Date", "", QString("#ff3584e4"), QString(), false, -1);
+    gridLayout->addTagPreference("User Name", "", QString("#ff1c71d8"), QString(), false, -1);
+    gridLayout->addTagPreference("Hash", "", QString("#ff26a269"), QString(), false, -1);
+    gridLayout->addTagPreference("Comment", "", QString("#ff63452c"), QString("Nimbus Sans,8,-1,5,50,0,0,0,0,0"), false, -1);
 
     // Dynamic entries (from QSettings first)
     QSet<QString> tagprefKeys;
@@ -762,27 +711,28 @@ void MainWindow::createMenus()
         lookup = "tagpref/" + name + "/color";
         color = settings.value(lookup).toString();
 
-        gridLayout->addTagPreference(name, regexp, color, font, true);
+        gridLayout->addTagPreference(name, regexp, color, font, true, 0);
     }
 
     // Create initial default
     if (tagprefKeys.size() == 0)
     {
-        gridLayout->addTagPreference("Branch", "^((?!.*tag: )\\b([\\/0-9a-zA-Z_]*)\\b)$", QString("#ff5e5c64"), QString(), true);
-        gridLayout->addTagPreference("Release Label", "tag: \\b(v[0-9.\\-]+)|(R[0-9.\\-]+(_RC[0-9]+)?)$", QString("#ffe01b24"), QString("Nimbus Sans L,18,-1,5,75,0,0,0,0,0"), true);
-        gridLayout->addTagPreference("Baseline Label", "tag: \\b(BASELINE_[0-9.\\-]+)$", QString("#ff3d3846"), QString("Nimbus Sans L,18,-1,5,75,0,0,0,0,0"), true);
-        gridLayout->addTagPreference("FIX Label", "tag: \\b((FIX_STR[0-9]+(DEV|DOC)?(_RR[0-9]+)?))$", QString(), QString(), true);
-        gridLayout->addTagPreference("PQT Label", "tag: \\b((PQT_STR[0-9]+(DEV|DOC)?(_RR[0-9]+)?))$", QString(), QString(), true);
-        gridLayout->addTagPreference("HO Label", "tag: \\b(STR[0-9]+(DEV|DOC)?_HO[0-9]*)$", QString("#ff5e5c64"), QString(), true);
+        gridLayout->addTagPreference("Branch", "^((?!.*tag: )\\b([\\/0-9a-zA-Z_]*)\\b)$", QString("#ff5e5c64"), QString(), true, 0);
+        gridLayout->addTagPreference("Release Label", "tag: \\b(((v|R)[0-9.\\-]+)(_RC[0-9]+)?([a-z]+\\.[0-9]+)?)$", QString("#ffe01b24"), QString("Nimbus Sans L,18,-1,5,75,0,0,0,0,0"), true, 0);
+        gridLayout->addTagPreference("Baseline Label", "tag: \\b(BASELINE_[0-9.\\-]+)$", QString("#ff3d3846"), QString("Nimbus Sans L,18,-1,5,75,0,0,0,0,0"), true, 0);
+        gridLayout->addTagPreference("FIX Label", "tag: \\b((FIX_STR[0-9]+(DEV|DOC)?(_RR[0-9]+)?))$", QString(), QString(), true, 0);
+        gridLayout->addTagPreference("PQT Label", "tag: \\b((PQT_STR[0-9]+(DEV|DOC)?(_RR[0-9]+)?))$", QString(), QString(), true, 0);
+        gridLayout->addTagPreference("HO Label", "tag: \\b(STR[0-9]+(DEV|DOC)?_HO[0-9]*)$", QString("#ff5e5c64"), QString(), true, 0);
     }
 
     // Fixed entry 'Other Tags' must be the last one in the list
-    gridLayout->addTagPreference("Other Tags", "tag: \\b(.*)$", QString("#ff000000"));
+    gridLayout->addTagPreference("Other Tags", "tag: \\b(.*)$", QString("#ff000000"), QString(), false, 1);
     gvtree_preferences.verticalLayout_3->addWidget(gridLayout);
 
     // tagpref or visibility changed
     connect(gridLayout, SIGNAL(regexpChanged()), this, SLOT(resetCurrentRepository()));
-    connect(gridLayout, SIGNAL(visibilityChanged()), this, SLOT(tagPreferencesVisibilityChange()));
+    //connect(gridLayout, SIGNAL(visibilityChanged()), this, SLOT(tagPreferencesVisibilityChange()));
+    connect(gridLayout, SIGNAL(visibilityChanged()), this, SLOT(tagPreferencesElementChange()));
     connect(gridLayout, SIGNAL(elementChanged()), this, SLOT(tagPreferencesElementChange()));
 
     tagPreferencesVisibilityChange();
@@ -840,6 +790,12 @@ void MainWindow::tagPreferencesElementChange()
     gridLayout->getChangeableTagPreferences(changeable);
     graphwidget->setChangeableVersionInfo(changeable);
     gridLayout->getTagPreferences(nodeInfo);
+
+    QStringList visibility;
+
+    gridLayout->getVisibleTagPreferences(visibility);
+    graphwidget->setGlobalVersionInfo(visibility);
+
     graphwidget->gitlog(true);
     refreshRepo->setEnabled(true);
 }
@@ -1303,42 +1259,6 @@ void MainWindow::saveChangedSettings()
     settings.setValue("textborder", gvtree_preferences.textborder->isChecked());
     settings.setValue("diffLocalFile", gvtree_preferences.diff_local_files->isChecked());
     settings.setValue("reduceTree", gvtree_preferences.reduce_tree->isChecked());
-
-    forceUpdate = forceUpdate || !settings.contains("fold_no_tag")
-        || settings.value("fold_no_tag").toBool() != gvtree_preferences.fold_no_tag->isChecked()
-        || !settings.contains("fold_no_head")
-        || settings.value("fold_no_head").toBool() != gvtree_preferences.fold_no_head->isChecked()
-        || !settings.contains("fold_no_branch")
-        || settings.value("fold_no_branch").toBool() != gvtree_preferences.fold_no_branch->isChecked()
-        || !settings.contains("fold_no_baseline")
-        || settings.value("fold_no_baseline").toBool() != gvtree_preferences.fold_no_baseline->isChecked()
-        || !settings.contains("fold_no_release")
-        || settings.value("fold_no_release").toBool() != gvtree_preferences.fold_no_release->isChecked()
-        || !settings.contains("fold_no_FIXPQT")
-        || settings.value("fold_no_FIXPQT").toBool() != gvtree_preferences.fold_no_FIXPQT->isChecked()
-        || !settings.contains("fold_no_HO")
-        || settings.value("fold_no_HO").toBool() != gvtree_preferences.fold_no_HO->isChecked()
-        || !settings.contains("fold_not_pattern")
-        || settings.value("fold_not_pattern").toBool() != gvtree_preferences.fold_not_pattern->isChecked()
-        || !settings.contains("fold_not_regexp")
-        || settings.value("fold_not_regexp").toString() != gvtree_preferences.fold_not_regexp->text();
-
-    settings.setValue("fold_no_tag", gvtree_preferences.fold_no_tag->isChecked());
-    settings.setValue("fold_no_head", gvtree_preferences.fold_no_head->isChecked());
-    settings.setValue("fold_no_branch", gvtree_preferences.fold_no_branch->isChecked());
-    settings.setValue("fold_no_baseline", gvtree_preferences.fold_no_baseline->isChecked());
-    settings.setValue("fold_no_release", gvtree_preferences.fold_no_release->isChecked());
-    settings.setValue("fold_no_FIXPQT", gvtree_preferences.fold_no_FIXPQT->isChecked());
-    settings.setValue("fold_no_HO", gvtree_preferences.fold_no_HO->isChecked());
-    settings.setValue("fold_not_pattern", gvtree_preferences.fold_not_pattern->isChecked());
-    settings.setValue("fold_not_regexp", gvtree_preferences.fold_not_regexp->text());
-    gvtree_preferences.fold_not_regexp->setText(settings.value("fold_not_regexp").toString());
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-    foldNotRegExp = QRegularExpression(gvtree_preferences.fold_not_regexp->text());
-#else
-    foldNotRegExp = QRegExp(gvtree_preferences.fold_not_regexp->text());
-#endif
-
     settings.setValue("connectorStyle", getConnectorStyle());
     settings.setValue("defaultLastRepo", gvtree_preferences.rbLastRepo->isChecked() ? 1 : 0);
     settings.setValue("printCmdToStdout", gvtree_preferences.print_cmd_to_stdout->isChecked());
@@ -1607,54 +1527,19 @@ const QStringList& MainWindow::getNodeInfo() const
 
 bool MainWindow::getVersionIsFoldable(const QMap<QString, QStringList>& _keyinformation) const
 {
-    bool fold_no_head = gvtree_preferences.fold_no_head->isChecked();
-    bool fold_no_branch = gvtree_preferences.fold_no_branch->isChecked();
-    bool fold_no_release = gvtree_preferences.fold_no_release->isChecked();
-    bool fold_no_baseline = gvtree_preferences.fold_no_baseline->isChecked();
-    bool fold_no_HO = gvtree_preferences.fold_no_HO->isChecked();
-    bool fold_no_FIXPQT = gvtree_preferences.fold_no_FIXPQT->isChecked();
-    bool fold_no_tag = gvtree_preferences.fold_no_tag->isChecked();
-    bool fold_not_pattern = gvtree_preferences.fold_not_pattern->isChecked();
+    bool fold = true;
 
     for (QMap<QString, QStringList>::const_iterator it = _keyinformation.begin();
-         it != _keyinformation.end();
+         it != _keyinformation.end() && fold;
          it++)
     {
-        if (it.value().size() > 0)
+        const TagPreference* tp = gridLayout->getTagPreference(it.key());
+        if (tp && tp->getFold() == 0 && tp->getVisibility() == true)
         {
-            if (it.key() == "HEAD" && (fold_no_tag || fold_no_head))
-                return false;
-
-            if (it.key() == "Release Label" && (fold_no_tag || fold_no_release))
-                return false;
-
-            if (it.key() == "Baseline Label" && (fold_no_tag || fold_no_baseline))
-                return false;
-
-            if (it.key() == "Branch" && (fold_no_tag || fold_no_branch))
-                return false;
-
-            if (it.key() == "FIX/PQT Label" && (fold_no_tag || fold_no_FIXPQT))
-                return false;
-
-            if (it.key() == "HO Label" && (fold_no_tag || fold_no_HO))
-                return false;
-
-            if (it.key() == "Other Tags" && fold_no_tag)
-            {
-                return false;
-            }
-            if (fold_not_pattern && foldNotRegExp.isValid())
-            {
-                foreach(const QString& str, it.value())
-                {
-                    if (!foldNotRegExp.match(str).hasMatch())
-                        return false;
-                }
-            }
+            fold = false;
         }
     }
-    return true;
+    return fold;
 }
 
 GraphWidget* MainWindow::getGraphWidget()
