@@ -15,69 +15,114 @@
 /*                                               */
 /* --------------------------------------------- */
 
-#include <QFontDialog>
-#include <QColorDialog>
+#include <QAction>
 #include <QApplication>
+#include <QColorDialog>
+#include <QFontDialog>
+#include <QInputDialog>
+#include <QMenu>
+#include <QSettings>
 #include "tagpreference.h"
 
 #include <iostream>
 using namespace std;
 
-TagPreference::TagPreference(int _row,
-                             const QString& _name,
+TagPreference::TagPreference(const QString& _name,
+                             QWidget* _parent) : QLabel(_name, _parent), regexpChangeable(true)
+{
+    setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+    initDefault();
+}
+
+TagPreference::TagPreference(const QString& _name,
                              const QString& _regexDefault,
                              const QString& _colorDefault,    // default, if not defined in settings
-                             const QString& _fontDefault,      // default, if not defined in settings
-                             QGridLayout* _layout) : QObject(NULL)
+                             const QString& _fontDefault,     // default, if not defined in settings
+                             const QColor& _bgcolor,
+                             bool _visibility,
+                             bool _regexpChangeable,
+                             QWidget* _parent) : QLabel(_name, _parent), bgcolor(_bgcolor), regexpChangeable(_regexpChangeable)
+{
+    setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+    initDefault(_regexDefault, _colorDefault, _fontDefault, _visibility);
+
+    // tag and color
+    setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
+            this, SLOT(onCustomContextMenu(const QPoint&)));
+
+    updateLabel();
+}
+
+void TagPreference::initDefault(const QString& _regexDefault,
+                                const QString& _colorDefault,
+                                const QString& _fontDefault,
+                                bool _visibility)
 {
     QSettings settings;
+    QString lookup;
 
-    // regular expression
-    regularExpression = new QLineEdit();
-    _layout->addWidget(regularExpression, _row, 2, 1, 2);
-
-    QString lookupRegexp = _name + "/regExp";
-
-    if (settings.contains(lookupRegexp))
+    lookup = "tagpref/" + text() + "/regExp";
+    if (settings.contains(lookup))
     {
-        regularExpression->setText(settings.value(lookupRegexp).toString());
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-        regExp = QRegularExpression(settings.value(lookupRegexp).toString());
-#else
-        regExp = QRegExp(settings.value(lookupRegexp).toString());
-#endif
+        regExpText = settings.value(lookup).toString();
     }
     else
     {
-        regularExpression->setText(_regexDefault);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-        regExp = QRegularExpression(_regexDefault);
-#else
-        regExp = QRegExp(_regexDefault);
-#endif
+        regExpText = _regexDefault;
+        settings.setValue(lookup, _regexDefault);
     }
 
-    connect(regularExpression, SIGNAL(textChanged(const QString&)), this, SLOT(setRegularExpression(const QString&)));
+    lookup = "tagpref/" + text() + "/color";
+    if (settings.contains(lookup))
+    {
+        color = settings.contains(lookup) ? settings.value(lookup).value<QColor>() : QColor(_colorDefault);
+    }
+    else
+    {
+        color = QColor(_colorDefault);
+        settings.setValue(lookup, _colorDefault);
+    }
 
-    // tag and color
-    tagType = new QPushButton(_name);
+    lookup = "tagpref/" + text() + "/font";
+    QString fontString = QFont().toString();
 
-    QString lookupColor = _name + "/color";
-    color = settings.contains(lookupColor) ? settings.value(lookupColor).value<QColor>() : QColor(_colorDefault);
-    updateColorButton();
+    if (settings.contains(lookup))
+    {
+        fontString = settings.value(lookup).toString();
+    }
+    else
+    {
+        if (!_fontDefault.isEmpty())
+        {
+            fontString = _fontDefault;
+        }
+        settings.setValue(lookup, fontString);
+    }
+    font.fromString(fontString);
 
-    connect(tagType, SIGNAL(clicked()), this, SLOT(setColor()));
-    _layout->addWidget(tagType, _row, 0, 1, 1);
+    lookup = "tagpref/" + text() + "/visibility";
+    if (settings.contains(lookup))
+    {
+        visibility = settings.value(lookup).toBool();
+    }
+    else
+    {
+        visibility = _visibility;
+        settings.setValue(lookup, visibility);
+    }
 
-    // font
-    fontButton = new QPushButton(QApplication::font().toString());
-    QString lookupFont = _name + "/font";
-    font.fromString(settings.contains(lookupFont)?settings.value(lookupFont).toString():_fontDefault);
-    updateFontButton();
 
-    connect(fontButton, SIGNAL(clicked()), this, SLOT(setFont()));
-    _layout->addWidget(fontButton, _row, 1, 1, 1);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    regExp = QRegularExpression(regExpText);
+#else
+    regExp = QRegExp(regExpText);
+#endif
+}
 
+bool TagPreference::getVisibility() const
+{
+    return visibility;
 }
 
 const QFont& TagPreference::getFont() const
@@ -99,74 +144,176 @@ const QRegExp& TagPreference::getRegExp() const
     return regExp;
 }
 
-void TagPreference::setFont()
+bool TagPreference::getChangeable() const
+{
+    return regexpChangeable;
+}
+
+void TagPreference::updateLabel()
+{
+    QSettings settings;
+    QString lookup;
+
+    lookup = "tagpref/" + text() + "/font";
+    settings.setValue(lookup, font.toString());
+
+    lookup = "tagpref/" + text() + "/color";
+    settings.setValue(lookup, color.name());
+
+    setFont(font);
+
+    QString css = "background-color: " + bgcolor.name() + "; color: " + color.name() + ";";
+
+    setStyleSheet(css);
+}
+
+void TagPreference::changeFont()
 {
     QFontDialog dialog(font, NULL);
 
     if (dialog.exec())
     {
         font = dialog.selectedFont();
-        updateFontButton();
+        updateLabel();
     }
 }
 
-void TagPreference::updateFontButton()
+void TagPreference::changeColor()
 {
-    QSettings settings;
-    QString settingsKey = tagType->text() + "/font";
+    QColor result = QColorDialog::getColor(color);
 
-    settings.setValue(settingsKey, font.toString());
-    fontButton->setText(font.toString());
-}
-
-void TagPreference::setColor()
-{
-    QColor tmpColor = QColorDialog::getColor(color);
-
-    if (tmpColor.isValid())
+    if (result.isValid())
     {
-        color = tmpColor;
-        updateColorButton();
+        color = result;
+        updateLabel();
     }
 }
 
-void TagPreference::updateColorButton()
+void TagPreference::setBackgroundColor(const QColor& _bgcolor)
 {
-    QSettings settings;
-    QString settingsKey = tagType->text() + "/color";
-
-    settings.setValue(settingsKey, color.name());
-
-    QColor fgColor = (color.lightness() < 128) ? QColor(255, 255, 255) : QColor(0, 0, 0);
-
-    QString css = "background-color: " + color.name() + "; color: " + fgColor.name() + ";";
-
-    tagType->setStyleSheet(css);
+    bgcolor = _bgcolor;
+    updateLabel();
 }
 
-void TagPreference::setRegularExpression(const QString& _regex)
+void TagPreference::onCustomContextMenu(const QPoint& /*_pos*/)
 {
+    QMenu* menu = new QMenu(this);
+
+    QAction* act = NULL;
+
+    act = new QAction("Visible", this);
+    act->setCheckable(true);
+    act->setChecked(visibility);
+    connect(act, SIGNAL(triggered(bool)), this, SLOT(changeVisibility(bool)));
+    menu->addAction(act);
+    menu->addSeparator();
+
+    act = new QAction("Add New", this);
+    menu->addAction(act);
+    connect(act, SIGNAL(triggered()), this, SLOT(addTagPreference()));
+
+    QMenu* cmenu = new QMenu("Change");
+
+    act = new QAction("Color", this);
+
+    cmenu->addAction(act);
+    connect(act, SIGNAL(triggered()), this, SLOT(changeColor()));
+
+    act = new QAction("Font", this);
+    cmenu->addAction(act);
+    connect(act, SIGNAL(triggered()), this, SLOT(changeFont()));
+
+    if (regexpChangeable)
+    {
+        act = new QAction("RegExp", this);
+        cmenu->addAction(act);
+        connect(act, SIGNAL(triggered()), this, SLOT(changeRegularExpression()));
+    }
+    menu->addMenu(cmenu);
+    if (regexpChangeable)
+    {
+        act = new QAction("Delete", this);
+        menu->addAction(act);
+        connect(act, SIGNAL(triggered()), this, SLOT(deleteTagPreference()));
+    }
+
+
+    menu->exec(QCursor::pos());
+}
+
+void TagPreference::changeRegularExpression()
+{
+    bool ok;
+    QString tmpcss = styleSheet();
+
+    setStyleSheet("");
+    QString result = QInputDialog::getText(this, tr("Change Regular Expression"),
+                                           tr("Regular Expression:"), QLineEdit::Normal,
+                                           regExpText, &ok);
+
+    setStyleSheet(tmpcss);
+
+    if (ok && !result.isEmpty())
+    {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-    regExp = QRegularExpression(_regex);
+        bool valid = QRegularExpression(result).isValid();
 #else
-    regExp = QRegExp(_regex);
+        bool valid = QRegExp(result).isValid();
 #endif
 
-    if (regExp.isValid())
-    {
-        QSettings settings;
-        QString lookupRegexp = tagType->text() + "/regExp";
-        settings.setValue(lookupRegexp, _regex);
-        regularExpression->setStyleSheet("color: black;  background-color: white");
-        emit regexpChanged();
-    }
-    else
-    {
-        regularExpression->setStyleSheet("color: black;  background-color: red");
+        if (valid)
+        {
+            regExpText = result;
+            QSettings settings;
+            QString lookup = "tagpref/" + text() + "/regExp";
+            settings.setValue(lookup, regExpText);
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+            regExp = QRegularExpression(regExpText);
+#else
+            regExp = QRegExp(regExpText);
+#endif
+            emit regexpChanged();
+        }
     }
 }
 
-void TagPreference::disableRegExp()
+void TagPreference::changeVisibility(bool _val)
 {
-    regularExpression->setEnabled(false);
+    visibility = _val;
+    QSettings settings;
+    QString lookup = "tagpref/" + text() + "/visiblity";
+
+    settings.setValue(lookup, _val);
+
+    emit visibilityChanged();
+}
+
+void TagPreference::addTagPreference()
+{
+    bool ok;
+    QString tmpcss = styleSheet();
+
+    setStyleSheet("");
+    QString result = QInputDialog::getText(this, tr("Add new tag pattern"),
+                                           tr("Label :"), QLineEdit::Normal,
+                                           QString("name"), &ok);
+
+    setStyleSheet(tmpcss);
+    if (ok && !result.isEmpty())
+    {
+        emit addTagPreference(result);
+    }
+}
+
+void TagPreference::deleteTagPreference()
+{
+    // delete from tagpref list
+    emit deleteTagPreference(text());
+
+    // delete from QSettings
+    QSettings settings;
+    QString lookup = "tagpref/" + text();
+
+    settings.remove(lookup);
 }

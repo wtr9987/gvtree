@@ -37,6 +37,7 @@ Version::Version(GraphWidget* _graphWidget, QGraphicsItem* _parent) :
     Node(),
     graph(_graphWidget),
     globalVersionInfo(dummy),
+    changeableVersionInfo(dummy),
     matched(false),
     folded(false),
     foldable(true),
@@ -57,12 +58,14 @@ Version::Version(GraphWidget* _graphWidget, QGraphicsItem* _parent) :
 }
 
 Version::Version(const QStringList& _globalVersionInfo,
+                const QStringList& _changeableVersionInfo,
                  GraphWidget* _graphWidget,
                  QGraphicsItem* _parent) :
     QGraphicsItem(_parent),
     Node(),
     graph(_graphWidget),
     globalVersionInfo(_globalVersionInfo),
+    changeableVersionInfo(_changeableVersionInfo),
     matched(false),
     folded(true),
     foldable(true),
@@ -458,11 +461,7 @@ void Version::processGitLogTagInformation(const QString& _tagInfo)
 
         QStringList scanItems (QStringList()
                                << QString("HEAD")
-                               << QString("Release Label")
-                               << QString("Baseline Label")
-                               << QString("FIX/PQT Label")
-                               << QString("HO Label")
-                               << QString("Branch")
+                               << changeableVersionInfo
                                << QString("Other Tags"));
 
         foreach(const QString& it, scanItems)

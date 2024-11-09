@@ -18,64 +18,82 @@
 #ifndef __TAGPREFERENCE_H__
 #define __TAGPREFERENCE_H__
 
+#include <QColor>
 #include <QFont>
 #include <QLabel>
-#include <QLineEdit>
-#include <QPushButton>
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include <QRegularExpression>
 #else
 #include <QRegExp>
 #endif
-#include <QSettings>
 #include <QString>
-#include <QGridLayout>
-#include <QObject>
-#include <QColor>
+#include <QWidget>
 
-class TagPreference : public QObject
+class TagPreference : public QLabel
 {
     Q_OBJECT
 public:
-    TagPreference(int _row,
-                  const QString& _name,
+    TagPreference(const QString& _name,
+                  QWidget* _parent = NULL);
+
+    TagPreference(const QString& _name,
                   const QString& _regexDefault,
                   const QString& _colorDefault,
                   const QString& _fontDefault,
-                  QGridLayout* _parent = NULL);
+                  const QColor& _bgcolor,
+                  bool _visibility,
+                  bool _regexpChangeable,
+                  QWidget* _parent = NULL);
 
+    void initDefault(const QString& _regexDefault = QString(),
+                     const QString& _colorDefault = QString(),
+                     const QString& _fontDefault = QString(),
+                     bool _visibility = false);
+
+    bool getVisibility() const;
     const QFont& getFont() const;
     const QColor& getColor() const;
+    bool getChangeable() const;
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     const QRegularExpression& getRegExp() const;
 #else
     const QRegExp& getRegExp() const;
 #endif
-    void disableRegExp();
 
 protected:
-    void updateColorButton();
-    void updateFontButton();
+    void updateLabel();
 
 protected:
-    QPushButton* tagType;
-    QLineEdit* regularExpression;
+    QString regExpText;
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     QRegularExpression regExp;
 #else
     QRegExp regExp;
 #endif
-    QPushButton* fontButton;
     QFont font;
     QColor color;
+    QColor bgcolor;
+    bool regexpChangeable;
+    bool visibility;
 
-private slots:
-    void setFont();
-    void setColor();
-    void setRegularExpression(const QString& _regex);
+public slots:
+    void setBackgroundColor(const QColor& _bgcolor);
+    void onCustomContextMenu(const QPoint& _pos);
+
+protected slots:
+    void changeVisibility(bool _val);
+    void changeFont();
+    void changeColor();
+    void changeRegularExpression();
+
+    void addTagPreference();
+    void deleteTagPreference();
 
 signals:
     void regexpChanged();
+    void visibilityChanged();
+    void deleteTagPreference(const QString&);
+    void addTagPreference(const QString&);
 };
 
 #endif

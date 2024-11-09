@@ -239,33 +239,23 @@ void TagTree::resetTagTree()
     root = treemodel->invisibleRootItem();
     root->setEditable(false);
 
-    QStringList nodeInfo;
-
-    nodeInfo << "Search Result"
-             << "HEAD"
-             << "Release Label"
-             << "Baseline Label"
-             << "Commit Date"
-             << "Branch"
-             << "FIX/PQT Label"
-             << "HO Label"
-             << "Other Tags"
-             << "User Name" // ... many versions
-             << "Comment"  // ... don't know if useful, maby not
-             << "Hash"; // ... not useful, use search instead
-
-    foreach(const QString &key, nodeInfo)
-    {
-        QStandardItem* t = new QStandardItem(key);
-
-        t->setEditable(false);
-        root->appendRow(t);
-    }
-
+    // Search widget
+    QStandardItem* t = new QStandardItem("Search Result");
+    t->setEditable(false);
+    root->appendRow(t);
     search = new QLineEdit(this);
     connect(search, SIGNAL(textEdited(const QString&)), this, SLOT(lookupId(const QString&)));
     connect(search, SIGNAL(returnPressed()), this, SLOT(focusGraph()));
     setIndexWidget(treemodel->index(0, 1), search);
+
+    // node info TODO dynamic update
+    QStringList nodeInfo = mwin->getNodeInfo();
+    foreach(const QString &key, nodeInfo)
+    {
+        t = new QStandardItem(key);
+        t->setEditable(false);
+        root->appendRow(t);
+    }
 }
 
 void TagTree::onCustomContextMenu(const QPoint& point)

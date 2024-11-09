@@ -791,7 +791,7 @@
           <item row="0" column="0">
            <widget class="QCheckBox" name="fold_no_tag">
             <property name="text">
-             <string>any tag</string>
+             <string>any visible tag</string>
             </property>
            </widget>
           </item>

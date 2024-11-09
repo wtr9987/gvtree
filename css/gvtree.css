@@ -14,10 +14,6 @@ QHeaderView::section {
 		color: black;
     background-color: #eeeeee;
 }
-QLabel {
-		color: black;
-    background-color: white;
-}
 QListView {
 		color: black;
     background-color: white;

@@ -18,12 +18,12 @@
 #ifndef __TAGPREFGRIDLAYOUT_H__
 #define __TAGPREFGRIDLAYOUT_H__
 
+#include <QVBoxLayout>
 #include <QWidget>
-#include <QGridLayout>
 #include <QString>
 #include "tagpreference.h"
 
-class TagPrefGridLayout : public QGridLayout
+class TagPrefGridLayout : public QWidget
 {
     Q_OBJECT
 public:
@@ -36,17 +36,27 @@ public:
                           bool _regexpChangable = false);
 
     const TagPreference* getTagPreference(const QString& _item) const;
+    void getVisibleTagPreferences(QStringList& _visible) const;
+    void getTagPreferences(QStringList& _all) const;
+    void getChangeableTagPreferences(QStringList& _changeable) const;
+
 
 protected:
-    int line;
-    QVBoxLayout* cl;
+    QColor bgcolor;
     QMap<QString, TagPreference*> tp;
 
 public slots:
+    void setBackgroundColor(const QColor& _bgcolor);
     void regexpChangedProxy();
+    void visibilityChangedProxy();
+    void deleteTagPreference(const QString& _name);
+    void addTagPreferenceShort(const QString& _name);
 
 signals:
     void regexpChanged();
+    void visibilityChanged();
+    void elementChanged();
+    void sigSetBackgroundColor(const QColor&);
 };
 
 #endif

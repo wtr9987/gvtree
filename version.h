@@ -20,7 +20,7 @@
 
 #include <QGraphicsItem>
 #include <QList>
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include <QRegularExpression>
 #else
 #include <QRegExp>
@@ -57,6 +57,7 @@ public:
      */
 
     Version(const QStringList& _globalVersionInfo,
+            const QStringList& _changeableVersionInfo,
             GraphWidget* _graphWidget,
             QGraphicsItem* _parent = NULL);
 
@@ -135,7 +136,7 @@ public:
     void addLocalVersionInfo(const QString& _val);
 
     void setUpdateBoundingRect(bool _val);
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     bool findMatch(QRegularExpression& _pattern, const QString& _text, bool _exactMatch = false, QString _keyConstraint = QString());
 #else
     bool findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatch = false, QString _keyConstraint = QString());
@@ -211,6 +212,7 @@ private:
 
     QString commit_sse;
     const QStringList& globalVersionInfo;
+    const QStringList& changeableVersionInfo;
     static QStringList dummy;
 
     bool matched;

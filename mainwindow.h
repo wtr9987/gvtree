@@ -130,8 +130,9 @@ public slots:
     void setGitLocalRepository();
     void quit();
 
-    // View menu
-    void changeGlobalVersionInfo(QAction* _act);
+    // tag preferences visibility
+    void tagPreferencesVisibilityChange();
+    void tagPreferencesElementChange();
 
     // Help menu
     void helpDialog();
@@ -164,7 +165,7 @@ protected:
     bool applyStyleSheetFile(QString _path);
 
     // color dialog helper for different objects
-    void colorDialogCommon(QString _key, QPushButton* _pb);
+    bool colorDialogCommon(QString _key, QPushButton* _pb);
 
     // check for .git in the path
     bool checkGitLocalRepository(const QString& _path,
@@ -257,6 +258,8 @@ private:
 #else
     QRegExp foldNotRegExp;
 #endif
+signals:
+    void sigBackgroundColorChange(const QColor&);
 };
 
 #endif

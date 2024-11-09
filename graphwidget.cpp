@@ -138,7 +138,7 @@ void GraphWidget::test()
         QString line = "#0#0##(tag: " + n + ")#";
         QStringList parts = line.split(QChar('#'));
 
-        nodes[n] = new Version(globalVersionInfo, this);
+        nodes[n] = new Version(globalVersionInfo, changeableVersionInfo, this);
         nodes[n]->processGitLogInfo(line, parts);
 
         scene()->addItem(nodes[n]);
@@ -462,7 +462,7 @@ Version* GraphWidget::gitlogSingle(QString _hash, bool _create)
     if (!v)
     {
         // create an object...
-        v = new Version(globalVersionInfo, this);
+        v = new Version(globalVersionInfo, changeableVersionInfo, this);
 
         // if the key information has already been parsed, use it
         v->setKeyInformation(keyInformationCache.value(hash, QMap<QString, QStringList>()));
@@ -826,7 +826,7 @@ void GraphWidget::process(QList<QString> _cache)
             }
 
             // create version node
-            Version* v = new Version(globalVersionInfo, this);
+            Version* v = new Version(globalVersionInfo, changeableVersionInfo, this);
 
             // if the key information has already been parsed, use it
             QString hash = parts.at(1);
@@ -1561,17 +1561,22 @@ void GraphWidget::flipY()
     }
 }
 
-void GraphWidget::setGlobalVersionInfo(const QString& _item, bool _value)
+void GraphWidget::setGlobalVersionInfo(const QStringList& _globalVersionInfo)
 {
-    if (_value)
+    if (globalVersionInfo != _globalVersionInfo)
     {
-        globalVersionInfo << _item;
+        globalVersionInfo = _globalVersionInfo;
+        QGraphicsView::update();
     }
-    else
+}
+
+void GraphWidget::setChangeableVersionInfo(const QStringList& _changeableVersionInfo)
+{
+    if (changeableVersionInfo!= _changeableVersionInfo)
     {
-        globalVersionInfo.removeOne(_item);
+        changeableVersionInfo= _changeableVersionInfo;
+        QGraphicsView::update();
     }
-    QGraphicsView::update();
 }
 
 void GraphWidget::setLocalRepositoryPath(const QString& _dir)

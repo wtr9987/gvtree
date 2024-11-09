@@ -715,25 +715,84 @@ void MainWindow::createMenus()
     connect(action, SIGNAL(triggered()), this, SLOT(quit()));
     filemenu->addAction(action);
 
-    // -- View
-    viewmenu = menuBar()->addMenu(tr("View"));
+    // TODO move to own method
 
-    gridLayout = new TagPrefGridLayout();
+    QSettings settings;
+
+    gridLayout = new TagPrefGridLayout(this);
+    gridLayout->setBackgroundColor(QColor(settings.value("colorBackground").toString()));
+    connect(this, SIGNAL(sigBackgroundColorChange(const QColor&)), gridLayout, SLOT(setBackgroundColor(const QColor&)));
+
+    // Fixed entries for version information
     gridLayout->addTagPreference("HEAD", "(HEAD.*)", QString("#ffff0004"));
     gridLayout->addTagPreference("Commit Date", "", QString("#ff3584e4"));
     gridLayout->addTagPreference("User Name", "", QString("#ff1c71d8"));
     gridLayout->addTagPreference("Hash", "", QString("#ff26a269"));
-    gridLayout->addTagPreference("Branch", "^((?!.*tag: )\\b([\\/0-9a-zA-Z_]*)\\b)$", QString("#ff5e5c64"), QString(), true);
-    gridLayout->addTagPreference("Release Label", "tag: \\b(v[0-9.\\-]+)|(R[0-9.\\-]+(_RC[0-9]+)?)$", QString("#ffe01b24"), QString("Nimbus Sans L,18,-1,5,75,0,0,0,0,0"), true);
-    gridLayout->addTagPreference("Baseline Label", "tag: \\b(BASELINE_[0-9.\\-]+)$", QString("#ff3d3846"), QString("Nimbus Sans L,18,-1,5,75,0,0,0,0,0"), true);
-    gridLayout->addTagPreference("FIX/PQT Label", "tag: \\b(((FIX|PQT)_STR[0-9]+(DEV|DOC)?(_RR[0-9]+)?))$", QString(), QString(), true);
-    gridLayout->addTagPreference("HO Label", "tag: \\b(STR[0-9]+(DEV|DOC)?_HO[0-9]*)$", QString("#ff5e5c64"), QString(), true);
-    gridLayout->addTagPreference("Other Tags", "tag: \\b(.*)$", QString("#ff000000"));
     gridLayout->addTagPreference("Comment", "", QString("#ff63452c"), QString("Nimbus Sans,8,-1,5,50,0,0,0,0,0"));
-    gvtree_preferences.verticalLayout_3->addLayout(gridLayout);
 
+    // Dynamic entries (from QSettings first)
+    QSet<QString> tagprefKeys;
+
+    settings.beginGroup("tagpref");
+    // better way to get a list of the subgroups? TODO
+    QStringList groups = settings.allKeys();
+
+    foreach(const QString& a, groups)
+    {
+        tagprefKeys << a.left(a.indexOf('/'));
+    }
+    settings.endGroup();
+
+    // now remove the fixed entries
+    QSet<QString> fixed;
+
+    fixed << "HEAD" << "Commit Date" << "User Name" << "Hash" << "Other Tags" << "Comment";
+
+    tagprefKeys.subtract(fixed);
+
+    // init the dyanmic entries from QSettings
+    QString lookup, regexp, font, color;
+
+    foreach(const QString& name, tagprefKeys)
+    {
+        lookup = "tagpref/" + name + "/regExp";
+        regexp = settings.value(lookup).toString();
+        lookup = "tagpref/" + name + "/font";
+        font = settings.value(lookup).toString();
+        lookup = "tagpref/" + name + "/color";
+        color = settings.value(lookup).toString();
+
+        gridLayout->addTagPreference(name, regexp, color, font, true);
+    }
+
+    // Create initial default
+    if (tagprefKeys.size() == 0)
+    {
+        gridLayout->addTagPreference("Branch", "^((?!.*tag: )\\b([\\/0-9a-zA-Z_]*)\\b)$", QString("#ff5e5c64"), QString(), true);
+        gridLayout->addTagPreference("Release Label", "tag: \\b(v[0-9.\\-]+)|(R[0-9.\\-]+(_RC[0-9]+)?)$", QString("#ffe01b24"), QString("Nimbus Sans L,18,-1,5,75,0,0,0,0,0"), true);
+        gridLayout->addTagPreference("Baseline Label", "tag: \\b(BASELINE_[0-9.\\-]+)$", QString("#ff3d3846"), QString("Nimbus Sans L,18,-1,5,75,0,0,0,0,0"), true);
+        gridLayout->addTagPreference("FIX Label", "tag: \\b((FIX_STR[0-9]+(DEV|DOC)?(_RR[0-9]+)?))$", QString(), QString(), true);
+        gridLayout->addTagPreference("PQT Label", "tag: \\b((PQT_STR[0-9]+(DEV|DOC)?(_RR[0-9]+)?))$", QString(), QString(), true);
+        gridLayout->addTagPreference("HO Label", "tag: \\b(STR[0-9]+(DEV|DOC)?_HO[0-9]*)$", QString("#ff5e5c64"), QString(), true);
+    }
+
+    // Fixed entry 'Other Tags' must be the last one in the list
+    gridLayout->addTagPreference("Other Tags", "tag: \\b(.*)$", QString("#ff000000"));
+    gvtree_preferences.verticalLayout_3->addWidget(gridLayout);
+
+    // tagpref or visibility changed
     connect(gridLayout, SIGNAL(regexpChanged()), this, SLOT(resetCurrentRepository()));
+    connect(gridLayout, SIGNAL(visibilityChanged()), this, SLOT(tagPreferencesVisibilityChange()));
+    connect(gridLayout, SIGNAL(elementChanged()), this, SLOT(tagPreferencesElementChange()));
 
+    tagPreferencesVisibilityChange();
+    gridLayout->getTagPreferences(nodeInfo);
+    QStringList changeable;
+
+    gridLayout->getChangeableTagPreferences(changeable);
+    graphwidget->setChangeableVersionInfo(changeable);
+
+    // preferences
     connect(gvtree_preferences.pbOK, SIGNAL(pressed()), this, SLOT(saveChangedSettings()));
 
     gvtree_preferences.mimeTypesTable->fromSettings();
@@ -745,32 +804,8 @@ void MainWindow::createMenus()
     windowmenu->addAction(preferencesAct);
     windowmenu->addSeparator();
 
-    nodeInfo << "HEAD" << "Commit Date" << "User Name" << "Hash" << "Branch" << "Release Label" << "Baseline Label" << "FIX/PQT Label" << "HO Label" << "Other Tags" << "Comment";
-
-    QSettings settings;
-
-    foreach (const QString& it, nodeInfo)
-    {
-        QAction* item = new QAction(it, this);
-
-        item->setCheckable(true);
-
-        if (settings.contains(it) == false)
-        {
-            settings.setValue(it, true);
-        }
-
-        bool item_state = settings.value(it).toBool();
-
-        item->setChecked(item_state);
-        graphwidget->setGlobalVersionInfo(it, item_state);
-        viewmenu->addAction(item);
-    }
-    connect(viewmenu, SIGNAL(triggered(QAction*)),
-            this, SLOT(changeGlobalVersionInfo(QAction*)));
-    viewmenu->addSeparator();
-    action = viewmenu->addAction(QString("Fit in view"));
-    connect(action, SIGNAL(triggered()), graphwidget, SLOT(fitInView()));
+    //action = viewmenu->addAction(QString("Fit in view"));
+    //connect(action, SIGNAL(triggered()), graphwidget, SLOT(fitInView())); TODO
 
     // -- Help
     helpmenu = menuBar()->addMenu(tr("Help"));
@@ -798,12 +833,23 @@ void MainWindow::createMenus()
     connect(gvtree_preferences.pbColorFileConstraint, SIGNAL(pressed()), this, SLOT(colorDialogFileConstraint()));
 }
 
-void MainWindow::changeGlobalVersionInfo(QAction* _act)
+void MainWindow::tagPreferencesElementChange()
 {
-    graphwidget->setGlobalVersionInfo(_act->text(), _act->isChecked());
-    QSettings settings;
+    QStringList changeable;
 
-    settings.setValue(_act->text(), _act->isChecked());
+    gridLayout->getChangeableTagPreferences(changeable);
+    graphwidget->setChangeableVersionInfo(changeable);
+    gridLayout->getTagPreferences(nodeInfo);
+    graphwidget->gitlog(true);
+    refreshRepo->setEnabled(true);
+}
+
+void MainWindow::tagPreferencesVisibilityChange()
+{
+    QStringList visibility;
+
+    gridLayout->getVisibleTagPreferences(visibility);
+    graphwidget->setGlobalVersionInfo(visibility);
     graphwidget->forceUpdate();
 }
 
@@ -1386,7 +1432,7 @@ void MainWindow::restoreColorSettingsHelper(
     _pb->setStyleSheet(css);
 }
 
-void MainWindow::colorDialogCommon(QString _key, QPushButton* _pb)
+bool MainWindow::colorDialogCommon(QString _key, QPushButton* _pb)
 {
     QSettings settings;
     QColor tmpColor = settings.value(_key).value<QColor>();
@@ -1395,12 +1441,19 @@ void MainWindow::colorDialogCommon(QString _key, QPushButton* _pb)
     if (tmpColor.isValid())
     {
         restoreColorSettingsHelper(_pb, _key, tmpColor, true);
+        return true;
     }
+    return false;
 }
 
 void MainWindow::colorDialogBackground()
 {
-    colorDialogCommon("colorBackground", gvtree_preferences.pbColorBackground);
+    if (colorDialogCommon("colorBackground", gvtree_preferences.pbColorBackground))
+    {
+        QSettings settings;
+        QColor color(settings.value("colorBackground").toString());
+        emit sigBackgroundColorChange(color);
+    }
 }
 
 void MainWindow::colorDialogFolded()
