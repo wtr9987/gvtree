@@ -68,7 +68,7 @@ set(SRCS
     comparetree.cpp 
     execute_cmd.cpp 
     tagpreference.cpp 
-    tagprefgridlayout.cpp 
+    tagpreflist.cpp 
     tagtree.cpp 
     branchtable.cpp 
     mimetable.cpp 
@@ -86,7 +86,7 @@ set(HDRS
     comparetree.h 
     execute_cmd.h
     tagpreference.h 
-    tagprefgridlayout.h 
+    tagpreflist.h 
     tagtree.h 
     branchtable.h 
     mimetable.h 

@@ -668,7 +668,7 @@ void MainWindow::createMenus()
 
     QSettings settings;
 
-    gridLayout = new TagPrefGridLayout(this);
+    gridLayout = new TagPregList(this);
     gridLayout->setBackgroundColor(QColor(settings.value("colorBackground").toString()));
     connect(this, SIGNAL(sigBackgroundColorChange(const QColor&)), gridLayout, SLOT(setBackgroundColor(const QColor&)));
 
@@ -730,12 +730,12 @@ void MainWindow::createMenus()
     gvtree_preferences.verticalLayout_3->addWidget(gridLayout);
 
     // tagpref or visibility changed
-    connect(gridLayout, SIGNAL(regexpChanged()), this, SLOT(resetCurrentRepository()));
-    //connect(gridLayout, SIGNAL(visibilityChanged()), this, SLOT(tagPreferencesVisibilityChange()));
-    connect(gridLayout, SIGNAL(visibilityChanged()), this, SLOT(tagPreferencesElementChange()));
+    connect(gridLayout, SIGNAL(regexpChanged(const QString&)), this, SLOT(resetCurrentRepository()));
+    connect(gridLayout, SIGNAL(visibilityChanged(const QString&)), this, SLOT(tagPreferencesVisibilityChange(const QString&)));
+    connect(gridLayout, SIGNAL(foldChanged(const QString&)), this, SLOT(tagPreferencesFoldChange(const QString&)));
     connect(gridLayout, SIGNAL(elementChanged()), this, SLOT(tagPreferencesElementChange()));
 
-    tagPreferencesVisibilityChange();
+    tagPreferencesVisibilityChange(QString());
     gridLayout->getTagPreferences(nodeInfo);
     QStringList changeable;
 
@@ -800,12 +800,18 @@ void MainWindow::tagPreferencesElementChange()
     refreshRepo->setEnabled(true);
 }
 
-void MainWindow::tagPreferencesVisibilityChange()
+void MainWindow::tagPreferencesVisibilityChange(const QString&)
 {
     QStringList visibility;
 
     gridLayout->getVisibleTagPreferences(visibility);
     graphwidget->setGlobalVersionInfo(visibility);
+    graphwidget->forceUpdate();
+}
+
+void MainWindow::tagPreferencesFoldChange(const QString&)
+{
+    graphwidget->updateFold();
     graphwidget->forceUpdate();
 }
 

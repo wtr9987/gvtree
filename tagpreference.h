@@ -95,9 +95,9 @@ protected slots:
     void deleteTagPreference();
 
 signals:
-    void regexpChanged();
-    void visibilityChanged();
-    void foldChanged();
+    void regexpChanged(const QString&);
+    void visibilityChanged(const QString&);
+    void foldChanged(const QString&);
     void deleteTagPreference(const QString&);
     void addTagPreference(const QString&);
 };

@@ -897,6 +897,24 @@ void Version::updateFolderBox()
     }
 }
 
+void Version::updateFoldRecurse()
+{
+  // xxx
+  foldable = graph->getMainWindow()->getVersionIsFoldable(keyInformation);
+  if (isFolder() && isFolded())
+  {
+    foldAction();
+  }
+
+  foreach (Edge * edge, outEdges)
+  {
+        Version* next = dynamic_cast<Version*>(edge->destVersion());
+
+        if (next)
+            next->updateFoldRecurse();
+  }
+}
+
 void Version::foldRecurse(bool _val)
 {
     if (isFolder() && isFolded() != _val)

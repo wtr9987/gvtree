@@ -173,6 +173,7 @@ public slots:
     void resetSelection();
     void focusCurrent();
     void fitInView();
+    void updateFold();
     void foldAll();
     void unfoldAll();
     void normalizeGraph();

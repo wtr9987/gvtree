@@ -36,7 +36,7 @@
 #endif
 
 #include "graphwidget.h"
-#include "tagprefgridlayout.h"
+#include "tagpreflist.h"
 #include "tagtree.h"
 #include "branchtable.h"
 #include "ui_gvtree_comparetree.h"
@@ -131,7 +131,8 @@ public slots:
     void quit();
 
     // tag preferences visibility
-    void tagPreferencesVisibilityChange();
+    void tagPreferencesVisibilityChange(const QString&);
+    void tagPreferencesFoldChange(const QString&);
     void tagPreferencesElementChange();
 
     // Help menu
@@ -222,7 +223,7 @@ protected:
     QWidget* ctwin;
     QWidget* blwin;
     QTreeView* compareTree;
-    TagPrefGridLayout* gridLayout;
+    TagPregList* gridLayout;
     BranchTable* branchList;
 
     // preferences dialog

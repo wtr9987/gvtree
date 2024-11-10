@@ -17,18 +17,17 @@
 
 // TODO RegExp rules are greedy, the order is relevant
 // TODO allow shifting of the rules
-// TODO save/load rules to QSettings
 
-#include "tagprefgridlayout.h"
+#include "tagpreflist.h"
 
-TagPrefGridLayout::TagPrefGridLayout(QWidget* _parent) : QWidget(_parent)
+TagPregList::TagPregList(QWidget* _parent) : QWidget(_parent)
 {
     QVBoxLayout* layout = new QVBoxLayout;
 
     setLayout(layout);
 }
 
-const TagPreference* TagPrefGridLayout::getTagPreference(const QString& _item) const
+const TagPreference* TagPregList::getTagPreference(const QString& _item) const
 {
     if (tp.contains(_item))
         return tp[_item];
@@ -36,7 +35,7 @@ const TagPreference* TagPrefGridLayout::getTagPreference(const QString& _item) c
     return NULL;
 }
 
-void TagPrefGridLayout::addTagPreference(const QString& _name,
+void TagPregList::addTagPreference(const QString& _name,
                                          const QString& _regexp,
                                          const QString& _color,
                                          const QString& _font,
@@ -55,13 +54,13 @@ void TagPrefGridLayout::addTagPreference(const QString& _name,
 
     layout()->addWidget(tpw);
 
-    connect(tpw, SIGNAL(regexpChanged()), this, SLOT(regexpChangedProxy()));
-    connect(tpw, SIGNAL(visibilityChanged()), this, SLOT(visibilityChangedProxy()));
-    connect(tpw, SIGNAL(foldChanged()), this, SLOT(regexpChangedProxy()));
+    connect(tpw, SIGNAL(regexpChanged(const QString&)), this, SLOT(regexpChangedProxy(const QString&)));
+    connect(tpw, SIGNAL(visibilityChanged(const QString&)), this, SLOT(visibilityChangedProxy(const QString&)));
+    connect(tpw, SIGNAL(foldChanged(const QString&)), this, SLOT(foldChangedProxy(const QString&)));
     tp[_name] = tpw;
 }
 
-void TagPrefGridLayout::addTagPreferenceShort(const QString& _name)
+void TagPregList::addTagPreferenceShort(const QString& _name)
 {
     if (tp.contains(_name))
         return;
@@ -69,12 +68,12 @@ void TagPrefGridLayout::addTagPreferenceShort(const QString& _name)
     QColor color = (bgcolor.lightness() < 128) ? QColor(255, 255, 255) : QColor(0, 0, 0);
     QFont font = QFont();
 
-    addTagPreference(_name, QString(), color.name(), font.toString(), true);
+    addTagPreference(_name, QString(), color.name(), font.toString(), true, true);
 
     emit elementChanged();
 }
 
-void TagPrefGridLayout::deleteTagPreference(const QString& _name)
+void TagPregList::deleteTagPreference(const QString& _name)
 {
     if (!tp.contains(_name))
         return;
@@ -88,23 +87,28 @@ void TagPrefGridLayout::deleteTagPreference(const QString& _name)
     emit elementChanged();
 }
 
-void TagPrefGridLayout::regexpChangedProxy()
+void TagPregList::regexpChangedProxy(const QString& _text)
 {
-    emit regexpChanged();
+    emit regexpChanged(_text);
 }
 
-void TagPrefGridLayout::visibilityChangedProxy()
+void TagPregList::visibilityChangedProxy(const QString& _text)
 {
-    emit visibilityChanged();
+    emit visibilityChanged(_text);
 }
 
-void TagPrefGridLayout::setBackgroundColor(const QColor& _bgcolor)
+void TagPregList::foldChangedProxy(const QString& _text)
+{
+    emit foldChanged(_text);
+}
+
+void TagPregList::setBackgroundColor(const QColor& _bgcolor)
 {
     bgcolor = _bgcolor;
     emit sigSetBackgroundColor(_bgcolor);
 }
 
-void TagPrefGridLayout::getVisibleTagPreferences(QStringList& _visible) const
+void TagPregList::getVisibleTagPreferences(QStringList& _visible) const
 {
     _visible.clear();
     for (QMap<QString, TagPreference*>::const_iterator it = tp.begin(); it != tp.end(); it++)
@@ -116,7 +120,7 @@ void TagPrefGridLayout::getVisibleTagPreferences(QStringList& _visible) const
     }
 }
 
-void TagPrefGridLayout::getTagPreferences(QStringList& _visible) const
+void TagPregList::getTagPreferences(QStringList& _visible) const
 {
     _visible.clear();
     for (QMap<QString, TagPreference*>::const_iterator it = tp.begin(); it != tp.end(); it++)
@@ -125,7 +129,7 @@ void TagPrefGridLayout::getTagPreferences(QStringList& _visible) const
     }
 }
 
-void TagPrefGridLayout::getChangeableTagPreferences(QStringList& _changeable) const
+void TagPregList::getChangeableTagPreferences(QStringList& _changeable) const
 {
     _changeable.clear();
     for (QMap<QString, TagPreference*>::const_iterator it = tp.begin(); it != tp.end(); it++)

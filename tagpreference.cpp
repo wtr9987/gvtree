@@ -305,7 +305,7 @@ void TagPreference::changeRegularExpression()
 #else
             regExp = QRegExp(regExpText);
 #endif
-            emit regexpChanged();
+            emit regexpChanged(text());
         }
     }
 }
@@ -318,7 +318,7 @@ void TagPreference::changeVisibility(bool _val)
 
     settings.setValue(lookup, _val);
 
-    emit visibilityChanged();
+    emit visibilityChanged(text());
 }
 
 void TagPreference::changeFold(bool _val)
@@ -331,7 +331,7 @@ void TagPreference::changeFold(bool _val)
 
         settings.setValue(lookup, _val);
 
-        emit foldChanged();
+        emit foldChanged(text());
     }
 }
 

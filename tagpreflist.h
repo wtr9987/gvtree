@@ -15,19 +15,19 @@
 /*                                               */
 /* --------------------------------------------- */
 
-#ifndef __TAGPREFGRIDLAYOUT_H__
-#define __TAGPREFGRIDLAYOUT_H__
+#ifndef __TAGPREFLIST_H__
+#define __TAGPREFLIST_H__
 
 #include <QVBoxLayout>
 #include <QWidget>
 #include <QString>
 #include "tagpreference.h"
 
-class TagPrefGridLayout : public QWidget
+class TagPregList : public QWidget
 {
     Q_OBJECT
 public:
-    TagPrefGridLayout(QWidget* _parent = NULL);
+    TagPregList(QWidget* _parent = NULL);
 
     void addTagPreference(const QString& _name,
                           const QString& _regexp,
@@ -41,21 +41,22 @@ public:
     void getTagPreferences(QStringList& _all) const;
     void getChangeableTagPreferences(QStringList& _changeable) const;
 
-
 protected:
     QColor bgcolor;
     QMap<QString, TagPreference*> tp;
 
 public slots:
     void setBackgroundColor(const QColor& _bgcolor);
-    void regexpChangedProxy();
-    void visibilityChangedProxy();
+    void regexpChangedProxy(const QString&);
+    void visibilityChangedProxy(const QString&);
+    void foldChangedProxy(const QString&);
     void deleteTagPreference(const QString& _name);
     void addTagPreferenceShort(const QString& _name);
 
 signals:
-    void regexpChanged();
-    void visibilityChanged();
+    void regexpChanged(const QString&);
+    void visibilityChanged(const QString&);
+    void foldChanged(const QString&);
     void elementChanged();
     void sigSetBackgroundColor(const QColor&);
 };

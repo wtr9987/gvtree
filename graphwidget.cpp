@@ -1684,6 +1684,15 @@ void GraphWidget::updateColors()
     forceUpdate();
 }
 
+void GraphWidget::updateFold()
+{
+    rootVersion->foldRecurse(false);
+    rootVersion->updateFoldRecurse();
+    rootVersion->collectFolderVersions(rootVersion, NULL);
+    rootVersion->foldRecurse(true);
+    updateGraphFolding();
+}
+
 void GraphWidget::foldAll()
 {
     rootVersion->foldRecurse(true);
