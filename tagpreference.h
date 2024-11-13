@@ -93,6 +93,8 @@ protected slots:
 
     void addTagPreference();
     void deleteTagPreference();
+    void moveUp();
+    void moveDown();
 
 signals:
     void regexpChanged(const QString&);
@@ -100,6 +102,8 @@ signals:
     void foldChanged(const QString&);
     void deleteTagPreference(const QString&);
     void addTagPreference(const QString&);
+    void moveUp(TagPreference*);
+    void moveDown(TagPreference*);
 };
 
 #endif

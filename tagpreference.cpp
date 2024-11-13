@@ -269,8 +269,24 @@ void TagPreference::onCustomContextMenu(const QPoint& /*_pos*/)
         connect(act, SIGNAL(triggered()), this, SLOT(deleteTagPreference()));
     }
 
+        act = new QAction("Up", this);
+        menu->addAction(act);
+        connect(act, SIGNAL(triggered()), this, SLOT(moveUp()));
+        act = new QAction("Down", this);
+        menu->addAction(act);
+        connect(act, SIGNAL(triggered()), this, SLOT(moveDown()));
 
     menu->exec(QCursor::pos());
+}
+
+void TagPreference::moveUp()
+{
+  emit moveUp(this);
+}
+
+void TagPreference::moveDown()
+{
+  emit moveDown(this);
 }
 
 void TagPreference::changeRegularExpression()

@@ -18,16 +18,19 @@
 // TODO RegExp rules are greedy, the order is relevant
 // TODO allow shifting of the rules
 
+#include <iostream>
 #include "tagpreflist.h"
+#include <QSpacerItem>
 
-TagPregList::TagPregList(QWidget* _parent) : QWidget(_parent)
+TagPrefList::TagPrefList(QWidget* _parent) : QWidget(_parent)
 {
     QVBoxLayout* layout = new QVBoxLayout;
+    layout->addSpacerItem(new QSpacerItem(1,1,QSizePolicy::Minimum,QSizePolicy::Maximum));
 
     setLayout(layout);
 }
 
-const TagPreference* TagPregList::getTagPreference(const QString& _item) const
+const TagPreference* TagPrefList::getTagPreference(const QString& _item) const
 {
     if (tp.contains(_item))
         return tp[_item];
@@ -35,7 +38,7 @@ const TagPreference* TagPregList::getTagPreference(const QString& _item) const
     return NULL;
 }
 
-void TagPregList::addTagPreference(const QString& _name,
+void TagPrefList::addTagPreference(const QString& _name,
                                          const QString& _regexp,
                                          const QString& _color,
                                          const QString& _font,
@@ -52,15 +55,21 @@ void TagPregList::addTagPreference(const QString& _name,
     connect(tpw, SIGNAL(deleteTagPreference(const QString&)), this, SLOT(deleteTagPreference(const QString&)));
     connect(tpw, SIGNAL(addTagPreference(const QString&)), this, SLOT(addTagPreferenceShort(const QString&)));
 
-    layout()->addWidget(tpw);
+    QVBoxLayout* l = dynamic_cast<QVBoxLayout*>(layout());
+    if (l)
+    {
+    l->insertWidget(layout()->count()-1,tpw);
+    }
 
     connect(tpw, SIGNAL(regexpChanged(const QString&)), this, SLOT(regexpChangedProxy(const QString&)));
     connect(tpw, SIGNAL(visibilityChanged(const QString&)), this, SLOT(visibilityChangedProxy(const QString&)));
     connect(tpw, SIGNAL(foldChanged(const QString&)), this, SLOT(foldChangedProxy(const QString&)));
+    connect(tpw, SIGNAL(moveUp(TagPreference*)), this, SLOT(moveUp(TagPreference*)));
+    connect(tpw, SIGNAL(moveDown(TagPreference*)), this, SLOT(moveDown(TagPreference*)));
     tp[_name] = tpw;
 }
 
-void TagPregList::addTagPreferenceShort(const QString& _name)
+void TagPrefList::addTagPreferenceShort(const QString& _name)
 {
     if (tp.contains(_name))
         return;
@@ -73,7 +82,7 @@ void TagPregList::addTagPreferenceShort(const QString& _name)
     emit elementChanged();
 }
 
-void TagPregList::deleteTagPreference(const QString& _name)
+void TagPrefList::deleteTagPreference(const QString& _name)
 {
     if (!tp.contains(_name))
         return;
@@ -87,28 +96,28 @@ void TagPregList::deleteTagPreference(const QString& _name)
     emit elementChanged();
 }
 
-void TagPregList::regexpChangedProxy(const QString& _text)
+void TagPrefList::regexpChangedProxy(const QString& _text)
 {
     emit regexpChanged(_text);
 }
 
-void TagPregList::visibilityChangedProxy(const QString& _text)
+void TagPrefList::visibilityChangedProxy(const QString& _text)
 {
     emit visibilityChanged(_text);
 }
 
-void TagPregList::foldChangedProxy(const QString& _text)
+void TagPrefList::foldChangedProxy(const QString& _text)
 {
     emit foldChanged(_text);
 }
 
-void TagPregList::setBackgroundColor(const QColor& _bgcolor)
+void TagPrefList::setBackgroundColor(const QColor& _bgcolor)
 {
     bgcolor = _bgcolor;
     emit sigSetBackgroundColor(_bgcolor);
 }
 
-void TagPregList::getVisibleTagPreferences(QStringList& _visible) const
+void TagPrefList::getVisibleTagPreferences(QStringList& _visible) const
 {
     _visible.clear();
     for (QMap<QString, TagPreference*>::const_iterator it = tp.begin(); it != tp.end(); it++)
@@ -120,7 +129,7 @@ void TagPregList::getVisibleTagPreferences(QStringList& _visible) const
     }
 }
 
-void TagPregList::getTagPreferences(QStringList& _visible) const
+void TagPrefList::getTagPreferences(QStringList& _visible) const
 {
     _visible.clear();
     for (QMap<QString, TagPreference*>::const_iterator it = tp.begin(); it != tp.end(); it++)
@@ -129,7 +138,7 @@ void TagPregList::getTagPreferences(QStringList& _visible) const
     }
 }
 
-void TagPregList::getChangeableTagPreferences(QStringList& _changeable) const
+void TagPrefList::getChangeableTagPreferences(QStringList& _changeable) const
 {
     _changeable.clear();
     for (QMap<QString, TagPreference*>::const_iterator it = tp.begin(); it != tp.end(); it++)
@@ -137,4 +146,52 @@ void TagPregList::getChangeableTagPreferences(QStringList& _changeable) const
       if (it.value()->getChangeable())
         _changeable << it.value()->text();
     }
+}
+
+void TagPrefList::moveUp(TagPreference* _item)
+{
+  QVBoxLayout* layout = dynamic_cast<QVBoxLayout*>(this->layout());
+  if (!layout)
+    return;
+
+  int index=-1;
+  for (int i=0;i<layout->count()-1;i++)
+  {
+    if (_item == layout->itemAt(i)->widget())
+    {
+      index = i;
+      break;
+    }
+  }
+
+  if (index==-1 || index==0)
+    return;
+
+  QLayoutItem* item1 = layout->takeAt(index);
+  layout->insertItem(index-1,item1);
+  layout->update();
+}
+
+void TagPrefList::moveDown(TagPreference* _item)
+{
+  QVBoxLayout* layout = dynamic_cast<QVBoxLayout*>(this->layout());
+  if (!layout)
+    return;
+
+  int index=-1;
+  for (int i=0;i<layout->count()-1;i++)
+  {
+    if (_item == layout->itemAt(i)->widget())
+    {
+      index = i;
+      break;
+    }
+  }
+
+  if (index==-1 || (index>=layout->count()-2))
+    return;
+
+  QLayoutItem* item1 = layout->takeAt(index);
+  layout->insertItem(index+1,item1);
+  layout->update();
 }

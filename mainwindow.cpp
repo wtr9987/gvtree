@@ -668,7 +668,7 @@ void MainWindow::createMenus()
 
     QSettings settings;
 
-    gridLayout = new TagPregList(this);
+    gridLayout = new TagPrefList(this);
     gridLayout->setBackgroundColor(QColor(settings.value("colorBackground").toString()));
     connect(this, SIGNAL(sigBackgroundColorChange(const QColor&)), gridLayout, SLOT(setBackgroundColor(const QColor&)));
 

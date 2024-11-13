@@ -23,11 +23,11 @@
 #include <QString>
 #include "tagpreference.h"
 
-class TagPregList : public QWidget
+class TagPrefList : public QWidget
 {
     Q_OBJECT
 public:
-    TagPregList(QWidget* _parent = NULL);
+    TagPrefList(QWidget* _parent = NULL);
 
     void addTagPreference(const QString& _name,
                           const QString& _regexp,
@@ -52,6 +52,8 @@ public slots:
     void foldChangedProxy(const QString&);
     void deleteTagPreference(const QString& _name);
     void addTagPreferenceShort(const QString& _name);
+    void moveUp(TagPreference* _item);
+    void moveDown(TagPreference* _item);
 
 signals:
     void regexpChanged(const QString&);

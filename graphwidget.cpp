@@ -1686,11 +1686,13 @@ void GraphWidget::updateColors()
 
 void GraphWidget::updateFold()
 {
+    QRectF from = mapToScene(viewport()->geometry()).boundingRect();
     rootVersion->foldRecurse(false);
     rootVersion->updateFoldRecurse();
     rootVersion->collectFolderVersions(rootVersion, NULL);
     rootVersion->foldRecurse(true);
     updateGraphFolding();
+    focusFromTo(from, from);
 }
 
 void GraphWidget::foldAll()

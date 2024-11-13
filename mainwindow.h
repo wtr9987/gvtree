@@ -223,7 +223,7 @@ protected:
     QWidget* ctwin;
     QWidget* blwin;
     QTreeView* compareTree;
-    TagPregList* gridLayout;
+    TagPrefList* gridLayout;
     BranchTable* branchList;
 
     // preferences dialog
