@@ -37,20 +37,14 @@ public:
                   QWidget* _parent = NULL);
 
     TagPreference(const QString& _name,
-                  const QString& _regexDefault,
-                  const QString& _colorDefault,
-                  const QString& _fontDefault,
+                  const QString& _regex,
+                  const QString& _color,
+                  const QString& _font,
                   const QColor& _bgcolor,
                   bool _visibility,
-                  bool _regexpChangeable,
+                  bool _changeable,
                   int _fold,
                   QWidget* _parent = NULL);
-
-    void initDefault(const QString& _regexDefault = QString(),
-                     const QString& _colorDefault = QString(),
-                     const QString& _fontDefault = QString(),
-                     bool _visibility = false,
-                     int _fold = -1);
 
     bool getVisibility() const;
     int getFold() const;
@@ -62,6 +56,7 @@ public:
 #else
     const QRegExp& getRegExp() const;
 #endif
+    void setBackgroundColor(const QColor& _bgcolor);
 
 protected:
     void updateLabel();
@@ -76,12 +71,13 @@ protected:
     QFont font;
     QColor color;
     QColor bgcolor;
-    bool regexpChangeable;
+    bool changeable;
     bool visibility;
     int fold;
 
+    QString path;
+
 public slots:
-    void setBackgroundColor(const QColor& _bgcolor);
     void onCustomContextMenu(const QPoint& _pos);
 
 protected slots:

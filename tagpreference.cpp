@@ -30,111 +30,57 @@ using namespace std;
 TagPreference::TagPreference(const QString& _name,
                              QWidget* _parent)
     : QLabel(_name, _parent),
-    regexpChangeable(true)
+    changeable(true),
+    visibility(true),
+    fold(0)
 {
     setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-    initDefault();
+    path = QString("tagpref/" + _name + "/");
 }
 
 TagPreference::TagPreference(const QString& _name,
-                             const QString& _regexDefault,
-                             const QString& _colorDefault,    // default, if not defined in settings
-                             const QString& _fontDefault,     // default, if not defined in settings
+                             const QString& _regex,
+                             const QString& _color,    // default, if not defined in settings
+                             const QString& _font,     // default, if not defined in settings
                              const QColor& _bgcolor,
                              bool _visibility,
-                             bool _regexpChangeable,
+                             bool _changeable,
                              int _fold,
                              QWidget* _parent)
     : QLabel(_name, _parent),
+    regExpText(_regex),
     bgcolor(_bgcolor),
-    regexpChangeable(_regexpChangeable)
+    changeable(_changeable),
+    visibility(_visibility),
+    fold(_fold)
 {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    regExp = QRegularExpression(_regex);
+#else
+    regExp = QRegExp(_regex);
+#endif
+
+    font.fromString(_font);
+    color = QColor(_color);
+
     setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-    initDefault(_regexDefault, _colorDefault, _fontDefault, _visibility, _fold);
 
     // tag and color
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
             this, SLOT(onCustomContextMenu(const QPoint&)));
 
-    updateLabel();
-}
-
-void TagPreference::initDefault(const QString& _regexDefault,
-                                const QString& _colorDefault,
-                                const QString& _fontDefault,
-                                bool _visibility,
-                                int _fold)
-{
     QSettings settings;
-    QString lookup;
 
-    lookup = "tagpref/" + text() + "/regExp";
-    if (settings.contains(lookup))
-    {
-        regExpText = settings.value(lookup).toString();
-    }
-    else
-    {
-        regExpText = _regexDefault;
-        settings.setValue(lookup, _regexDefault);
-    }
+    path = QString("tagpref/" + _name + "/");
+    settings.setValue(path + "regExp", _regex);
+    settings.setValue(path + "font", _font);
+    settings.setValue(path + "color", _color);
+    settings.setValue(path + "visibility", visibility);
+    settings.setValue(path + "changeable", changeable);
+    settings.setValue(path + "fold", fold);
 
-    lookup = "tagpref/" + text() + "/color";
-    if (settings.contains(lookup))
-    {
-        color = settings.contains(lookup) ? settings.value(lookup).value<QColor>() : QColor(_colorDefault);
-    }
-    else
-    {
-        color = QColor(_colorDefault);
-        settings.setValue(lookup, _colorDefault);
-    }
-
-    lookup = "tagpref/" + text() + "/font";
-    QString fontString = QFont().toString();
-
-    if (settings.contains(lookup))
-    {
-        fontString = settings.value(lookup).toString();
-    }
-    else
-    {
-        if (!_fontDefault.isEmpty())
-        {
-            fontString = _fontDefault;
-        }
-        settings.setValue(lookup, fontString);
-    }
-    font.fromString(fontString);
-
-    lookup = "tagpref/" + text() + "/visibility";
-    if (settings.contains(lookup))
-    {
-        visibility = settings.value(lookup).toBool();
-    }
-    else
-    {
-        visibility = _visibility;
-        settings.setValue(lookup, visibility);
-    }
-
-    lookup = "tagpref/" + text() + "/fold";
-    if (settings.contains(lookup))
-    {
-        fold = settings.value(lookup).toInt();
-    }
-    else
-    {
-        fold = _fold;
-        settings.setValue(lookup, fold);
-    }
-
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-    regExp = QRegularExpression(regExpText);
-#else
-    regExp = QRegExp(regExpText);
-#endif
+    updateLabel();
 }
 
 int TagPreference::getFold() const
@@ -168,30 +114,28 @@ const QRegExp& TagPreference::getRegExp() const
 
 bool TagPreference::getChangeable() const
 {
-    return regexpChangeable;
+    return changeable;
 }
 
 void TagPreference::updateLabel()
 {
     QSettings settings;
-    QString lookup;
 
-    lookup = "tagpref/" + text() + "/font";
-    settings.setValue(lookup, font.toString());
-
-    lookup = "tagpref/" + text() + "/color";
-    settings.setValue(lookup, color.name());
+    settings.setValue(path + "font", font.toString());
+    settings.setValue(path + "color", color.name());
 
     setFont(font);
 
     QString css = "background-color: " + bgcolor.name() + "; color: " + color.name() + ";";
 
     setStyleSheet(css);
+
+    emit visibilityChanged(text());
 }
 
 void TagPreference::changeFont()
 {
-    QFontDialog dialog(font, NULL);
+    QFontDialog dialog(font);
 
     if (dialog.exec())
     {
@@ -247,7 +191,6 @@ void TagPreference::onCustomContextMenu(const QPoint& /*_pos*/)
     QMenu* cmenu = new QMenu("Change");
 
     act = new QAction("Color", this);
-
     cmenu->addAction(act);
     connect(act, SIGNAL(triggered()), this, SLOT(changeColor()));
 
@@ -255,38 +198,39 @@ void TagPreference::onCustomContextMenu(const QPoint& /*_pos*/)
     cmenu->addAction(act);
     connect(act, SIGNAL(triggered()), this, SLOT(changeFont()));
 
-    if (regexpChangeable)
+    if (changeable)
     {
         act = new QAction("RegExp", this);
         cmenu->addAction(act);
         connect(act, SIGNAL(triggered()), this, SLOT(changeRegularExpression()));
     }
     menu->addMenu(cmenu);
-    if (regexpChangeable)
+    if (changeable)
     {
         act = new QAction("Delete", this);
         menu->addAction(act);
         connect(act, SIGNAL(triggered()), this, SLOT(deleteTagPreference()));
     }
 
-        act = new QAction("Up", this);
-        menu->addAction(act);
-        connect(act, SIGNAL(triggered()), this, SLOT(moveUp()));
-        act = new QAction("Down", this);
-        menu->addAction(act);
-        connect(act, SIGNAL(triggered()), this, SLOT(moveDown()));
+    act = new QAction("Up", this);
+    menu->addAction(act);
+    connect(act, SIGNAL(triggered()), this, SLOT(moveUp()));
+
+    act = new QAction("Down", this);
+    menu->addAction(act);
+    connect(act, SIGNAL(triggered()), this, SLOT(moveDown()));
 
     menu->exec(QCursor::pos());
 }
 
 void TagPreference::moveUp()
 {
-  emit moveUp(this);
+    emit moveUp(this);
 }
 
 void TagPreference::moveDown()
 {
-  emit moveDown(this);
+    emit moveDown(this);
 }
 
 void TagPreference::changeRegularExpression()
@@ -313,8 +257,7 @@ void TagPreference::changeRegularExpression()
         {
             regExpText = result;
             QSettings settings;
-            QString lookup = "tagpref/" + text() + "/regExp";
-            settings.setValue(lookup, regExpText);
+            settings.setValue(path + "regExp", regExpText);
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
             regExp = QRegularExpression(regExpText);
@@ -330,9 +273,8 @@ void TagPreference::changeVisibility(bool _val)
 {
     visibility = _val;
     QSettings settings;
-    QString lookup = "tagpref/" + text() + "/visiblity";
 
-    settings.setValue(lookup, _val);
+    settings.setValue(path + "visibility", _val);
 
     emit visibilityChanged(text());
 }
@@ -343,11 +285,10 @@ void TagPreference::changeFold(bool _val)
     {
         fold = _val ? 1 : 0;
         QSettings settings;
-        QString lookup = "tagpref/" + text() + "/fold";
 
-        settings.setValue(lookup, _val);
+        settings.setValue(path + "fold", _val);
 
-        emit foldChanged(text());
+        emit visibilityChanged(text());
     }
 }
 
@@ -375,7 +316,6 @@ void TagPreference::deleteTagPreference()
 
     // delete from QSettings
     QSettings settings;
-    QString lookup = "tagpref/" + text();
 
-    settings.remove(lookup);
+    settings.remove(path);
 }

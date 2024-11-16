@@ -1572,9 +1572,9 @@ void GraphWidget::setGlobalVersionInfo(const QStringList& _globalVersionInfo)
 
 void GraphWidget::setChangeableVersionInfo(const QStringList& _changeableVersionInfo)
 {
-    if (changeableVersionInfo!= _changeableVersionInfo)
+    if (changeableVersionInfo != _changeableVersionInfo)
     {
-        changeableVersionInfo= _changeableVersionInfo;
+        changeableVersionInfo = _changeableVersionInfo;
         QGraphicsView::update();
     }
 }
@@ -1687,6 +1687,7 @@ void GraphWidget::updateColors()
 void GraphWidget::updateFold()
 {
     QRectF from = mapToScene(viewport()->geometry()).boundingRect();
+
     rootVersion->foldRecurse(false);
     rootVersion->updateFoldRecurse();
     rootVersion->collectFolderVersions(rootVersion, NULL);

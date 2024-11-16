@@ -180,7 +180,7 @@ public:
     QList<Edge*>& getFileConstraintOutEdgeList();
 
     /**
-     * \brief If version is folded away, ensure its visiblity.
+     * \brief If version is folded away, ensure its visibility.
      *
      * \return true, if folding has changed
      */

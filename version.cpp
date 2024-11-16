@@ -262,7 +262,7 @@ void Version::paint(QPainter* _painter, const QStyleOptionGraphicsItem* _option,
         int height = -10;
         bool textborder = graph->getMainWindow()->getTextBorder();
 
-        foreach(const QString& info, graph->getMainWindow()->getNodeInfo())
+        foreach(const QString& info, graph->getMainWindow()->getVersionInfo())
         {
             if (globalVersionInfo.contains(info)
                 || localVersionInfo.contains(info))
@@ -694,7 +694,7 @@ void Version::calculateLocalBoundingBox()
 
     int height = 0;
 
-    foreach(const QString& info, graph->getMainWindow()->getNodeInfo())
+    foreach(const QString& info, graph->getMainWindow()->getVersionInfo())
     {
         if (globalVersionInfo.contains(info)
             || localVersionInfo.contains(info))

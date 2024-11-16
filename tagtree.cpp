@@ -249,8 +249,8 @@ void TagTree::resetTagTree()
     setIndexWidget(treemodel->index(0, 1), search);
 
     // node info TODO dynamic update
-    QStringList nodeInfo = mwin->getNodeInfo();
-    foreach(const QString &key, nodeInfo)
+    QStringList versionInfo = mwin->getVersionInfo();
+    foreach(const QString &key, versionInfo)
     {
         t = new QStandardItem(key);
         t->setEditable(false);

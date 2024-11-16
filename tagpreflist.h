@@ -29,11 +29,12 @@ class TagPrefList : public QWidget
 public:
     TagPrefList(QWidget* _parent = NULL);
 
-    void addTagPreference(const QString& _name,
+    bool addTagPreference(const QString& _name,
                           const QString& _regexp,
                           const QString& _color = QString(),
                           const QString& _font = QString(),
                           bool _regexpChangable = false,
+                          bool _visibility = true,
                           int _fold = -1);
 
     const TagPreference* getTagPreference(const QString& _item) const;
@@ -42,6 +43,10 @@ public:
     void getChangeableTagPreferences(QStringList& _changeable) const;
 
 protected:
+    void getOrderedTagPreferences(QList<TagPreference*>& _list) const;
+    void updateSettings();
+    int getIndex(QVBoxLayout* _layout, TagPreference* _item) const;
+
     QColor bgcolor;
     QMap<QString, TagPreference*> tp;
 
@@ -49,18 +54,14 @@ public slots:
     void setBackgroundColor(const QColor& _bgcolor);
     void regexpChangedProxy(const QString&);
     void visibilityChangedProxy(const QString&);
-    void foldChangedProxy(const QString&);
     void deleteTagPreference(const QString& _name);
     void addTagPreferenceShort(const QString& _name);
     void moveUp(TagPreference* _item);
     void moveDown(TagPreference* _item);
 
 signals:
-    void regexpChanged(const QString&);
     void visibilityChanged(const QString&);
-    void foldChanged(const QString&);
     void elementChanged();
-    void sigSetBackgroundColor(const QColor&);
 };
 
 #endif

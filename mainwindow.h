@@ -102,7 +102,7 @@ public:
     Ui_Dialog& getPreferences();
 
     //
-    const QStringList& getNodeInfo() const;
+    const QStringList& getVersionInfo() const;
 
 public slots:
 
@@ -132,7 +132,6 @@ public slots:
 
     // tag preferences visibility
     void tagPreferencesVisibilityChange(const QString&);
-    void tagPreferencesFoldChange(const QString&);
     void tagPreferencesElementChange();
 
     // Help menu
@@ -180,6 +179,9 @@ protected:
     // create main window menus
     void createMenus();
 
+    // init tag preference list
+    void initTagPreferenceList();
+
     // combo box with all codecs
     bool initCbCodecForCStrings(QString _default);
 
@@ -223,7 +225,7 @@ protected:
     QWidget* ctwin;
     QWidget* blwin;
     QTreeView* compareTree;
-    TagPrefList* gridLayout;
+    TagPrefList* tagpreflist;
     BranchTable* branchList;
 
     // preferences dialog
@@ -253,7 +255,7 @@ private:
     QDockWidget* compareTreeDock;
     QDockWidget* tagTreeDock;
     QDockWidget* branchDock;
-    QStringList nodeInfo;
+    QStringList versionInfo;
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     QRegularExpression foldNotRegExp;
 #else
