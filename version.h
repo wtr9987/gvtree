@@ -142,7 +142,8 @@ public:
     bool findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatch = false, QString _keyConstraint = QString());
 #endif
     void collectFolderVersions(Version* _rootNode, Version* _parent);
-    void updateFoldRecurse();
+    void flattenFoldersRecurse();
+    void updateFoldableRecurse();
     void foldRecurse(bool _val);
     int numEdges() const;
     const QList<Version*>& getFolderVersions() const;

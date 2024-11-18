@@ -58,7 +58,7 @@ Version::Version(GraphWidget* _graphWidget, QGraphicsItem* _parent) :
 }
 
 Version::Version(const QStringList& _globalVersionInfo,
-                const QStringList& _changeableVersionInfo,
+                 const QStringList& _changeableVersionInfo,
                  GraphWidget* _graphWidget,
                  QGraphicsItem* _parent) :
     QGraphicsItem(_parent),
@@ -361,7 +361,7 @@ bool Version::processGitLogInfo(const QString& _input, const QStringList& _parts
     // store the raw input in the key information, too
     keyInformation[QString("_input")] = QStringList(_input);
     keyInformation[QString("Hash")] = QStringList(hash);
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     keyInformation[QString("Commit Date")] =
         QStringList(
             QDateTime::fromSecsSinceEpoch(_parts.at(2).toInt())
@@ -471,7 +471,7 @@ void Version::processGitLogTagInformation(const QString& _tagInfo)
 
             if (tp)
             {
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
                 QRegularExpression r = tp->getRegExp();
                 foreach (const QString& str, tags)
                 {
@@ -499,7 +499,7 @@ void Version::processGitLogTagInformation(const QString& _tagInfo)
     }
 }
 
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 bool Version::findMatch(QRegularExpression& _pattern, const QString& _text, bool _exactMatch, QString _keyConstraint)
 #else
 bool Version::findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatch, QString _keyConstraint)
@@ -515,7 +515,7 @@ bool Version::findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatc
     QString rawInput = keyInformation["_input"].join(" ")
         + " " + keyInformation["Commit Date"].join(" ");
 
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     bool checkDetail = _pattern.isValid() ? (_pattern.match(rawInput).hasMatch()) :
         (rawInput.indexOf(_text, 0) != -1);
 #else
@@ -556,7 +556,7 @@ bool Version::findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatc
             {
                 QString tmp = kit.value().join(QString(" "));
 
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
                 if ((_pattern.isValid() && _pattern.match(tmp).hasMatch())
                     || (tmp.indexOf(_text) != -1))
 #else
@@ -785,6 +785,7 @@ void Version::collectFolderVersions(Version* _rootNode, Version* _parent)
         && _parent->getNumOutEdges() == 1
         && (numEdges() - getNumOutEdges() <= 1)
         && _parent->isFoldable()
+        && isFoldable()
        )
     {
         addToFolder(_parent);
@@ -897,22 +898,37 @@ void Version::updateFolderBox()
     }
 }
 
-void Version::updateFoldRecurse()
+void Version::flattenFoldersRecurse()
 {
-  // xxx
-  foldable = graph->getMainWindow()->getVersionIsFoldable(keyInformation);
-  if (isFolder() && isFolded())
-  {
-    foldAction();
-  }
+    if (isFolder())
+    {
+        foreach(Version * v, linear)
+        {
+            v->setH(1);
+        }
+        linear.clear();
+    }
 
-  foreach (Edge * edge, outEdges)
-  {
+    foreach (Edge * edge, outEdges)
+    {
         Version* next = dynamic_cast<Version*>(edge->destVersion());
 
         if (next)
-            next->updateFoldRecurse();
-  }
+            next->flattenFoldersRecurse();
+    }
+}
+
+void Version::updateFoldableRecurse()
+{
+    foldable = graph->getMainWindow()->getVersionIsFoldable(keyInformation);
+
+    foreach (Edge * edge, outEdges)
+    {
+        Version* next = dynamic_cast<Version*>(edge->destVersion());
+
+        if (next)
+            next->updateFoldableRecurse();
+    }
 }
 
 void Version::foldRecurse(bool _val)

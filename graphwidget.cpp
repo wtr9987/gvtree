@@ -1688,11 +1688,12 @@ void GraphWidget::updateFold()
 {
     QRectF from = mapToScene(viewport()->geometry()).boundingRect();
 
-    rootVersion->foldRecurse(false);
-    rootVersion->updateFoldRecurse();
+    rootVersion->flattenFoldersRecurse();
+    rootVersion->updateFoldableRecurse();
     rootVersion->collectFolderVersions(rootVersion, NULL);
     rootVersion->foldRecurse(true);
-    updateGraphFolding();
+    normalizeGraph();
+
     focusFromTo(from, from);
 }
 

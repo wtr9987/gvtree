@@ -103,7 +103,8 @@ void Edge::adjust()
         }
         else
         {
-            destPoint = line.p2() - QPointF(0, rad);
+            double sign = graph->getTopDownView() ? -1.0 : 1.0;
+            destPoint = line.p2() - QPointF(0, sign * rad);
         }
     }
 }
@@ -214,13 +215,12 @@ void Edge::paint(QPainter* _painter,
     const qreal lod = _option->levelOfDetailFromTransform(_painter->worldTransform());
 
     // angle of the edge, only relevant for lod > 0.33
+    double sign = graph->getTopDownView() ? -1.0 : 1.0;
     double angle = ((!fileConstraint && !merge && graph->getConnectorStyle() == 1) || lod <= 0.33) ?
-        M_PI / 2.0 :
+        (::atan2(sign, 0.0)) :
         (::atan2(line.p2().y() - line.p1().y(), line.p2().x() - line.p1().x()));
 
     angle += M_PI;
-
-    // double sign = graph->getTopDownView() ? -1.0:1.0;
 
     // color
     QColor col = info ? graph->getEdgeColor() : merge ? graph->getMergeColor() :

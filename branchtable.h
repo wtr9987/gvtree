@@ -53,6 +53,7 @@ protected:
     class MainWindow* mwin;
     QTableWidgetItem* currentBranch;
     QTableWidgetItem* selectedBranch;
+    bool blockReload;
 };
 
 #endif

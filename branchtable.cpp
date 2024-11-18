@@ -20,8 +20,10 @@
 #include "branchtable.h"
 #include "mainwindow.h"
 
+#include <iostream>
+
 BranchTable::BranchTable(QWidget* _parent) : QTableWidget(_parent),
-    mwin(NULL), currentBranch(NULL), selectedBranch(NULL)
+    mwin(NULL), currentBranch(NULL), selectedBranch(NULL), blockReload(false)
 {
     verticalHeader()->hide();
 
@@ -51,7 +53,7 @@ void BranchTable::setMainWindow(MainWindow* _mwin)
 
 void BranchTable::refresh(const QString& _localRepositoryPath)
 {
-    if (!mwin)
+    if (!mwin || blockReload)
         return;
 
     bool sigstat = blockSignals(true);
@@ -155,7 +157,11 @@ void BranchTable::branchSelectionChanged()
         return;
 
     if (mwin->getAll() == false)
+    {
+        blockReload = true;
         mwin->reloadCurrentRepository();
+        blockReload = false;
+    }
 
     if (!mwin->getGraphWidget()->focusElements(getSelectedBranch(), true, QString("Branch")))
         mwin->getGraphWidget()->focusElements(getSelectedBranch(), false, QString("Branch"));

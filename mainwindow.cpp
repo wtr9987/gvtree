@@ -687,7 +687,7 @@ void MainWindow::initTagPreferenceList()
         // Import from settings
         QString path, regexp, font, color;
         bool visibility, changeable;
-        int fold;
+        int foldable;
 
         foreach(const QString& name, items)
         {
@@ -697,9 +697,9 @@ void MainWindow::initTagPreferenceList()
             color = settings.value(path + "color").toString();
             visibility = settings.value(path + "visibility").toBool();
             changeable = settings.value(path + "changeable").toBool();
-            fold = settings.value(path + "fold").toInt();
+            foldable = settings.value(path + "foldable").toInt();
 
-            tagpreflist->addTagPreference(name, regexp, color, font, visibility, changeable, fold);
+            tagpreflist->addTagPreference(name, regexp, color, font, visibility, changeable, foldable);
         }
     }
 
@@ -881,6 +881,9 @@ void MainWindow::reloadCurrentRepository()
             graphwidget->verticalScrollBar()->setValue(shift.y());
         }
     }
+
+    // if called from branchTable the refresh is blocked
+    gvtree_branchtable.branchTable->refresh(repositoryPath);
     updateGitStatus(repositoryPath);
     pbRepositoryRefresh->hide();
 }
@@ -1545,19 +1548,19 @@ const QStringList& MainWindow::getVersionInfo() const
 
 bool MainWindow::getVersionIsFoldable(const QMap<QString, QStringList>& _keyinformation) const
 {
-    bool fold = true;
+    bool foldable = true;
 
     for (QMap<QString, QStringList>::const_iterator it = _keyinformation.begin();
-         it != _keyinformation.end() && fold;
+         it != _keyinformation.end() && foldable;
          it++)
     {
         const TagPreference* tp = tagpreflist->getTagPreference(it.key());
         if (tp && tp->getFold() == 0 && tp->getVisibility() == true)
         {
-            fold = false;
+            foldable = false;
         }
     }
-    return fold;
+    return foldable;
 }
 
 GraphWidget* MainWindow::getGraphWidget()

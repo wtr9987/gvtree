@@ -35,7 +35,7 @@ public:
                           const QString& _font = QString(),
                           bool _regexpChangable = false,
                           bool _visibility = true,
-                          int _fold = -1);
+                          int _foldable = -1);
 
     const TagPreference* getTagPreference(const QString& _item) const;
     void getVisibleTagPreferences(QStringList& _visible) const;

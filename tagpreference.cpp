@@ -32,7 +32,7 @@ TagPreference::TagPreference(const QString& _name,
     : QLabel(_name, _parent),
     changeable(true),
     visibility(true),
-    fold(0)
+    foldable(0)
 {
     setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     path = QString("tagpref/" + _name + "/");
@@ -45,14 +45,14 @@ TagPreference::TagPreference(const QString& _name,
                              const QColor& _bgcolor,
                              bool _visibility,
                              bool _changeable,
-                             int _fold,
+                             int _foldable,
                              QWidget* _parent)
     : QLabel(_name, _parent),
     regExpText(_regex),
     bgcolor(_bgcolor),
     changeable(_changeable),
     visibility(_visibility),
-    fold(_fold)
+    foldable(_foldable)
 {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     regExp = QRegularExpression(_regex);
@@ -78,14 +78,14 @@ TagPreference::TagPreference(const QString& _name,
     settings.setValue(path + "color", _color);
     settings.setValue(path + "visibility", visibility);
     settings.setValue(path + "changeable", changeable);
-    settings.setValue(path + "fold", fold);
+    settings.setValue(path + "foldable", foldable);
 
     updateLabel();
 }
 
 int TagPreference::getFold() const
 {
-    return fold;
+    return foldable;
 }
 
 bool TagPreference::getVisibility() const
@@ -173,12 +173,12 @@ void TagPreference::onCustomContextMenu(const QPoint& /*_pos*/)
     connect(act, SIGNAL(triggered(bool)), this, SLOT(changeVisibility(bool)));
     menu->addAction(act);
 
-    if (fold != -1)
+    if (foldable != -1)
     {
-        act = new QAction("Fold", this);
+        act = new QAction("Foldable", this);
         act->setCheckable(true);
-        act->setChecked(fold);
-        connect(act, SIGNAL(triggered(bool)), this, SLOT(changeFold(bool)));
+        act->setChecked(foldable);
+        connect(act, SIGNAL(triggered(bool)), this, SLOT(changeFoldable(bool)));
         menu->addAction(act);
     }
 
@@ -279,14 +279,14 @@ void TagPreference::changeVisibility(bool _val)
     emit visibilityChanged(text());
 }
 
-void TagPreference::changeFold(bool _val)
+void TagPreference::changeFoldable(bool _val)
 {
-    if (fold != -1)
+    if (foldable != -1)
     {
-        fold = _val ? 1 : 0;
+        foldable = _val ? 1 : 0;
         QSettings settings;
 
-        settings.setValue(path + "fold", _val);
+        settings.setValue(path + "foldable", foldable);
 
         emit visibilityChanged(text());
     }

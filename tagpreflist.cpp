@@ -15,9 +15,6 @@
 /*                                               */
 /* --------------------------------------------- */
 
-// TODO RegExp rules are greedy, the order is relevant
-// TODO allow shifting of the rules
-
 #include <iostream>
 #include "tagpreflist.h"
 #include <QSpacerItem>
@@ -43,13 +40,13 @@ bool TagPrefList::addTagPreference(const QString& _name,
                                    const QString& _font,
                                    bool _visibility,
                                    bool _regexpChangeable,
-                                   int _fold)
+                                   int _foldable)
 {
     QVBoxLayout* l = dynamic_cast<QVBoxLayout*>(layout());
 
     if (l && !tp.contains(_name))
     {
-        TagPreference* tpw = new TagPreference(_name, _regexp, _color, _font, bgcolor, _visibility, _regexpChangeable, _fold, this);
+        TagPreference* tpw = new TagPreference(_name, _regexp, _color, _font, bgcolor, _visibility, _regexpChangeable, _foldable, this);
         if (tpw)
         {
             connect(tpw, SIGNAL(deleteTagPreference(const QString&)), this, SLOT(deleteTagPreference(const QString&)));
