@@ -675,7 +675,7 @@ void MainWindow::initTagPreferenceList()
     if (tagprefKeys.size() == 0)
     {
         // Create initial default
-        tagpreflist->addTagPreference("Branch", "^((?!.*tag: )\\b([\\/0-9a-zA-Z_]*)\\b)$", "#ff5e5c64", "", true, true, 0);
+        tagpreflist->addTagPreference("Branch", "^((?!.*tag: )\\b([\\/0-9a-zA-Z\\._]*)\\b)$", "#ff5e5c64", "", true, true, 0);
         tagpreflist->addTagPreference("Release Label", "tag: \\b(((v|R)[0-9.\\-]+)(_RC[0-9]+)?([a-z]+\\.[0-9]+)?)$", "#ffe01b24", "Nimbus Sans L,18,-1,5,75,0,0,0,0,0", true, true, 0);
         tagpreflist->addTagPreference("Baseline Label", "tag: \\b(BASELINE_[0-9.\\-]+)$", "#ff3d3846", "Nimbus Sans L,18,-1,5,75,0,0,0,0,0", true, true, 0);
         tagpreflist->addTagPreference("FIX Label", "tag: \\b((FIX_STR[0-9]+(DEV|DOC)?(_RR[0-9]+)?))$", "", "", true, true, 0);
