@@ -60,7 +60,10 @@ TagPreference::TagPreference(const QString& _name,
     regExp = QRegExp(_regex);
 #endif
 
-    font.fromString(_font);
+    if (!_font.isEmpty())
+    {
+        font.fromString(_font);
+    }
     color = QColor(_color);
 
     setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
