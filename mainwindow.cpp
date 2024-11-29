@@ -55,6 +55,9 @@ using namespace std;
 
 MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL), blwin(NULL), pwin(NULL)
 {
+    // settings
+    QSettings settings;
+
     // setup preferences dialog first
     pwin = new QDialog;
     gvtree_preferences.setupUi(pwin);
@@ -66,19 +69,19 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
     connect(watcher, SIGNAL(directoryChanged(const QString&)), this, SLOT(showRefreshButton(const QString&)));
     connect(watcher, SIGNAL(fileChanged(const QString&)), this, SLOT(showRefreshButton(const QString&)));
 
+    // remotes and all checkbox
     cbRemotes = new QCheckBox("--remotes");
     cbAll = new QCheckBox("--all");
+    if (!settings.contains("all"))
     {
-        QSettings settings;
-        if (settings.contains("remotes") && settings.value("remotes").toBool())
-            cbRemotes->setChecked(true);
-        else
-            cbRemotes->setChecked(false);
-        if (settings.contains("all") && settings.value("all").toBool())
-            cbAll->setChecked(true);
-        else
-            cbAll->setChecked(false);
+        settings.setValue("all", true);
     }
+    if (!settings.contains("remotes"))
+    {
+        settings.setValue("remotes", false);
+    }
+    cbRemotes->setChecked(settings.value("remotes").toBool());
+    cbAll->setChecked(settings.value("all").toBool());
     connect(cbRemotes, SIGNAL(stateChanged(int)), this, SLOT(remotesChanged(int)));
     connect(cbAll, SIGNAL(stateChanged(int)), this, SLOT(allChanged(int)));
 
@@ -495,8 +498,9 @@ void MainWindow::restorePreferencesSettings()
         settings.setValue("textborder", true);
     gvtree_preferences.textborder->setChecked(settings.value("textborder").toBool());
 
-    if (settings.contains("diffLocalFile"))
-        gvtree_preferences.diff_local_files->setChecked(settings.value("diffLocalFile").toBool());
+    if (!settings.contains("diffLocalFile"))
+      settings.setValue("diffLocalFile", true);
+    gvtree_preferences.diff_local_files->setChecked(settings.value("diffLocalFile").toBool());
 
     if (settings.contains("reduceTree"))
         gvtree_preferences.reduce_tree->setChecked(settings.value("reduceTree").toBool());
