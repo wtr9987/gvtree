@@ -1,16 +1,17 @@
-cmake_minimum_required (VERSION 3.0)
+cmake_minimum_required (VERSION 3.16.0)
 
 project(gvtree
-        VERSION 1.8.0
+        VERSION 1.9.0
         LANGUAGES CXX)
 
-include(FeatureSummary)
-
-                  
-set(QT_MIN_VERSION "5.0.0")
-set(CMAKE_CXX_STANDARD 14)
-set(CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
+
+option(USE_QT6 "Enable this if you want to use Qt6, instead of Qt5" no)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug" CACHE STRING
@@ -21,11 +22,20 @@ if(NOT CMAKE_INSTALL_PREFIX)
     set(CMAKE_INSTALL_PREFIX ".")
 endif()
 
-find_package(Qt5Core ${QT_MIN_VERSION} REQUIRED)
-find_package(Qt5Gui ${QT_MIN_VERSION} REQUIRED)
-find_package(Qt5Network ${QT_MIN_VERSION} REQUIRED)
-find_package(Qt5Widgets ${QT_MIN_VERSION} REQUIRED)
+if (NOT DEFINED USE_QT6)
+  find_package(Qt6 COMPONENTS Widgets)
+  if (NOT Qt6_FOUND)
+      find_package(Qt5 5.15 COMPONENTS Core REQUIRED)
+  endif(NOT Qt6_FOUND)
+endif(NOT DEFINED USE_QT6)
 
+if(USE_QT6)
+    find_package(Qt6 REQUIRED COMPONENTS Widgets Core Gui Network)
+else(USE_QT6)
+    find_package(Qt5 COMPONENTS Widgets REQUIRED)
+endif(USE_QT6)
+
+include(FeatureSummary)
 feature_summary(WHAT ALL FATAL_ON_MISSING_REQUIRED_PACKAGES)
 
 add_compile_options(-Wall
@@ -34,15 +44,16 @@ add_compile_options(-Wall
                     $<$<CONFIG:DEBUG>:-fsanitize=address>
                     $<$<CONFIG:DEBUG>:-fno-omit-frame-pointer>)
                     
-add_compile_definitions (VERSION="${VERSION}"
+add_compile_definitions(VERSION="${VERSION}"
                          $<$<CONFIG:RELEASE>:QT_NO_DEBUG_OUTPUT>)
+
+add_compile_definitions(QT_DISABLE_DEPRECATED_UP_TO=0x050F00)
 
 add_link_options ("$<$<CONFIG:DEBUG>:-fsanitize=address>"
                   "$<$<CONFIG:DEBUG>:-fno-omit-frame-pointer>")
 
 message("Buildtype: ${CMAKE_BUILD_TYPE}")
 
-set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(SRCS
@@ -57,7 +68,7 @@ set(SRCS
     comparetree.cpp 
     execute_cmd.cpp 
     tagpreference.cpp 
-    tagprefgridlayout.cpp 
+    tagpreflist.cpp 
     tagtree.cpp 
     branchtable.cpp 
     mimetable.cpp 
@@ -75,7 +86,7 @@ set(HDRS
     comparetree.h 
     execute_cmd.h
     tagpreference.h 
-    tagprefgridlayout.h 
+    tagpreflist.h 
     tagtree.h 
     branchtable.h 
     mimetable.h 
@@ -95,14 +106,22 @@ set(RCS
    gvtree.qrc
 )
 
-set(QTMODULES
-  Qt5::Core 
-  Qt5::Widgets 
-  Qt5::Network
- )
- 
-qt5_wrap_ui(UI_HDRS ${UIS})
-qt5_add_resources(RC_SRCS ${RCS})
+if(USE_QT6)
+  set(QTMODULES
+    Qt6::Core 
+    Qt6::Widgets 
+    Qt6::Network
+  )
+  qt6_wrap_ui(UI_HDRS ${UIS})
+  qt6_add_resources(RC_SRCS ${RCS})
+else(USE_QT6)
+  set(QTMODULES
+    Qt5::Core 
+    Qt5::Widgets 
+  )
+  qt5_wrap_ui(UI_HDRS ${UIS})
+  qt5_add_resources(RC_SRCS ${RCS})
+endif(USE_QT6)
 
 add_executable(gvtree ${SRCS} ${HDRS} ${UI_HDRS} ${RC_SRCS})
 

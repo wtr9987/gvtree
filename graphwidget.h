@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.8-0                */
+/*                  gvtree V1.9-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -80,7 +80,8 @@ public:
 
     // change the position of HEAD
     void flipY();
-    void setGlobalVersionInfo(const QString& _item, bool _value);
+    void setGlobalVersionInfo(const QStringList& _globalVersionInfo);
+    void setChangeableVersionInfo(const QStringList& _changeableVersionInfo);
 
     void setLocalRepositoryPath(const QString& _dir);
     const QString& getLocalRepositoryPath() const;
@@ -172,6 +173,7 @@ public slots:
     void resetSelection();
     void focusCurrent();
     void fitInView();
+    void updateFold();
     void foldAll();
     void unfoldAll();
     void normalizeGraph();
@@ -232,6 +234,7 @@ private:
     Version* headVersion;      // top version element (without --remotes == localHeadVersion)
 
     QStringList globalVersionInfo;
+    QStringList changeableVersionInfo;
 
     // other widgets
     class MainWindow* mwin;

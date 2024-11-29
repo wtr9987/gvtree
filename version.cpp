@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.8-0                */
+/*                  gvtree V1.9-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -15,10 +15,8 @@
 /*                                               */
 /* --------------------------------------------- */
 
-#include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
-#include <QColor>
 #include <QStyleOption>
 #include <QClipboard>
 #include <QApplication>
@@ -39,6 +37,7 @@ Version::Version(GraphWidget* _graphWidget, QGraphicsItem* _parent) :
     Node(),
     graph(_graphWidget),
     globalVersionInfo(dummy),
+    changeableVersionInfo(dummy),
     matched(false),
     folded(false),
     foldable(true),
@@ -59,12 +58,14 @@ Version::Version(GraphWidget* _graphWidget, QGraphicsItem* _parent) :
 }
 
 Version::Version(const QStringList& _globalVersionInfo,
+                 const QStringList& _changeableVersionInfo,
                  GraphWidget* _graphWidget,
                  QGraphicsItem* _parent) :
     QGraphicsItem(_parent),
     Node(),
     graph(_graphWidget),
     globalVersionInfo(_globalVersionInfo),
+    changeableVersionInfo(_changeableVersionInfo),
     matched(false),
     folded(true),
     foldable(true),
@@ -261,7 +262,7 @@ void Version::paint(QPainter* _painter, const QStyleOptionGraphicsItem* _option,
         int height = -10;
         bool textborder = graph->getMainWindow()->getTextBorder();
 
-        foreach(const QString& info, graph->getMainWindow()->getNodeInfo())
+        foreach(const QString& info, graph->getMainWindow()->getVersionInfo())
         {
             if (globalVersionInfo.contains(info)
                 || localVersionInfo.contains(info))
@@ -360,10 +361,17 @@ bool Version::processGitLogInfo(const QString& _input, const QStringList& _parts
     // store the raw input in the key information, too
     keyInformation[QString("_input")] = QStringList(_input);
     keyInformation[QString("Hash")] = QStringList(hash);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    keyInformation[QString("Commit Date")] =
+        QStringList(
+            QDateTime::fromSecsSinceEpoch(_parts.at(2).toInt())
+            .toString("yyyy.MM.dd HH:mm:ss"));
+#else
     keyInformation[QString("Commit Date")] =
         QStringList(
             QDateTime::fromTime_t(_parts.at(2).toInt())
             .toString("yyyy.MM.dd HH:mm:ss"));
+#endif
     commitDate = _parts.at(2).toInt();
     keyInformation[QString("User Name")] = QStringList(_parts.at(3));
 
@@ -453,11 +461,7 @@ void Version::processGitLogTagInformation(const QString& _tagInfo)
 
         QStringList scanItems (QStringList()
                                << QString("HEAD")
-                               << QString("Release Label")
-                               << QString("Baseline Label")
-                               << QString("FIX/PQT Label")
-                               << QString("HO Label")
-                               << QString("Branch")
+                               << changeableVersionInfo
                                << QString("Other Tags"));
 
         foreach(const QString& it, scanItems)
@@ -467,6 +471,19 @@ void Version::processGitLogTagInformation(const QString& _tagInfo)
 
             if (tp)
             {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+                QRegularExpression r = tp->getRegExp();
+                foreach (const QString& str, tags)
+                {
+                    QRegularExpressionMatch m = r.match(str);
+
+                    if (m.hasMatch())
+                    {
+                        keyInformation[it].push_back(m.captured(1));
+                        tags.removeOne(str);
+                    }
+                }
+#else
                 QRegExp r = tp->getRegExp();
                 foreach (const QString& str, tags)
                 {
@@ -476,12 +493,17 @@ void Version::processGitLogTagInformation(const QString& _tagInfo)
                         tags.removeOne(str);
                     }
                 }
+#endif
             }
         }
     }
 }
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+bool Version::findMatch(QRegularExpression& _pattern, const QString& _text, bool _exactMatch, QString _keyConstraint)
+#else
 bool Version::findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatch, QString _keyConstraint)
+#endif
 {
     bool oldmatched = matched;
     bool newmatched = false;
@@ -493,8 +515,13 @@ bool Version::findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatc
     QString rawInput = keyInformation["_input"].join(" ")
         + " " + keyInformation["Commit Date"].join(" ");
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    bool checkDetail = _pattern.isValid() ? (_pattern.match(rawInput).hasMatch()) :
+        (rawInput.indexOf(_text, 0) != -1);
+#else
     bool checkDetail = _pattern.isValid() ? (_pattern.indexIn(rawInput, 0) != -1) :
         (rawInput.indexOf(_text, 0) != -1);
+#endif
 
     if (checkDetail)
     {
@@ -529,8 +556,13 @@ bool Version::findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatc
             {
                 QString tmp = kit.value().join(QString(" "));
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+                if ((_pattern.isValid() && _pattern.match(tmp).hasMatch())
+                    || (tmp.indexOf(_text) != -1))
+#else
                 if ((_pattern.isValid() && _pattern.indexIn(tmp, 0) != -1)
                     || (tmp.indexOf(_text) != -1))
+#endif
                 {
                     newmatched = true;
                     if (kit.key() == "CommentRaw")
@@ -662,7 +694,7 @@ void Version::calculateLocalBoundingBox()
 
     int height = 0;
 
-    foreach(const QString& info, graph->getMainWindow()->getNodeInfo())
+    foreach(const QString& info, graph->getMainWindow()->getVersionInfo())
     {
         if (globalVersionInfo.contains(info)
             || localVersionInfo.contains(info))
@@ -753,6 +785,7 @@ void Version::collectFolderVersions(Version* _rootNode, Version* _parent)
         && _parent->getNumOutEdges() == 1
         && (numEdges() - getNumOutEdges() <= 1)
         && _parent->isFoldable()
+        && isFoldable()
        )
     {
         addToFolder(_parent);
@@ -862,6 +895,39 @@ void Version::updateFolderBox()
     foreach(Version * v, linear)
     {
         folderBox |= QRectF(-30, -30, 60, 60).translated(v->QGraphicsItem::scenePos() - QGraphicsItem::scenePos());
+    }
+}
+
+void Version::flattenFoldersRecurse()
+{
+    if (isFolder())
+    {
+        foreach(Version * v, linear)
+        {
+            v->setH(1);
+        }
+        linear.clear();
+    }
+
+    foreach (Edge * edge, outEdges)
+    {
+        Version* next = dynamic_cast<Version*>(edge->destVersion());
+
+        if (next)
+            next->flattenFoldersRecurse();
+    }
+}
+
+void Version::updateFoldableRecurse()
+{
+    foldable = graph->getMainWindow()->getVersionIsFoldable(keyInformation);
+
+    foreach (Edge * edge, outEdges)
+    {
+        Version* next = dynamic_cast<Version*>(edge->destVersion());
+
+        if (next)
+            next->updateFoldableRecurse();
     }
 }
 

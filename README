@@ -55,11 +55,12 @@ qmake PREFIX=/usr/local
 make
 sudo make install
 
+ cmake (Qt >= 5.15)
+---------------------
 
- cmake (Qt > 5.0)
-------------------
+To use Qt >= 6.0 use -D USE_QT6=true switch, default is false.
 
-cmake CMakeLists.txt
+cmake -D USE_QT6=true CMakeLists.txt
 cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local
 make
 sudo make install
@@ -72,7 +73,7 @@ After installation
 gvtree -h 
 will give you the following information:
 
-gvtree-1.8-0
+gvtree-1.9-0
 
 Tool to display git log graph
 
@@ -123,5 +124,5 @@ Parameters:
 
 --------------------------------------------------------------------------------
 
-For more details please refer to doc/gvtree/gvtree-1.8-0.pdf
+For more details please refer to doc/gvtree/gvtree-1.9-0.pdf
 

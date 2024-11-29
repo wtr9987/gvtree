@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.8-0                */
+/*                  gvtree V1.9-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -239,33 +239,23 @@ void TagTree::resetTagTree()
     root = treemodel->invisibleRootItem();
     root->setEditable(false);
 
-    QStringList nodeInfo;
-
-    nodeInfo << "Search Result"
-             << "HEAD"
-             << "Release Label"
-             << "Baseline Label"
-             << "Commit Date"
-             << "Branch"
-             << "FIX/PQT Label"
-             << "HO Label"
-             << "Other Tags"
-             << "User Name" // ... many versions
-             << "Comment"  // ... don't know if useful, maby not
-             << "Hash"; // ... not useful, use search instead
-
-    foreach(const QString &key, nodeInfo)
-    {
-        QStandardItem* t = new QStandardItem(key);
-
-        t->setEditable(false);
-        root->appendRow(t);
-    }
-
+    // Search widget
+    QStandardItem* t = new QStandardItem("Search Result");
+    t->setEditable(false);
+    root->appendRow(t);
     search = new QLineEdit(this);
     connect(search, SIGNAL(textEdited(const QString&)), this, SLOT(lookupId(const QString&)));
     connect(search, SIGNAL(returnPressed()), this, SLOT(focusGraph()));
     setIndexWidget(treemodel->index(0, 1), search);
+
+    // node info TODO dynamic update
+    QStringList versionInfo = mwin->getVersionInfo();
+    foreach(const QString &key, versionInfo)
+    {
+        t = new QStandardItem(key);
+        t->setEditable(false);
+        root->appendRow(t);
+    }
 }
 
 void TagTree::onCustomContextMenu(const QPoint& point)
@@ -326,7 +316,11 @@ void TagTree::collectSubitems(const QModelIndex& _p, QList<Version*>& _collect)
             QString arg = _p.parent().data(Qt::DisplayRole).toString();
             if (arg == "Search Result")
             {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+                QRegularExpression pattern(search->text());
+#else
                 QRegExp pattern(search->text());
+#endif
                 v->findMatch(pattern, search->text(), false);
             }
             else

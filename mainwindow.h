@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.8-0                */
+/*                  gvtree V1.9-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -29,10 +29,14 @@
 #include <QStringList>
 #include <QTextBrowser>
 #include <QTreeView>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include <QRegularExpression>
+#else
 #include <QRegExp>
+#endif
 
 #include "graphwidget.h"
-#include "tagprefgridlayout.h"
+#include "tagpreflist.h"
 #include "tagtree.h"
 #include "branchtable.h"
 #include "ui_gvtree_comparetree.h"
@@ -98,7 +102,7 @@ public:
     Ui_Dialog& getPreferences();
 
     //
-    const QStringList& getNodeInfo() const;
+    const QStringList& getVersionInfo() const;
 
 public slots:
 
@@ -126,8 +130,9 @@ public slots:
     void setGitLocalRepository();
     void quit();
 
-    // View menu
-    void changeGlobalVersionInfo(QAction* _act);
+    // tag preferences visibility
+    void tagPreferencesVisibilityChange(const QString&);
+    void tagPreferencesElementChange();
 
     // Help menu
     void helpDialog();
@@ -160,7 +165,7 @@ protected:
     bool applyStyleSheetFile(QString _path);
 
     // color dialog helper for different objects
-    void colorDialogCommon(QString _key, QPushButton* _pb);
+    bool colorDialogCommon(QString _key, QPushButton* _pb);
 
     // check for .git in the path
     bool checkGitLocalRepository(const QString& _path,
@@ -173,6 +178,9 @@ protected:
 
     // create main window menus
     void createMenus();
+
+    // init tag preference list
+    void initTagPreferenceList();
 
     // combo box with all codecs
     bool initCbCodecForCStrings(QString _default);
@@ -217,7 +225,7 @@ protected:
     QWidget* ctwin;
     QWidget* blwin;
     QTreeView* compareTree;
-    TagPrefGridLayout* gridLayout;
+    TagPrefList* tagpreflist;
     BranchTable* branchList;
 
     // preferences dialog
@@ -247,8 +255,14 @@ private:
     QDockWidget* compareTreeDock;
     QDockWidget* tagTreeDock;
     QDockWidget* branchDock;
-    QStringList nodeInfo;
+    QStringList versionInfo;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    QRegularExpression foldNotRegExp;
+#else
     QRegExp foldNotRegExp;
+#endif
+signals:
+    void sigBackgroundColorChange(const QColor&);
 };
 
 #endif

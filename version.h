@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.8-0                */
+/*                  gvtree V1.9-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -20,7 +20,11 @@
 
 #include <QGraphicsItem>
 #include <QList>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include <QRegularExpression>
+#else
 #include <QRegExp>
+#endif
 #include <QSet>
 #include <QRectF>
 #include <QString>
@@ -53,6 +57,7 @@ public:
      */
 
     Version(const QStringList& _globalVersionInfo,
+            const QStringList& _changeableVersionInfo,
             GraphWidget* _graphWidget,
             QGraphicsItem* _parent = NULL);
 
@@ -131,8 +136,14 @@ public:
     void addLocalVersionInfo(const QString& _val);
 
     void setUpdateBoundingRect(bool _val);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    bool findMatch(QRegularExpression& _pattern, const QString& _text, bool _exactMatch = false, QString _keyConstraint = QString());
+#else
     bool findMatch(QRegExp& _pattern, const QString& _text, bool _exactMatch = false, QString _keyConstraint = QString());
+#endif
     void collectFolderVersions(Version* _rootNode, Version* _parent);
+    void flattenFoldersRecurse();
+    void updateFoldableRecurse();
     void foldRecurse(bool _val);
     int numEdges() const;
     const QList<Version*>& getFolderVersions() const;
@@ -170,7 +181,7 @@ public:
     QList<Edge*>& getFileConstraintOutEdgeList();
 
     /**
-     * \brief If version is folded away, ensure its visiblity.
+     * \brief If version is folded away, ensure its visibility.
      *
      * \return true, if folding has changed
      */
@@ -203,6 +214,7 @@ private:
 
     QString commit_sse;
     const QStringList& globalVersionInfo;
+    const QStringList& changeableVersionInfo;
     static QStringList dummy;
 
     bool matched;

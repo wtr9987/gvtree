@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.8-0                */
+/*                  gvtree V1.9-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -19,8 +19,6 @@
 #include <QColor>
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
-#include <QClipboard>
-#include <QApplication>
 
 #include <math.h>
 
@@ -105,7 +103,8 @@ void Edge::adjust()
         }
         else
         {
-            destPoint = line.p2() - QPointF(0, rad);
+            double sign = graph->getTopDownView() ? -1.0 : 1.0;
+            destPoint = line.p2() - QPointF(0, sign * rad);
         }
     }
 }
@@ -135,7 +134,7 @@ QPainterPath Edge::shape() const
     {
         QPointF cur = sourcePoint - QPointF(sx * 10.0, sy * 10.0);
         border.push_back(cur);
-        cur += QPointF(sx * 20.0, 0.0);
+        cur += QPointF(sx * 10.0, 0.0);
         border.push_back(cur);
         cur += QPointF(dx, dy);
         border.push_back(cur);
@@ -145,20 +144,22 @@ QPainterPath Edge::shape() const
         border.push_back(cur);
         cur -= QPointF(dx, dy);
         border.push_back(cur);
+        cur -= QPointF(0.0, sy * 10.0);
+        border.push_back(cur);
     }
     else
     {
         QPointF cur = sourcePoint - QPointF(sx * 10.0, sy * 10.0);
         border.push_back(cur);
-        cur += QPointF(sx * 20.0, 0.0);
+        cur += QPointF(sx * 10.0, 0.0);
         border.push_back(cur);
         cur += QPointF(0.0, 0.5 * dy);
         border.push_back(cur);
         cur += QPointF(dx, 0.0);
         border.push_back(cur);
-        cur += QPointF(0.0, 0.5 * dy) + QPointF(0.0, sy * 20.0);
+        cur += QPointF(0.0, 0.5 * dy) + QPointF(0.0, sy * 10.0);
         border.push_back(cur);
-        cur -= QPointF(sx * 20.0, 0.0);
+        cur -= QPointF(sx * 10.0, 0.0);
         border.push_back(cur);
         cur -= QPointF(0.0, 0.5 * dy);
         border.push_back(cur);
@@ -214,20 +215,20 @@ void Edge::paint(QPainter* _painter,
     const qreal lod = _option->levelOfDetailFromTransform(_painter->worldTransform());
 
     // angle of the edge, only relevant for lod > 0.33
+    double sign = graph->getTopDownView() ? -1.0 : 1.0;
     double angle = ((!fileConstraint && !merge && graph->getConnectorStyle() == 1) || lod <= 0.33) ?
-        M_PI / 2.0 :
+        (::atan2(sign, 0.0)) :
         (::atan2(line.p2().y() - line.p1().y(), line.p2().x() - line.p1().x()));
 
     angle += M_PI;
-
-    // double sign = graph->getTopDownView() ? -1.0:1.0;
 
     // color
     QColor col = info ? graph->getEdgeColor() : merge ? graph->getMergeColor() :
         graph->getEdgeColor();
 
     // line width
-    int pw = (lod <= 0.33) ? 0 : (source->isMain() && dest->isMain()) ? 4 : 2;
+    int pw = (!source->isMain() || !dest->isMain()) ? 0 :
+        (lod <= 0.33) ? 2.8 / lod : 4;
 
     if (fileConstraint)
     {

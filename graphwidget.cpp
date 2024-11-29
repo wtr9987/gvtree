@@ -23,7 +23,13 @@
 #include <sys/time.h>
 
 #include <QtGui>
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include <QRegularExpression>
+#else
 #include <QRegExp>
+#endif
+
 #include <QAction>
 #include <QMenu>
 #include <QScrollBar>
@@ -132,7 +138,7 @@ void GraphWidget::test()
         QString line = "#0#0##(tag: " + n + ")#";
         QStringList parts = line.split(QChar('#'));
 
-        nodes[n] = new Version(globalVersionInfo, this);
+        nodes[n] = new Version(globalVersionInfo, changeableVersionInfo, this);
         nodes[n]->processGitLogInfo(line, parts);
 
         scene()->addItem(nodes[n]);
@@ -304,6 +310,9 @@ void GraphWidget::keyPressEvent(QKeyEvent* _event)
         case Qt::Key_H:
             focusCurrent();
             break;
+        case Qt::Key_F5:
+            mwin->reloadCurrentRepository();
+            break;
         default:
             QGraphicsView::keyPressEvent(_event);
     }
@@ -453,7 +462,7 @@ Version* GraphWidget::gitlogSingle(QString _hash, bool _create)
     if (!v)
     {
         // create an object...
-        v = new Version(globalVersionInfo, this);
+        v = new Version(globalVersionInfo, changeableVersionInfo, this);
 
         // if the key information has already been parsed, use it
         v->setKeyInformation(keyInformationCache.value(hash, QMap<QString, QStringList>()));
@@ -627,13 +636,33 @@ void GraphWidget::process(QList<QString> _cache)
     currentLines = linecount;
 
     QString previousTree;
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    QRegularExpression treePattern("^([*\\\\/\\. |\\-_]*[*\\\\/\\.|\\-_]+)");
+#else
     QRegExp treePattern("^([*\\\\/\\. |\\-_]*[*\\\\/\\.|\\-_]+)");
+#endif
 
     int linenumber = 0;
 
     foreach (const QString& line, swap_cache)
     {
         // get the tree pattern
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        QRegularExpressionMatch m = treePattern.match(line);
+
+        if (!m.hasMatch())
+        {
+            cerr << "No --graph pattern contained in line " << linenumber << " : " << line.toUtf8().data() << endl;
+            continue;
+        }
+
+        int pos = m.capturedStart(1);
+
+        // get --graph tree pattern
+        int len = m.capturedLength(1);
+        QString tree = m.captured(1);
+#else
         int pos = treePattern.indexIn(line, 0);
 
         if (pos == -1)
@@ -642,11 +671,12 @@ void GraphWidget::process(QList<QString> _cache)
             continue;
         }
 
-        linenumber++;
-
         // get --graph tree pattern
         int len = treePattern.matchedLength();
         QString tree = treePattern.cap(1);
+#endif
+
+        linenumber++;
 
         // allocate space
         if (previousTree.isEmpty())
@@ -796,7 +826,7 @@ void GraphWidget::process(QList<QString> _cache)
             }
 
             // create version node
-            Version* v = new Version(globalVersionInfo, this);
+            Version* v = new Version(globalVersionInfo, changeableVersionInfo, this);
 
             // if the key information has already been parsed, use it
             QString hash = parts.at(1);
@@ -1307,7 +1337,11 @@ int GraphWidget::matchVersions(const QString& _text, QList<Version*>& _matches, 
 
     if (!_text.isEmpty())
     {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        QRegularExpression pattern(_text);
+#else
         QRegExp pattern(_text);
+#endif
 
         foreach(QGraphicsItem * it, scene()->items())
         {
@@ -1527,17 +1561,22 @@ void GraphWidget::flipY()
     }
 }
 
-void GraphWidget::setGlobalVersionInfo(const QString& _item, bool _value)
+void GraphWidget::setGlobalVersionInfo(const QStringList& _globalVersionInfo)
 {
-    if (_value)
+    if (globalVersionInfo != _globalVersionInfo)
     {
-        globalVersionInfo << _item;
+        globalVersionInfo = _globalVersionInfo;
+        QGraphicsView::update();
     }
-    else
+}
+
+void GraphWidget::setChangeableVersionInfo(const QStringList& _changeableVersionInfo)
+{
+    if (changeableVersionInfo != _changeableVersionInfo)
     {
-        globalVersionInfo.removeOne(_item);
+        changeableVersionInfo = _changeableVersionInfo;
+        QGraphicsView::update();
     }
-    QGraphicsView::update();
 }
 
 void GraphWidget::setLocalRepositoryPath(const QString& _dir)
@@ -1643,6 +1682,19 @@ void GraphWidget::updateColors()
     unfoldedColor = mwin->getPreferencesColor("colorUnfolded");
     fileConstraintColor = mwin->getPreferencesColor("colorFileConstraint");
     forceUpdate();
+}
+
+void GraphWidget::updateFold()
+{
+    QRectF from = mapToScene(viewport()->geometry()).boundingRect();
+
+    rootVersion->flattenFoldersRecurse();
+    rootVersion->updateFoldableRecurse();
+    rootVersion->collectFolderVersions(rootVersion, NULL);
+    rootVersion->foldRecurse(true);
+    normalizeGraph();
+
+    focusFromTo(from, from);
 }
 
 void GraphWidget::foldAll()

@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.8-0                */
+/*                  gvtree V1.9-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -18,49 +18,88 @@
 #ifndef __TAGPREFERENCE_H__
 #define __TAGPREFERENCE_H__
 
+#include <QColor>
 #include <QFont>
 #include <QLabel>
-#include <QLineEdit>
-#include <QPushButton>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include <QRegularExpression>
+#else
 #include <QRegExp>
-#include <QSettings>
+#endif
 #include <QString>
-#include <QGridLayout>
-#include <QObject>
-#include <QColor>
+#include <QWidget>
 
-class TagPreference : public QObject
+class TagPreference : public QLabel
 {
     Q_OBJECT
 public:
-    TagPreference(int _row,
-                  const QString& _name,
-                  const QString& _regexDefault,
-                  QGridLayout* _parent = NULL);
+    TagPreference(const QString& _name,
+                  QWidget* _parent = NULL);
 
+    TagPreference(const QString& _name,
+                  const QString& _regex,
+                  const QString& _color,
+                  const QString& _font,
+                  const QColor& _bgcolor,
+                  bool _visibility,
+                  bool _changeable,
+                  int _foldable,
+                  QWidget* _parent = NULL);
+
+    bool getVisibility() const;
+    int getFold() const;
     const QFont& getFont() const;
     const QColor& getColor() const;
+    bool getChangeable() const;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    const QRegularExpression& getRegExp() const;
+#else
     const QRegExp& getRegExp() const;
-    void disableRegExp();
+#endif
+    void setBackgroundColor(const QColor& _bgcolor);
 
 protected:
-    void updateColorButton();
+    void updateLabel();
 
 protected:
-    QPushButton* tagType;
-    QLineEdit* regularExpression;
+    QString regExpText;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    QRegularExpression regExp;
+#else
     QRegExp regExp;
-    QPushButton* fontButton;
+#endif
     QFont font;
     QColor color;
+    QColor bgcolor;
+    bool changeable;
+    bool visibility;
+    int foldable;
 
-private slots:
-    void setFont();
-    void setColor();
-    void setRegularExpression(const QString& _regex);
+    QString path;
+
+public slots:
+    void onCustomContextMenu(const QPoint& _pos);
+
+protected slots:
+    void changeVisibility(bool _val);
+    void changeFoldable(bool _val);
+    void changeFont();
+    void changeColor();
+    void changeRegularExpression();
+
+    void addTagPreference();
+    void deleteTagPreference();
+    void moveUp();
+    void moveDown();
 
 signals:
-    void regexpChanged();
+    void regexpChanged(const QString&);
+    void visibilityChanged(const QString&);
+    void foldableChanged(const QString&);
+    void deleteTagPreference(const QString&);
+    void addTagPreference(const QString&);
+    void moveUp(TagPreference*);
+    void moveDown(TagPreference*);
 };
 
 #endif
