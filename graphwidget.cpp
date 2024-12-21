@@ -454,6 +454,18 @@ Version* GraphWidget::gitlogSingle(QString _hash, bool _create)
         return NULL;
     }
 
+    // ugly, rejoin comment elements containing '#'
+    if (parts.size() > 5)
+    {
+        QString comment = parts.at(5);
+        for (int z = 6; z < parts.size() - 1;)
+        {
+            comment += QString("#") + parts.at(z);
+            parts.removeAt(6);
+        }
+        parts.replace(5, comment);
+    }
+
     // check if the Version object already exists
     QString hash = parts.at(1);
 
@@ -823,6 +835,18 @@ void GraphWidget::process(QList<QString> _cache)
             {
                 cerr << "Error: Input too short " << line.toUtf8().data() << endl;
                 break;
+            }
+
+            // ugly, rejoin comment elements containing '#'
+            if (parts.size() > 5)
+            {
+                QString comment = parts.at(5);
+                for (int z = 6; z < parts.size() - 1; z++)
+                {
+                    comment += QString("#") + parts.at(z);
+                    parts.removeAt(6);
+                }
+                parts.replace(5, comment);
             }
 
             // create version node
