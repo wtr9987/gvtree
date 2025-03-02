@@ -2249,11 +2249,35 @@ void GraphWidget::checkoutBranch(QAction* _action)
         + localRepositoryPath
         + " checkout " + _action->data().toString();
 
-    std::cerr << "co " << cmd.toUtf8().data() << std::endl;
-
     QList<QString> cache;
 
     execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
 
     mwin->reloadCurrentRepository();
+}
+
+void GraphWidget::gitAdd(const QString& _path)
+{
+    QString cmd = "git -C "
+        + localRepositoryPath
+        + " add " + _path;
+
+    QList<QString> cache;
+
+    execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
+
+    diffLocalChanges();
+}
+
+void GraphWidget::gitResetHEAD(const QString& _path)
+{
+    QString cmd = "git -C "
+        + localRepositoryPath
+        + " reset HEAD " + _path;
+
+    QList<QString> cache;
+
+    execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
+
+    diffStagedChanges();
 }

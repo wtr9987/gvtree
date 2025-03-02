@@ -365,6 +365,22 @@ void CompareTree::gitLogFileAction(QAction* _act)
 
         QApplication::clipboard()->setText(tmp.front());
     }
+    else if (tmp.front() == "ACT6")
+    {
+        tmp.pop_front();
+        if (tmp.isEmpty())
+            return;
+
+        graph->gitAdd(tmp.front());
+    }
+    else if (tmp.front() == "ACT7")
+    {
+        tmp.pop_front();
+        if (tmp.isEmpty())
+            return;
+
+        graph->gitResetHEAD(tmp.front());
+    }
 }
 
 void CompareTree::onCustomContextMenu(const QPoint& point)
@@ -409,7 +425,7 @@ void CompareTree::onCustomContextMenu(const QPoint& point)
         QAction* act = NULL;
         QStringList tmp;
 
-        if (status == "X" || status == "M" || status == "R" || status == "D")
+        if (QString("MDRXxZ").contains(status))
         {
             act = new QAction("Show version diff", this);
             tmp << "ACT1" << path << status << path_old;
@@ -418,7 +434,7 @@ void CompareTree::onCustomContextMenu(const QPoint& point)
             menu->addAction(act);
         }
 
-        if (status == "X" || status == "M" || status == "R" || status == "A")
+        if (QString("MARXxZ").contains(status))
         {
             act = new QAction("Edit current version", this);
             tmp << "ACT2" << path;
@@ -431,17 +447,44 @@ void CompareTree::onCustomContextMenu(const QPoint& point)
         {
             act = new QAction("Filter versions by file", this);
             tmp << "ACT3" << path;
-            act->setData(QVariant(tmp));
-            tmp.clear();
-            menu->addAction(act);
         }
         else
         {
             act = new QAction("Remove filter", this);
             tmp << "ACT4";
-            act->setData(QVariant(tmp));
-            tmp.clear();
-            menu->addAction(act);
+        }
+
+        act->setData(QVariant(tmp));
+        tmp.clear();
+        menu->addAction(act);
+
+        if (QString("Xx").contains(status))
+        {
+            menu->addSeparator();
+
+            if (status == "X")
+            {
+                // git add file.txt
+                act = new QAction("git add", this);
+                tmp << "ACT6" << path << status << path_old;
+
+                std::cerr << tmp.join(QString()).toUtf8().data() << std::endl;
+                act->setData(QVariant(tmp));
+                tmp.clear();
+                menu->addAction(act);
+            }
+
+            if (status == "x")
+            {
+                // git reset HEAD file.txt
+                act = new QAction("git reset HEAD", this);
+                tmp << "ACT7" << path << status << path_old;
+
+                std::cerr << tmp.join(QString()).toUtf8().data() << std::endl;
+                act->setData(QVariant(tmp));
+                tmp.clear();
+                menu->addAction(act);
+            }
         }
 
         menu->addSeparator();
@@ -471,7 +514,7 @@ void CompareTree::setGraphWidget(class GraphWidget* _graph)
 void CompareTree::viewLocalChanges(bool _staged)
 {
     // get data
-    QString cmd = "git -C " + graph->getLocalRepositoryPath() + (_staged == true ? " diff --cached --name-only" : " ls-files -m");
+    QString cmd = "git -C " + graph->getLocalRepositoryPath() + (_staged == true ? " diff --cached --name-only" : " ls-files -m --others --exclude-standard");
 
     QList<QString> cache;
 
@@ -535,7 +578,14 @@ void CompareTree::viewLocalChanges(bool _staged)
                     columns << t;
                     QStandardItem* actitem = new QStandardItem(path);
                     actitem->setEditable(false);
-                    actitem->setData("X", Qt::UserRole + 1);
+                    if (_staged)
+                    {
+                        actitem->setData("x", Qt::UserRole + 1);
+                    }
+                    else
+                    {
+                        actitem->setData("X", Qt::UserRole + 1);
+                    }
                     actitem->setData(path, Qt::UserRole + 2);
                     columns << actitem;
                     p->appendRow(columns);
@@ -622,7 +672,7 @@ void CompareTree::viewThisVersion(const QString& _hash)
                     columns << t;
                     QStandardItem* actitem = new QStandardItem(path);
                     actitem->setEditable(false);
-                    actitem->setData("X", Qt::UserRole + 1);
+                    actitem->setData("Z", Qt::UserRole + 1);
                     actitem->setData(path, Qt::UserRole + 2);
                     columns << actitem;
                     p->appendRow(columns);
@@ -662,7 +712,7 @@ void CompareTree::compareFileVersions(
     const QString& _path_old)
 {
     // if status is none of the following, nothing to do
-    if (QString("MDARX").contains(_status) == false)
+    if (QString("MDARXxZ").contains(_status) == false)
         return;
 
     bool compareToLocalCurrent = mwin->getDiffLocalFiles();
@@ -727,6 +777,7 @@ void CompareTree::compareFileVersions(
     }
 
     QString fnameList = diffFiles.join(QString(" "));
+
     difftool.replace("%1", fnameList);
     system(difftool.toUtf8().data());
 }
