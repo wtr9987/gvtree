@@ -23,6 +23,7 @@
 #include <sys/time.h>
 
 #include <QtGui>
+#include <QInputDialog>
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include <QRegularExpression>
@@ -338,6 +339,19 @@ void GraphWidget::zoomIn()
 void GraphWidget::zoomOut()
 {
     scaleView(1 / qreal(1.05));
+}
+
+QList<QString> GraphWidget::getLocalBranchesOfVersion(const Version* _v) const
+{
+    QString cmd = "git -C "
+        + localRepositoryPath
+        + " branch --format \"%(refname:short)\" --list --points-at " + _v->getHash();
+
+    QList<QString> cache;
+
+    execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
+
+    return cache;
 }
 
 void GraphWidget::setGitLogFileConstraint(const QString& _fileConstraint)
@@ -1897,6 +1911,53 @@ void GraphWidget::contextMenuEvent(QContextMenuEvent* _event)
 
             action = menu.addAction(QString("Focus neighbours"));
             connect(action, SIGNAL(triggered()), &adapter, SLOT(focusNeighbourBox()));
+
+            menu.addSeparator();
+
+            action = menu.addAction(QString("Checkout version " + v->getHash()));
+
+            QList<QString> branches = getLocalBranchesOfVersion(v);
+            if (branches.size() > 0)
+            {
+                if (branches.size() == 1)
+                {
+                    QActionGroup* group = new QActionGroup(&menu);
+                    action = new QAction(QString("Checkout branch " + branches.front()), &menu);
+                    action->setData(branches.front());
+                    group->addAction(action);
+                    connect(group, SIGNAL(triggered(QAction*)), this, SLOT(checkoutBranch(QAction*)));
+                    menu.addAction(action);
+                }
+                else
+                {
+                    QMenu* sub = menu.addMenu("Checkout branch");
+                    QActionGroup* group = new QActionGroup(sub);
+                    foreach(const QString& branch, branches)
+                    {
+                        action = new QAction(branch, sub);
+                        group->addAction(action);
+                        connect(group, SIGNAL(triggered(QAction*)), this, SLOT(checkoutBranch(QAction*)));
+                        sub->addAction(action);
+                    }
+                }
+            }
+
+            // TODO
+            QActionGroup* group = new QActionGroup(&menu);
+            action = new QAction(QString("Create branch"), &menu);
+            action->setData(v->getHash());
+            group->addAction(action);
+            connect(group, SIGNAL(triggered(QAction*)), this, SLOT(createBranch(QAction*)));
+            menu.addAction(action);
+
+            group = new QActionGroup(&menu);
+            action = menu.addAction(QString("Create tag"));
+            action->setData(v->getHash());
+            group->addAction(action);
+            connect(group, SIGNAL(triggered(QAction*)), this, SLOT(createTag(QAction*)));
+            menu.addAction(action);
+
+            // TODO Checkout branch
             menu.exec(_event->globalPos());
         }
         return;
@@ -2144,4 +2205,55 @@ const QImage* GraphWidget::getImage(const QString& _name) const
         return imageDB[_name];
     }
     return NULL;
+}
+
+void GraphWidget::createBranch(QAction* _action)
+{
+    bool ok;
+    QString branchName = QInputDialog::getText(this, tr("Create Branch"), tr("Name"), QLineEdit::Normal, QString(), &ok);
+
+    if (ok && branchName.size() > 1)
+    {
+        QString cmd = "git -C "
+            + localRepositoryPath
+            + " branch " + branchName + " " + _action->data().toString();
+
+        QList<QString> cache;
+
+        execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
+        mwin->reloadCurrentRepository();
+    }
+}
+
+void GraphWidget::createTag(QAction* _action)
+{
+    bool ok;
+    QString tagName = QInputDialog::getText(this, tr("Create Tag"), tr("Name"), QLineEdit::Normal, QString(), &ok);
+
+    if (ok && tagName.size() > 1)
+    {
+        QString cmd = "git -C "
+            + localRepositoryPath
+            + " tag " + tagName + " " + _action->data().toString();
+
+        QList<QString> cache;
+
+        execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
+        mwin->reloadCurrentRepository();
+    }
+}
+
+void GraphWidget::checkoutBranch(QAction* _action)
+{
+    QString cmd = "git -C "
+        + localRepositoryPath
+        + " checkout " + _action->data().toString();
+
+    std::cerr << "co " << cmd.toUtf8().data() << std::endl;
+
+    QList<QString> cache;
+
+    execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
+
+    mwin->reloadCurrentRepository();
 }

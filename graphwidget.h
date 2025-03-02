@@ -167,6 +167,9 @@ public:
     const QImage* getImage(const QString& _name) const;
 
 public slots:
+    void createBranch(QAction* _action);
+    void createTag(QAction* _action);
+    void checkoutBranch(QAction* _action);
     void diffStagedChanges();
     void diffLocalChanges();
     void resetDiff();
@@ -190,6 +193,7 @@ public slots:
     void setBlockItemChanged(bool _val);
 
 protected:
+    QList<QString> getLocalBranchesOfVersion(const Version* _v) const;
     void focusFromTo(const QRectF& _from, const QRectF& _to);
     void animatedFocus(const QRectF& _from, const QRectF& _to);
     QRectF animatedFocus(const QRectF& _from, const QRectF& _to, double _morph);

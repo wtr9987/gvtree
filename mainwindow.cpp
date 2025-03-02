@@ -499,7 +499,7 @@ void MainWindow::restorePreferencesSettings()
     gvtree_preferences.textborder->setChecked(settings.value("textborder").toBool());
 
     if (!settings.contains("diffLocalFile"))
-      settings.setValue("diffLocalFile", true);
+        settings.setValue("diffLocalFile", true);
     gvtree_preferences.diff_local_files->setChecked(settings.value("diffLocalFile").toBool());
 
     if (settings.contains("reduceTree"))
@@ -841,8 +841,10 @@ void MainWindow::removeFilter()
 void MainWindow::reloadCurrentRepository()
 {
     QPoint restoreVersionPosition;
-    QTransform restoreTransform;
+    QTransform restoreTransform = graphwidget->transform();
     QString restoreVersionHash;
+    QPoint shift(graphwidget->horizontalScrollBar()->value(),
+                 graphwidget->verticalScrollBar()->value());
 
     // if there is one selected version, keep it in place
     Version* restoreVersion = graphwidget->getSelectedVersion();
@@ -852,14 +854,8 @@ void MainWindow::reloadCurrentRepository()
         // hash to find it after reload
         restoreVersionHash = restoreVersion->getHash();
 
-        // scene position of the selected object
-        QPointF spos = restoreVersion->pos();
-
         // position in current view rectangle, left top corner is (0,0)
-        restoreVersionPosition = graphwidget->mapFromScene(spos);
-
-        // save transformation for scaling m11 m22
-        restoreTransform = graphwidget->transform();
+        restoreVersionPosition = graphwidget->mapFromScene(restoreVersion->pos());
     }
 
     graphwidget->gitlog();
@@ -873,6 +869,7 @@ void MainWindow::reloadCurrentRepository()
         {
             // restore transformation
             graphwidget->setTransform(QTransform(restoreTransform.m11(), 0, 0, restoreTransform.m22(), 0, 0));
+
             // reset view to position (0,0)
             graphwidget->horizontalScrollBar()->setValue(0);
             graphwidget->verticalScrollBar()->setValue(0);
@@ -880,11 +877,13 @@ void MainWindow::reloadCurrentRepository()
             // Get the new position of the former selected version
             // in view coordinates and get the difference to know
             // how to shift the (invisible) scrollbars.
-            QPoint shift = graphwidget->mapFromScene(restoreVersion->pos()) - restoreVersionPosition;
-            graphwidget->horizontalScrollBar()->setValue(shift.x());
-            graphwidget->verticalScrollBar()->setValue(shift.y());
+            shift = graphwidget->mapFromScene(restoreVersion->pos()) - restoreVersionPosition;
         }
     }
+
+    graphwidget->setTransform(QTransform(restoreTransform.m11(), 0, 0, restoreTransform.m22(), 0, 0));
+    graphwidget->horizontalScrollBar()->setValue(shift.x());
+    graphwidget->verticalScrollBar()->setValue(shift.y());
 
     // if called from branchTable the refresh is blocked
     gvtree_branchtable.branchTable->refresh(repositoryPath);
