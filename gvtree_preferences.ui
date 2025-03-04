@@ -43,7 +43,7 @@
    <item row="1" column="1" colspan="2">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tabWidgetPage1">
       <property name="statusTip">
@@ -53,167 +53,7 @@
        <string>Basic Settings</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_2">
-       <item row="9" column="1">
-        <widget class="QGroupBox" name="gbGitLog">
-         <property name="font">
-          <font>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="title">
-          <string>git log</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_11">
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="git_log_lines">
-            <property name="font">
-             <font>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="focusPolicy">
-             <enum>Qt::ClickFocus</enum>
-            </property>
-            <property name="toolTip">
-             <string>The number of versions processed from the git log output can be limited here.</string>
-            </property>
-            <property name="text">
-             <string>1000</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QCheckBox" name="git_short_hashes">
-            <property name="font">
-             <font>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="toolTip">
-             <string>This option controls if %h or %H is used to retrieve hash values from git. </string>
-            </property>
-            <property name="text">
-             <string>short hashes</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="lbGitLogLength">
-            <property name="font">
-             <font>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>length</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="25" column="1">
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="1" column="1">
-        <widget class="QGroupBox" name="groupBox_7">
-         <property name="font">
-          <font>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="title">
-          <string>git Repository Path</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_13">
-          <item row="0" column="0">
-           <widget class="QLabel" name="lbCurrentLocalRepositoryPath">
-            <property name="font">
-             <font>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Current Path</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QPushButton" name="pbLocalRepositoryPath">
-            <property name="font">
-             <font>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="toolTip">
-             <string>The path of the current local repository.</string>
-            </property>
-            <property name="text">
-             <string>local repository path</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0" colspan="2">
-           <widget class="QGroupBox" name="gbRepoPath">
-            <property name="font">
-             <font>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="toolTip">
-             <string>If no repository path is set with -r use the current one or the repository of the last session.</string>
-            </property>
-            <property name="title">
-             <string>Initial git Repository Path</string>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout_4">
-             <item>
-              <widget class="QRadioButton" name="rbCurrentPathRepo">
-               <property name="font">
-                <font>
-                 <bold>false</bold>
-                </font>
-               </property>
-               <property name="toolTip">
-                <string>If this option is selected the current path, when starting gvtree is looked up for a local git repository.</string>
-               </property>
-               <property name="text">
-                <string>current working directory</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QRadioButton" name="rbLastRepo">
-               <property name="font">
-                <font>
-                 <bold>false</bold>
-                </font>
-               </property>
-               <property name="toolTip">
-                <string>If this option is selected the git repository used in the last gvtree session is used.</string>
-               </property>
-               <property name="text">
-                <string>last repository path</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="20" column="1">
+       <item row="19" column="1">
         <widget class="QGroupBox" name="gbMisc">
          <property name="font">
           <font>
@@ -346,82 +186,190 @@
          </layout>
         </widget>
        </item>
-       <item row="10" column="1">
-        <widget class="QGroupBox" name="gbSort">
+       <item row="9" column="1">
+        <widget class="QGroupBox" name="gbGitLog">
          <property name="font">
           <font>
            <bold>true</bold>
           </font>
          </property>
          <property name="title">
-          <string>Tree Sort</string>
+          <string>git log</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout_10">
+         <layout class="QGridLayout" name="gridLayout_11">
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="git_log_lines">
+            <property name="font">
+             <font>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::ClickFocus</enum>
+            </property>
+            <property name="toolTip">
+             <string>The number of versions processed from the git log output can be limited here.</string>
+            </property>
+            <property name="text">
+             <string>1000</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="git_short_hashes">
+            <property name="font">
+             <font>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="toolTip">
+             <string>This option controls if %h or %H is used to retrieve hash values from git. </string>
+            </property>
+            <property name="text">
+             <string>short hashes</string>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="0">
-           <widget class="QLabel" name="lbVerticalSort">
+           <widget class="QLabel" name="lbGitLogLength">
             <property name="font">
              <font>
               <bold>false</bold>
              </font>
             </property>
             <property name="text">
-             <string>Vertical</string>
+             <string>length</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="lbHorizontalSort">
+         </layout>
+        </widget>
+       </item>
+       <item row="24" column="1">
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="1" column="1">
+        <widget class="QGroupBox" name="groupBox_7">
+         <property name="font">
+          <font>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="title">
+          <string>git Repository Path</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_13">
+          <item row="0" column="0">
+           <widget class="QLabel" name="lbCurrentLocalRepositoryPath">
             <property name="font">
              <font>
-              <bold>false</bold>
+              <bold>true</bold>
              </font>
             </property>
             <property name="text">
-             <string>Horizontal</string>
+             <string>Current Path</string>
             </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QComboBox" name="horizontal_sort">
-            <item>
-             <property name="text">
-              <string>natural</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>weight ascending</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>weight descending</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>commit date ascending</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>commit date descending</string>
-             </property>
-            </item>
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QComboBox" name="top_down_sort">
-            <item>
-             <property name="text">
-              <string>top down</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>bottom up</string>
-             </property>
-            </item>
+           <widget class="QPushButton" name="pbLocalRepositoryPath">
+            <property name="font">
+             <font>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="toolTip">
+             <string>The path of the current local repository.</string>
+            </property>
+            <property name="text">
+             <string>local repository path</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0" colspan="2">
+           <widget class="QGroupBox" name="gbRepoPath">
+            <property name="font">
+             <font>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="toolTip">
+             <string>If no repository path is set with -r use the current one or the repository of the last session.</string>
+            </property>
+            <property name="title">
+             <string>Initial git Repository Path</string>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_4">
+             <item>
+              <widget class="QRadioButton" name="rbCurrentPathRepo">
+               <property name="font">
+                <font>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="toolTip">
+                <string>If this option is selected the current path, when starting gvtree is looked up for a local git repository.</string>
+               </property>
+               <property name="text">
+                <string>current working directory</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="rbLastRepo">
+               <property name="font">
+                <font>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="toolTip">
+                <string>If this option is selected the git repository used in the last gvtree session is used.</string>
+               </property>
+               <property name="text">
+                <string>last repository path</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="10" column="1">
+        <widget class="QGroupBox" name="groupBox_6">
+         <property name="font">
+          <font>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="title">
+          <string>git Commands</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_9">
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="confirmation">
+            <property name="font">
+             <font>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>confirmation dialog</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
            </widget>
           </item>
          </layout>
@@ -436,12 +384,22 @@
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
         <widget class="QGroupBox" name="groupBox">
+         <property name="font">
+          <font>
+           <bold>true</bold>
+          </font>
+         </property>
          <property name="title">
           <string>Connector Style</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_8">
           <item row="0" column="0">
            <widget class="QRadioButton" name="rbConnectorStyle0">
+            <property name="font">
+             <font>
+              <bold>false</bold>
+             </font>
+            </property>
             <property name="focusPolicy">
              <enum>Qt::NoFocus</enum>
             </property>
@@ -462,6 +420,11 @@
           </item>
           <item row="1" column="0">
            <widget class="QRadioButton" name="rbConnectorStyle1">
+            <property name="font">
+             <font>
+              <bold>false</bold>
+             </font>
+            </property>
             <property name="focusPolicy">
              <enum>Qt::NoFocus</enum>
             </property>
@@ -485,6 +448,11 @@
        </item>
        <item>
         <widget class="QGroupBox" name="groupBox_4">
+         <property name="font">
+          <font>
+           <bold>true</bold>
+          </font>
+         </property>
          <property name="title">
           <string>Scale</string>
          </property>
@@ -544,6 +512,11 @@
           </item>
           <item row="0" column="0">
            <widget class="QLabel" name="label_4">
+            <property name="font">
+             <font>
+              <bold>false</bold>
+             </font>
+            </property>
             <property name="text">
              <string>X Factor</string>
             </property>
@@ -551,6 +524,11 @@
           </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_5">
+            <property name="font">
+             <font>
+              <bold>false</bold>
+             </font>
+            </property>
             <property name="text">
              <string>Y Factor</string>
             </property>
@@ -560,13 +538,114 @@
         </widget>
        </item>
        <item>
+        <widget class="QGroupBox" name="gbSort">
+         <property name="font">
+          <font>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="title">
+          <string>Tree Sort</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_10">
+          <item row="0" column="0">
+           <widget class="QLabel" name="lbVerticalSort">
+            <property name="font">
+             <font>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Vertical</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="lbHorizontalSort">
+            <property name="font">
+             <font>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Horizontal</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QComboBox" name="horizontal_sort">
+            <property name="font">
+             <font>
+              <bold>false</bold>
+             </font>
+            </property>
+            <item>
+             <property name="text">
+              <string>natural</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>weight ascending</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>weight descending</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>commit date ascending</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>commit date descending</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QComboBox" name="top_down_sort">
+            <property name="font">
+             <font>
+              <bold>false</bold>
+             </font>
+            </property>
+            <item>
+             <property name="text">
+              <string>top down</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>bottom up</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <widget class="QGroupBox" name="groupBox_3">
+         <property name="font">
+          <font>
+           <bold>true</bold>
+          </font>
+         </property>
          <property name="title">
           <string>Rendering</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_5">
           <item>
            <widget class="QCheckBox" name="animated">
+            <property name="font">
+             <font>
+              <bold>false</bold>
+             </font>
+            </property>
             <property name="text">
              <string>Animation</string>
             </property>
@@ -577,6 +656,11 @@
           </item>
           <item>
            <widget class="QCheckBox" name="textborder">
+            <property name="font">
+             <font>
+              <bold>false</bold>
+             </font>
+            </property>
             <property name="toolTip">
              <string>Text is rendered with a border in background color.</string>
             </property>
@@ -593,12 +677,22 @@
        </item>
        <item>
         <widget class="QGroupBox" name="groupBox_2">
+         <property name="font">
+          <font>
+           <bold>true</bold>
+          </font>
+         </property>
          <property name="title">
           <string>Colors</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_3">
           <item row="1" column="1" colspan="2">
            <widget class="QPushButton" name="pbColorEdge">
+            <property name="font">
+             <font>
+              <bold>false</bold>
+             </font>
+            </property>
             <property name="focusPolicy">
              <enum>Qt::NoFocus</enum>
             </property>
@@ -609,6 +703,11 @@
           </item>
           <item row="1" column="3" colspan="2">
            <widget class="QPushButton" name="pbColorSelected">
+            <property name="font">
+             <font>
+              <bold>false</bold>
+             </font>
+            </property>
             <property name="focusPolicy">
              <enum>Qt::NoFocus</enum>
             </property>
@@ -632,6 +731,11 @@
           </item>
           <item row="6" column="3" colspan="2">
            <widget class="QPushButton" name="pbColorSearch">
+            <property name="font">
+             <font>
+              <bold>false</bold>
+             </font>
+            </property>
             <property name="focusPolicy">
              <enum>Qt::NoFocus</enum>
             </property>
@@ -642,6 +746,11 @@
           </item>
           <item row="0" column="3" colspan="2">
            <widget class="QPushButton" name="pbColorVersion">
+            <property name="font">
+             <font>
+              <bold>false</bold>
+             </font>
+            </property>
             <property name="focusPolicy">
              <enum>Qt::NoFocus</enum>
             </property>
@@ -652,6 +761,11 @@
           </item>
           <item row="0" column="1" colspan="2">
            <widget class="QPushButton" name="pbColorBackground">
+            <property name="font">
+             <font>
+              <bold>false</bold>
+             </font>
+            </property>
             <property name="focusPolicy">
              <enum>Qt::NoFocus</enum>
             </property>
@@ -662,6 +776,11 @@
           </item>
           <item row="6" column="1" colspan="2">
            <widget class="QPushButton" name="pbColorMerge">
+            <property name="font">
+             <font>
+              <bold>false</bold>
+             </font>
+            </property>
             <property name="focusPolicy">
              <enum>Qt::NoFocus</enum>
             </property>
@@ -672,6 +791,11 @@
           </item>
           <item row="7" column="3" colspan="2">
            <widget class="QPushButton" name="pbColorFromTo">
+            <property name="font">
+             <font>
+              <bold>false</bold>
+             </font>
+            </property>
             <property name="text">
              <string>From/To</string>
             </property>
@@ -679,6 +803,11 @@
           </item>
           <item row="8" column="3" colspan="2">
            <widget class="QPushButton" name="pbColorFileConstraint">
+            <property name="font">
+             <font>
+              <bold>false</bold>
+             </font>
+            </property>
             <property name="text">
              <string>File Constraint</string>
             </property>
@@ -686,6 +815,11 @@
           </item>
           <item row="8" column="1" colspan="2">
            <widget class="QPushButton" name="pbColorUnfolded">
+            <property name="font">
+             <font>
+              <bold>false</bold>
+             </font>
+            </property>
             <property name="text">
              <string>Unfolded</string>
             </property>
@@ -693,6 +827,11 @@
           </item>
           <item row="7" column="1" colspan="2">
            <widget class="QPushButton" name="pbColorFolded">
+            <property name="font">
+             <font>
+              <bold>false</bold>
+             </font>
+            </property>
             <property name="text">
              <string>Folded</string>
             </property>

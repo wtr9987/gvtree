@@ -373,6 +373,14 @@ void CompareTree::gitLogFileAction(QAction* _act)
 
         graph->gitAdd(tmp.front());
     }
+    else if (tmp.front() == "ACT8")
+    {
+        tmp.pop_front();
+        if (tmp.isEmpty())
+            return;
+
+        graph->gitRestore(tmp.front());
+    }
     else if (tmp.front() == "ACT7")
     {
         tmp.pop_front();
@@ -467,6 +475,15 @@ void CompareTree::onCustomContextMenu(const QPoint& point)
                 // git add file.txt
                 act = new QAction("git add", this);
                 tmp << "ACT6" << path << status << path_old;
+
+                std::cerr << tmp.join(QString()).toUtf8().data() << std::endl;
+                act->setData(QVariant(tmp));
+                tmp.clear();
+                menu->addAction(act);
+
+                // git restore file.txt
+                act = new QAction("git restore", this);
+                tmp << "ACT8" << path << status << path_old;
 
                 std::cerr << tmp.join(QString()).toUtf8().data() << std::endl;
                 act->setData(QVariant(tmp));

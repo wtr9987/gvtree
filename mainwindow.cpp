@@ -490,6 +490,10 @@ void MainWindow::restorePreferencesSettings()
         settings.setValue("includeSelected", false);
     gvtree_preferences.include_selected->setChecked(settings.value("includeSelected").toBool());
 
+    if (!settings.contains("confirmation"))
+        settings.setValue("confirmation", false);
+    gvtree_preferences.confirmation->setChecked(settings.value("confirmation").toBool());
+
     if (!settings.contains("animated"))
         settings.setValue("animated", false);
     gvtree_preferences.animated->setChecked(settings.value("animated").toBool());
@@ -1227,6 +1231,22 @@ bool MainWindow::getIncludeSelected() const
     return gvtree_preferences.include_selected->isChecked();
 }
 
+bool MainWindow::getConfirmation() const
+{
+    if (gvtree_preferences.confirmation->isChecked())
+    {
+        int result = QMessageBox::information(
+            NULL, 
+            "Confirmation", 
+            "Sure to perform this action?",
+            QMessageBox::Yes | QMessageBox::No, 
+            QMessageBox::No); 
+
+        return result == QMessageBox::Yes;
+    }
+    return true;
+}
+
 bool MainWindow::getAnimated() const
 {
     return gvtree_preferences.animated->isChecked();
@@ -1279,6 +1299,7 @@ void MainWindow::saveChangedSettings()
     settings.setValue("horizontalSort", gvtree_preferences.horizontal_sort->currentIndex());
     settings.setValue("gitShortHashes", gvtree_preferences.git_short_hashes->isChecked());
     settings.setValue("includeSelected", gvtree_preferences.include_selected->isChecked());
+    settings.setValue("confirmation", gvtree_preferences.confirmation->isChecked());
     settings.setValue("animated", gvtree_preferences.animated->isChecked());
     settings.setValue("textborder", gvtree_preferences.textborder->isChecked());
     settings.setValue("diffLocalFile", gvtree_preferences.diff_local_files->isChecked());

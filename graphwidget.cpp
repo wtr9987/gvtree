@@ -2269,6 +2269,22 @@ void GraphWidget::gitAdd(const QString& _path)
     diffLocalChanges();
 }
 
+void GraphWidget::gitRestore(const QString& _path)
+{
+    if (mwin->getConfirmation())
+    {
+        QString cmd = "git -C "
+            + localRepositoryPath
+            + " restore " + _path;
+
+        QList<QString> cache;
+
+        execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
+
+        diffLocalChanges();
+    }
+}
+
 void GraphWidget::gitResetHEAD(const QString& _path)
 {
     QString cmd = "git -C "

@@ -85,6 +85,7 @@ public:
     bool getRemotes() const;
     bool getAll() const;
     bool getIncludeSelected() const;
+    bool getConfirmation() const;
     bool getAnimated() const;
     bool getTextBorder() const;
     bool getDiffLocalFiles() const;

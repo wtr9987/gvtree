@@ -167,6 +167,7 @@ public:
     const QImage* getImage(const QString& _name) const;
 
     void gitAdd(const QString& _path);
+    void gitRestore(const QString& _path);
     void gitResetHEAD(const QString& _path);
 
 public slots:
