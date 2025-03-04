@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.9-0                */
+/*                  gvtree V2.0-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -21,6 +21,6 @@
 #include <QString>
 #include <QList>
 
-void execute_cmd(const char* _cmd, QList<QString>& _output, bool _log = false);
+int execute_cmd(const char* _cmd, QList<QString>& _output, bool _log = false);
 
 #endif

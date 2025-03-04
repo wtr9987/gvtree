@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.9-0                */
+/*                  gvtree V2.0-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -472,20 +472,18 @@ void CompareTree::onCustomContextMenu(const QPoint& point)
 
             if (status == "X")
             {
-                // git add file.txt
+                // git add file
                 act = new QAction("git add", this);
                 tmp << "ACT6" << path << status << path_old;
 
-                std::cerr << tmp.join(QString()).toUtf8().data() << std::endl;
                 act->setData(QVariant(tmp));
                 tmp.clear();
                 menu->addAction(act);
 
-                // git restore file.txt
+                // git restore file
                 act = new QAction("git restore", this);
                 tmp << "ACT8" << path << status << path_old;
 
-                std::cerr << tmp.join(QString()).toUtf8().data() << std::endl;
                 act->setData(QVariant(tmp));
                 tmp.clear();
                 menu->addAction(act);
@@ -493,11 +491,10 @@ void CompareTree::onCustomContextMenu(const QPoint& point)
 
             if (status == "x")
             {
-                // git reset HEAD file.txt
+                // git reset HEAD file
                 act = new QAction("git reset HEAD", this);
                 tmp << "ACT7" << path << status << path_old;
 
-                std::cerr << tmp.join(QString()).toUtf8().data() << std::endl;
                 act->setData(QVariant(tmp));
                 tmp.clear();
                 menu->addAction(act);

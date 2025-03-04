@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.9-0                */
+/*                  gvtree V2.0-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -20,7 +20,7 @@
 
 #include "execute_cmd.h"
 
-void execute_cmd(const char* _cmd, QList<QString>& _output, bool _log)
+int execute_cmd(const char* _cmd, QList<QString>& _output, bool _log)
 {
     char buffer[65536];
 
@@ -34,6 +34,7 @@ void execute_cmd(const char* _cmd, QList<QString>& _output, bool _log)
         {
             _output.push_back(QString(buffer));
         }
-        pclose(pipe);
+        return pclose(pipe);
     }
+    return 1;
 }

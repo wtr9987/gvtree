@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.9-0                */
+/*                  gvtree V2.0-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -214,6 +214,7 @@ protected:
     QMenu* filemenu;
     QMenu* viewmenu;
     QMenu* windowmenu;
+    QMenu* commandmenu;
     QMenu* helpmenu;
     QAction* preferencesAct;
     QAction* aboutAct;

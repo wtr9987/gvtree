@@ -3,7 +3,7 @@
 /*   Copyright (C) 2021 Wolfgang Trummer         */
 /*   Contact: wolfgang.trummer@t-online.de       */
 /*                                               */
-/*                  gvtree V1.9-0                */
+/*                  gvtree V2.0-0                */
 /*                                               */
 /*             git version tree browser          */
 /*                                               */
@@ -765,6 +765,19 @@ void MainWindow::createMenus()
     connect(preferencesAct, SIGNAL(triggered()), pwin, SLOT(show()));
     windowmenu->addAction(preferencesAct);
     windowmenu->addSeparator();
+
+    // -- Commands
+    commandmenu = menuBar()->addMenu(tr("Commands"));
+    action = new QAction(tr("git pull --all"), this);
+    commandmenu->addAction(action);
+    action = new QAction(tr("git fetch -f --all"), this);
+    commandmenu->addAction(action);
+    action = new QAction(tr("git rebase"), this);
+    commandmenu->addAction(action);
+    action = new QAction(tr("git merge"), this);
+    commandmenu->addAction(action);
+    action = new QAction(tr("git ..."), this);
+    commandmenu->addAction(action);
 
     //action = viewmenu->addAction(QString("Fit in view"));
     //connect(action, SIGNAL(triggered()), graphwidget, SLOT(fitInView())); TODO
