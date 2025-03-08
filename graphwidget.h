@@ -30,6 +30,8 @@
 #include "fromtoinfo.h"
 #include "comparetree.h"
 
+#include "ui_gvtree_git_dialog.h"
+
 class Version;
 
 class GraphWidget : public QGraphicsView
@@ -225,7 +227,9 @@ protected:
                    const QString& _previousTree,
                    const QString& _line);
 
+    QDialog* gdialog;
 private:
+    Ui_GitDialog gvtree_git_dialog;
 
     // from/to version cursor
     QSet<Version*> fromVersions;

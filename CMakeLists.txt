@@ -100,6 +100,7 @@ set(UIS
     gvtree_license.ui 
     gvtree_comparetree.ui 
     gvtree_branchtable.ui
+    gvtree_git_dialog.ui
 )
 
 set(RCS

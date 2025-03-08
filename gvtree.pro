@@ -39,7 +39,8 @@ FORMS += gvtree_preferences.ui \
         gvtree_help.ui \
         gvtree_license.ui \
         gvtree_comparetree.ui \
-        gvtree_branchtable.ui
+        gvtree_branchtable.ui \
+        gvtree_git_dialog.ui
 
 SOURCES += \
         edge.cpp \

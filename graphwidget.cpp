@@ -118,6 +118,9 @@ GraphWidget::GraphWidget(MainWindow* _parent)
     clear();
 
     // imageDB["dot1"]= new QImage("dot4.png");
+
+    gdialog = new QDialog;
+    gvtree_git_dialog.setupUi(gdialog);
 }
 
 void GraphWidget::updateFromToInfo()
@@ -2227,14 +2230,25 @@ void GraphWidget::createBranch(QAction* _action)
 
 void GraphWidget::createTag(QAction* _action)
 {
-    bool ok;
-    QString tagName = QInputDialog::getText(this, tr("Create Tag"), tr("Name"), QLineEdit::Normal, QString(), &ok);
+    gdialog->setWindowTitle(tr("Create Tag"));
+    gvtree_git_dialog.lName->setText(tr("Name"));
+    gvtree_git_dialog.lComment->setText(tr("Comment"));
 
-    if (ok && tagName.size() > 1)
+    if (gdialog->exec() == QDialog::Accepted)
     {
+        QString tagName = gvtree_git_dialog.leName->text();
+        QString tagComment = gvtree_git_dialog.teComment->document()->toPlainText();
+
         QString cmd = "git -C "
             + localRepositoryPath
-            + " tag " + tagName + " " + _action->data().toString();
+            + " tag -a " + tagName;
+
+        if (tagComment.size())
+        {
+            cmd += " -m " + tagComment;
+        }
+
+        cmd += " " + _action->data().toString();
 
         QList<QString> cache;
 
