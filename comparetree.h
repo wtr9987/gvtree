@@ -47,8 +47,14 @@ public:
     // show differences of the fromVersions and the toVersion in an editor
     void compareFileVersions(const QString& _path, const QString& _status, const QString& _path_old);
 
-    // open a selected file in an editor
+    // open current version of selected file in an editor
     void editCurrentVersion(const QString& _path);
+
+    // open selected version of file in an editor
+    void editSelectedVersion(const QString& _hash, const QString& _path);
+
+    // open git blame of a selected version
+    void blameSelectedVersion(const QString& _hash, const QString& _path);
 
     // compare hash to local (modified files)
     void compareHashToLocal(const QString& _hash);
@@ -67,11 +73,9 @@ public:
 
 protected:
     // called by compareFileVersions to create temporary files
-    QString createTempVersionFile(const QString& _hash, const QString& _path) const;
+    QString createTempVersionFile(const QString& _hash, const QString& _path, bool _blame = false) const;
     // get mime type
     QString getMimeType(const QString& _path) const;
-    // get file extension
-    QString getFileExtension(const QString& _path) const;
 
 public slots:
     // update commit info displayed in the text edit
@@ -84,6 +88,13 @@ public slots:
     void compareFileVersionsAction(QAction* _act);
     // version edit/show
     void editCurrentVersionAction(QAction* _act);
+
+    // open selected version of file in an editor
+    void editSelectedVersionAction(QAction* _act);
+
+    // open git blame of a selected version
+    void blameSelectedVersionAction(QAction* _act);
+
     // setting/removing file constraint to version tree
     void gitLogFileAction(QAction* _act);
 

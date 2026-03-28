@@ -95,6 +95,7 @@ public:
     void resetCompareTree();
     QStringList getFromHashes() const;
     QString getToHash() const;
+    QString getSelectedHash() const;
     const QString& getFileConstraint() const;
     void calculateGraphicsViewPosition();
     const QSet<Version*>& getPredecessors() const;

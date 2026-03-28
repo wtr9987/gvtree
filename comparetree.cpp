@@ -230,7 +230,6 @@ void CompareTree::compareHashes(const QStringList& _hash1, const QString& _hash2
         QStringList diffFileConstraint;
         diffFileConstraint << "ACT1" << path << status << path_old;
 
-
         compareFileVersionsAction(diffFileConstraint);
     }
 }
@@ -307,6 +306,50 @@ void CompareTree::editCurrentVersionAction(QAction* _act)
     editCurrentVersion(path);
 }
 
+void CompareTree::editSelectedVersionAction(QAction* _act)
+{
+    QStringList tmp = _act->data().toStringList();
+
+    if (tmp.isEmpty() || tmp.front() != "ACT9")
+        return;
+
+    tmp.pop_front();
+    if (tmp.isEmpty())
+        return;
+
+    QString hash = tmp.front();
+
+    tmp.pop_front();
+    if (tmp.isEmpty())
+        return;
+
+    QString path = tmp.front();
+
+    editSelectedVersion(hash, path);
+}
+
+void CompareTree::blameSelectedVersionAction(QAction* _act)
+{
+    QStringList tmp = _act->data().toStringList();
+
+    if (tmp.isEmpty() || tmp.front() != "ACT10")
+        return;
+
+    tmp.pop_front();
+    if (tmp.isEmpty())
+        return;
+
+    QString hash = tmp.front();
+
+    tmp.pop_front();
+    if (tmp.isEmpty())
+        return;
+
+    QString path = tmp.front();
+
+    blameSelectedVersion(hash, path);
+}
+
 void CompareTree::compareFileVersionsAction(QAction* _act)
 {
     QStringList tmp = _act->data().toStringList();
@@ -373,14 +416,6 @@ void CompareTree::gitLogFileAction(QAction* _act)
 
         graph->gitAdd(tmp.front());
     }
-    else if (tmp.front() == "ACT8")
-    {
-        tmp.pop_front();
-        if (tmp.isEmpty())
-            return;
-
-        graph->gitRestore(tmp.front());
-    }
     else if (tmp.front() == "ACT7")
     {
         tmp.pop_front();
@@ -388,6 +423,14 @@ void CompareTree::gitLogFileAction(QAction* _act)
             return;
 
         graph->gitResetHEAD(tmp.front());
+    }
+    else if (tmp.front() == "ACT8")
+    {
+        tmp.pop_front();
+        if (tmp.isEmpty())
+            return;
+
+        graph->gitRestore(tmp.front());
     }
 }
 
@@ -437,6 +480,24 @@ void CompareTree::onCustomContextMenu(const QPoint& point)
         {
             act = new QAction("Show version diff", this);
             tmp << "ACT1" << path << status << path_old;
+            act->setData(QVariant(tmp));
+            tmp.clear();
+            menu->addAction(act);
+        }
+
+        if (QString("MRXxZ").contains(status))
+        {
+            act = new QAction("Edit copy of selected version", this);
+            tmp << "ACT9" << graph->getSelectedHash() << path;
+            act->setData(QVariant(tmp));
+            tmp.clear();
+            menu->addAction(act);
+        }
+
+        if (QString("MRXxZ").contains(status))
+        {
+            act = new QAction("Blame selected version", this);
+            tmp << "ACT10" << graph->getSelectedHash() << path;
             act->setData(QVariant(tmp));
             tmp.clear();
             menu->addAction(act);
@@ -510,6 +571,8 @@ void CompareTree::onCustomContextMenu(const QPoint& point)
 
         connect(menu, SIGNAL(triggered(QAction*)), this, SLOT(compareFileVersionsAction(QAction*)));
         connect(menu, SIGNAL(triggered(QAction*)), this, SLOT(editCurrentVersionAction(QAction*)));
+        connect(menu, SIGNAL(triggered(QAction*)), this, SLOT(editSelectedVersionAction(QAction*)));
+        connect(menu, SIGNAL(triggered(QAction*)), this, SLOT(blameSelectedVersionAction(QAction*)));
         connect(menu, SIGNAL(triggered(QAction*)), this, SLOT(gitLogFileAction(QAction*)));
         menu->exec(viewport()->mapToGlobal(point));
     }
@@ -705,11 +768,16 @@ void CompareTree::viewThisVersion(const QString& _hash)
     expandTree();
 }
 
-QString CompareTree::createTempVersionFile(const QString& _hash, const QString& _path) const
+QString CompareTree::createTempVersionFile(const QString& _hash, const QString& _path, bool _blame) const
 {
-    QString extension = getFileExtension(_path);
-    QString fname = QString("%1/%2_%3.%4").arg(mwin->getTempPath()).arg(_hash).arg(getpid()).arg(extension);
-    QString cmd = "git -C " + graph->getLocalRepositoryPath() + " show " + _hash + ":" + _path + " > " + fname;
+    QFileInfo fi(_path);
+    QString name = fi.completeBaseName();
+    QString extension = fi.suffix();
+    QString fname = QString("%1/%2_%3_%4.%5").arg(mwin->getTempPath()).arg(name).arg(_hash).arg(getpid()).arg(extension);
+
+    QString cmd = "git -C " + graph->getLocalRepositoryPath() 
+            + (_blame?" blame ":" show ") + _hash 
+            + (_blame?" ":":") + _path + " > " + fname;
 
     QList<QString> dummy;
 
@@ -808,6 +876,31 @@ void CompareTree::editCurrentVersion(const QString& _path)
     system(edittool.toUtf8().data());
 }
 
+void CompareTree::editSelectedVersion(const QString& _hash, const QString& _path)
+{
+    QString tmp = createTempVersionFile(_hash, _path);
+
+    QString mimeType = getMimeType(tmp);
+    QString dummy;
+    QString edittool;
+
+    mwin->getMimeTypeTools(mimeType, dummy, edittool);
+    edittool.replace("%1", tmp);
+    system(edittool.toUtf8().data());
+}
+
+void CompareTree::blameSelectedVersion(const QString& _hash, const QString& _path)
+{
+    QString tmp = createTempVersionFile(_hash, _path, true);
+    QString mimeType = getMimeType(tmp);
+    QString dummy;
+    QString edittool;
+
+    mwin->getMimeTypeTools(mimeType, dummy, edittool);
+    edittool.replace("%1", tmp);
+    system(edittool.toUtf8().data());
+}
+
 QString CompareTree::getMimeType(const QString& _path) const
 {
     QString cmd = "file --mime-type -b " + _path;
@@ -817,28 +910,6 @@ QString CompareTree::getMimeType(const QString& _path) const
 
     if (cache.size())
         return cache.at(0);
-
-    return QString();
-}
-
-QString CompareTree::getFileExtension(const QString& _path) const
-{
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-    QRegularExpression extension("\\.([^/.]*)$");
-    QRegularExpressionMatch m = extension.match(_path);
-
-    if (m.hasMatch())
-    {
-        return m.captured(1);
-    }
-#else
-    QRegExp extension("\\.([^/.]*)$");
-
-    if (extension.indexIn(_path, 0))
-    {
-        return extension.cap(1);
-    }
-#endif
 
     return QString();
 }

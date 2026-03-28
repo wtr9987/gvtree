@@ -2041,6 +2041,11 @@ QStringList GraphWidget::getFromHashes() const
     return result;
 }
 
+QString GraphWidget::getSelectedHash() const
+{
+    return selectedVersion ? selectedVersion->getHash() : QString();
+}
+
 QString GraphWidget::getToHash() const
 {
     return toVersion ? toVersion->getHash() : QString();
