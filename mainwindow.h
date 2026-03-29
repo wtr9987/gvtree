@@ -45,6 +45,7 @@
 #include "ui_gvtree_license.h"
 #include "ui_gvtree_preferences.h"
 #include "ui_gvtree_branchtable.h"
+#include "ui_gvtree_blamebrowser.h"
 
 class MainWindow : public QMainWindow
 {
@@ -65,6 +66,8 @@ public:
     QComboBox* getFromComboBox();
     QLabel* getToDateLabel();
     QDockWidget* getBranchDock();
+    QDockWidget* getBlameDock();
+    QTextBrowser* getBlameBrowser();
     TagTree* getTagTree() const;
     QDockWidget* getTagTreeDock();
     QString getSelectedBranch();
@@ -225,6 +228,7 @@ protected:
     // docks
     GraphWidget* graphwidget;
     QWidget* ctwin;
+    QWidget* brwin;
     QWidget* blwin;
     QTreeView* compareTree;
     TagPrefList* tagpreflist;
@@ -243,6 +247,7 @@ private:
     Ui_LicenseDialog gvtree_license;
     Ui_CompareTreeForm gvtree_comparetree;
     Ui_BranchTableForm gvtree_branchtable;
+    Ui_BlameBrowser gvtree_blamebrowser;
     // bottom status bar
     QLabel* lbRepositoryPath;
     QPushButton* pbRepositoryName;
@@ -257,6 +262,7 @@ private:
     QDockWidget* compareTreeDock;
     QDockWidget* tagTreeDock;
     QDockWidget* branchDock;
+    QDockWidget* blameDock;
     QStringList versionInfo;
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     QRegularExpression foldNotRegExp;

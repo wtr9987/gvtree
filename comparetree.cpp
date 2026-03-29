@@ -788,6 +788,20 @@ QString CompareTree::createTempVersionFile(const QString& _hash, const QString& 
     return fname;
 }
 
+void CompareTree::updateBlameBrowser(const QString& _hash, const QString& _path)
+{
+  mwin->getBlameBrowser()->clear();
+
+    QString cmd = "git -C " + graph->getLocalRepositoryPath() + " blame " + _hash + " " + _path;
+    QList<QString> cache;
+
+    execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
+    foreach(const QString& str, cache)
+    {
+        mwin->getBlameBrowser()->insertPlainText(str);
+    }
+}
+
 void CompareTree::compareFileVersions(
     const QString& _path,
     const QString& _status,
@@ -891,6 +905,9 @@ void CompareTree::editSelectedVersion(const QString& _hash, const QString& _path
 
 void CompareTree::blameSelectedVersion(const QString& _hash, const QString& _path)
 {
+  updateBlameBrowser(_hash, _path);
+
+#if 0
     QString tmp = createTempVersionFile(_hash, _path, true);
     QString mimeType = getMimeType(tmp);
     QString dummy;
@@ -899,6 +916,7 @@ void CompareTree::blameSelectedVersion(const QString& _hash, const QString& _pat
     mwin->getMimeTypeTools(mimeType, dummy, edittool);
     edittool.replace("%1", tmp);
     system(edittool.toUtf8().data());
+#endif
 }
 
 QString CompareTree::getMimeType(const QString& _path) const

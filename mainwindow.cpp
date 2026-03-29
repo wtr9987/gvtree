@@ -53,7 +53,7 @@
 
 using namespace std;
 
-MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL), blwin(NULL), pwin(NULL)
+MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL), brwin(NULL), blwin(NULL), pwin(NULL)
 {
     // settings
     QSettings settings;
@@ -186,16 +186,29 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
     connect(gvtree_comparetree.fromButton, SIGNAL(pressed()), graphwidget, SLOT(focusFromVersion()));
 
     // -- list of all branches
-    blwin = new QWidget;
-    gvtree_branchtable.setupUi(blwin);
+    brwin = new QWidget;
+    gvtree_branchtable.setupUi(brwin);
     gvtree_branchtable.branchTable->setMainWindow(this);
 
     dock = new QDockWidget(tr("Branch Table"), this);
     dock->setObjectName("Branch Table");
-    dock->setWidget(blwin);
+    dock->setWidget(brwin);
     addDockWidget(Qt::RightDockWidgetArea, dock);
     windowmenu->addAction(dock->toggleViewAction());
     branchDock = dock;
+    dock->hide();
+
+    // blame browser
+    blwin = new QWidget;
+    gvtree_blamebrowser.setupUi(blwin);
+    //gvtree_blamebrowser.textBrowser->setMainWindow(this);
+
+    dock = new QDockWidget(tr("Blame Browser"), this);
+    dock->setObjectName("Blame Browser");
+    dock->setWidget(blwin);
+    addDockWidget(Qt::RightDockWidgetArea, dock);
+    windowmenu->addAction(dock->toggleViewAction());
+    blameDock = dock;
     dock->hide();
 
     // parse arguments
@@ -405,6 +418,16 @@ QDockWidget* MainWindow::getTagTreeDock()
 QDockWidget* MainWindow::getBranchDock()
 {
     return branchDock;
+}
+
+QTextBrowser* MainWindow::getBlameBrowser()
+{
+    return gvtree_blamebrowser.textBrowser;
+}
+
+QDockWidget* MainWindow::getBlameDock()
+{
+    return blameDock;
 }
 
 bool MainWindow::applyStyleSheetFile(QString _path)

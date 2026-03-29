@@ -56,6 +56,9 @@ public:
     // open git blame of a selected version
     void blameSelectedVersion(const QString& _hash, const QString& _path);
 
+    // copy blame to blame browser
+    void updateBlameBrowser(const QString& _hash, const QString& _path);
+
     // compare hash to local (modified files)
     void compareHashToLocal(const QString& _hash);
 
