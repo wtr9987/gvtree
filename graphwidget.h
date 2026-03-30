@@ -165,6 +165,8 @@ public:
         return connectorStyle;
     }
 
+    void focusVersion(Version* _v);
+
     bool isFromToVersion(Version* _v) const;
 
     const QImage* getImage(const QString& _name) const;

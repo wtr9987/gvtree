@@ -775,9 +775,9 @@ QString CompareTree::createTempVersionFile(const QString& _hash, const QString& 
     QString extension = fi.suffix();
     QString fname = QString("%1/%2_%3_%4.%5").arg(mwin->getTempPath()).arg(name).arg(_hash).arg(getpid()).arg(extension);
 
-    QString cmd = "git -C " + graph->getLocalRepositoryPath() 
-            + (_blame?" blame ":" show ") + _hash 
-            + (_blame?" ":":") + _path + " > " + fname;
+    QString cmd = "git -C " + graph->getLocalRepositoryPath()
+        + (_blame ? " blame " : " show ") + _hash
+        + (_blame ? " " : ":") + _path + " > " + fname;
 
     QList<QString> dummy;
 
@@ -790,16 +790,65 @@ QString CompareTree::createTempVersionFile(const QString& _hash, const QString& 
 
 void CompareTree::updateBlameBrowser(const QString& _hash, const QString& _path)
 {
-  mwin->getBlameBrowser()->clear();
+    mwin->getBlameBrowser()->clear();
 
-    QString cmd = "git -C " + graph->getLocalRepositoryPath() + " blame " + _hash + " " + _path;
+
+    QString html = R"(
+        <html>
+        <head>
+            <style>
+                body { font-family: monospace; white-space: pre; }
+                .hash { color: #0066cc; text-decoration: underline; cursor: pointer; }
+                .hash:hover { color: #0099ff; }
+            </style>
+        </head>
+        <body>)";
+
+    QString cmd = "git -C " + graph->getLocalRepositoryPath() + " blame -l " + _hash + " " + _path;
+
     QList<QString> cache;
+
+    QString hash, info, source;
 
     execute_cmd(cmd.toUtf8().data(), cache, mwin->getPrintCmdToStdout());
     foreach(const QString& str, cache)
     {
-        mwin->getBlameBrowser()->insertPlainText(str);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        QRegularExpression r(R"(^(\S+)\s+(\(.+?\))\s+(.*)$)");
+        QRegularExpressionMatch m = r.match(str);
+        if (m.hasMatch())
+        {
+            hash = m.captured(1);
+            info = m.captured(2);
+            source = m.captured(3);
+        }
+        else
+        {
+            continue;
+        }
+#else
+        QRegExp r(R"(^(\S+)\s+(\(.+?\))\s+(.*)$)");
+        if (r.indexIn(str, 0) != -1)
+        {
+            hash = r.cap(1);
+            info = r.cap(2);
+            source = r.cap(3);
+        }
+        else
+        {
+            continue;
+        }
+#endif
+
+        if (mwin->getShortHashes())
+        {
+            hash = hash.left(7);
+        }
+
+        html += QString("<span class=\"hash\"><a href=\"%1\">%1</a></span>  %2<br>").arg(hash.toHtmlEscaped(), source);
     }
+    html += "</body></html>";
+    mwin->getBlameBrowser()->setHtml(html);
 }
 
 void CompareTree::compareFileVersions(
@@ -905,18 +954,8 @@ void CompareTree::editSelectedVersion(const QString& _hash, const QString& _path
 
 void CompareTree::blameSelectedVersion(const QString& _hash, const QString& _path)
 {
-  updateBlameBrowser(_hash, _path);
+    updateBlameBrowser(_hash, _path);
 
-#if 0
-    QString tmp = createTempVersionFile(_hash, _path, true);
-    QString mimeType = getMimeType(tmp);
-    QString dummy;
-    QString edittool;
-
-    mwin->getMimeTypeTools(mimeType, dummy, edittool);
-    edittool.replace("%1", tmp);
-    system(edittool.toUtf8().data());
-#endif
 }
 
 QString CompareTree::getMimeType(const QString& _path) const

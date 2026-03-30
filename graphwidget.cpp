@@ -1159,36 +1159,31 @@ void GraphWidget::focusCurrent()
     }
 }
 
+void GraphWidget::focusVersion(Version* _v)
+{
+    if (_v)
+    {
+        resetMatches();
+        _v->setMatched(true);
+        if (_v->ensureUnfolded())
+        {
+            updateGraphFolding();
+        }
+        displayHits(_v);
+    }
+}
+
 void GraphWidget::focusFromVersion()
 {
     int idx = mwin->getFromComboBox()->currentIndex();
 
     Version* v = mwin->getFromComboBox()->itemData(idx).value<VersionPointer>();
-
-    if (v)
-    {
-        resetMatches();
-        v->setMatched(true);
-        if (v->ensureUnfolded())
-        {
-            updateGraphFolding();
-        }
-        displayHits(v);
-    }
+    focusVersion(v);
 }
 
 void GraphWidget::focusToVersion()
 {
-    if (toVersion)
-    {
-        resetMatches();
-        toVersion->setMatched(true);
-        if (toVersion->ensureUnfolded())
-        {
-            updateGraphFolding();
-        }
-        displayHits(toVersion);
-    }
+  focusVersion(toVersion);
 }
 
 void GraphWidget::setMinSize(bool _resize)

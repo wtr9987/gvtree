@@ -201,7 +201,10 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
     // blame browser
     blwin = new QWidget;
     gvtree_blamebrowser.setupUi(blwin);
-    //gvtree_blamebrowser.textBrowser->setMainWindow(this);
+    gvtree_blamebrowser.textBrowser->setOpenLinks(false);
+    gvtree_blamebrowser.textBrowser->setOpenExternalLinks(false);
+
+    connect(gvtree_blamebrowser.textBrowser, SIGNAL(anchorClicked(const QUrl&)), this, SLOT(onCommitHashClicked(const QUrl&)));
 
     dock = new QDockWidget(tr("Blame Browser"), this);
     dock->setObjectName("Blame Browser");
@@ -389,6 +392,11 @@ MainWindow::MainWindow(const QStringList& _argv) : QMainWindow(NULL), ctwin(NULL
     }
 
     graphwidget->updateColors();
+}
+
+void MainWindow::onCommitHashClicked(const QUrl& _link)
+{
+    graphwidget->focusVersion(graphwidget->getVersionByHash(_link.toString()));
 }
 
 void MainWindow::updatePbFileConstraint(const QString& _fileConstraint)
@@ -1272,11 +1280,11 @@ bool MainWindow::getConfirmation() const
     if (gvtree_preferences.confirmation->isChecked())
     {
         int result = QMessageBox::information(
-            NULL, 
-            "Confirmation", 
+            NULL,
+            "Confirmation",
             "Sure to perform this action?",
-            QMessageBox::Yes | QMessageBox::No, 
-            QMessageBox::No); 
+            QMessageBox::Yes | QMessageBox::No,
+            QMessageBox::No);
 
         return result == QMessageBox::Yes;
     }

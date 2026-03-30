@@ -109,6 +109,7 @@ public:
     const QStringList& getVersionInfo() const;
 
 public slots:
+    void onCommitHashClicked(const QUrl& _link);
 
     // Watchdog if there are changes in the local repository
     void showRefreshButton(const QString& _path);
